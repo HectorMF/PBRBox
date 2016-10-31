@@ -118,30 +118,6 @@
     <None Include="..\x64\Release\data\IrrigationTool.mtl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Lambert.vert">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Lambert.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="EnvMap.vert">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="EnvMap.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Mirror.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Mirror.vert">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="NormalShader.vert">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="NormalShader.frag">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Object Include="bunny.obj">

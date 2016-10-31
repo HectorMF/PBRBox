@@ -54,23 +54,23 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 
 void initializeScene()
 {
-	Texture diffuse = Texture("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\x64\\Release\\data\\BB8 New\\Body diff MAP.jpg");
-	Texture environment = Texture("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\x64\\Release\\data\\Mono_Lake_B\\Mono_Lake_B_HiRes_TMap.jpg");
+	Texture diffuse = Texture("data\\BB8 New\\Body diff MAP.jpg");
+	Texture environment = Texture("data\\Mono_Lake_B\\Mono_Lake_B_HiRes_TMap.jpg");
 
-	Material normal;
-	normal.shader = Shader("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\NormalShader.vert", "C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\NormalShader.frag");
-	normal.environment = environment;
+	Material normalMat;
+	normalMat.shader = Shader("shaders\\NormalShader.vert", "shaders\\\NormalShader.frag");
+	normalMat.environment = environment;
 
-	Material mirror;
-	mirror.shader = Shader("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\Mirror.vert", "C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\Mirror.frag");
-	mirror.environment = environment;
+	Material mirrorMat;
+	mirrorMat.shader = Shader("shaders\\Mirror.vert", "shaders\\Mirror.frag");
+	mirrorMat.environment = environment;
 
 	Material envMat;
-	envMat.shader = Shader("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\EnvMap.vert", "C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\EnvMap.frag");
+	envMat.shader = Shader("shaders\\EnvMap.vert", "shaders\\EnvMap.frag");
 	envMat.environment = environment;
 
 	Material diffuseMat;
-	diffuseMat.shader = Shader("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\Lambert.vert", "C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\Lambert.frag");
+	diffuseMat.shader = Shader("shaders\\Lambert.vert", "shaders\\Lambert.frag");
 	diffuseMat.environment = environment;
 	diffuseMat.diffuse = diffuse;
 
@@ -78,20 +78,22 @@ void initializeScene()
 	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
 	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
 
-	scene.clearColor = glm::vec4(1, 0, 1, 1);
+
 	Mesh* skyBoxQuad = new Mesh(Shapes::renderQuad(), envMat);
+	scene.clearColor = glm::vec4(1, 0, 1, 1);
 	scene.skybox = skyBoxQuad;
 
-	Mesh* groundPlane = new Mesh(Shapes::plane(1, 1, 32, 32), mirror);
+	Mesh* groundPlane = new Mesh(Shapes::plane(5, 5), mirrorMat);
 	scene.add(groundPlane);
 
-	Geometry sphereMesh = Shapes::sphere(.1);
-	for (int x = -1; x <= 1; x++)
+	Geometry sphereMesh = Shapes::sphere(.2);
+
+	for (int x = -2; x <= 2; x++)
 	{
-		for (int z = -1; z <= 1; z++)
+		for (int z = -2; z <= 2; z++)
 		{
-			Mesh* sphere = new Mesh(sphereMesh, normal);
-			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .3, .1, z * .3));
+			Mesh* sphere = new Mesh(sphereMesh, diffuseMat);
+			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
 			scene.add(sphere);
 		}
 	}

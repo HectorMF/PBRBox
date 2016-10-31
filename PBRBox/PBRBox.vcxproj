@@ -133,15 +133,15 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Javi\Documents\GitHub\PBRBox\ext\glew-2.0.0\include;C:\Users\Javi\Documents\GitHub\PBRBox\ext\freeglut\include;C:\Users\Javi\Documents\GitHub\PBRBox\ext\glm-0.9.8.1\glm;C:\Users\Javi\Documents\GitHub\PBRBox\ext\assimp\include;C:\Users\Javi\Documents\GitHub\PBRBox\ext\DevIL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\ext\glew-2.0.0\include;..\ext\freeglut\include;..\ext\glm-0.9.8.1\glm;..\ext\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Users\Javi\Documents\GitHub\PBRBox\ext\glew-2.0.0\lib\Release\x64;C:\Users\Javi\Documents\GitHub\PBRBox\ext\freeglut\lib\x64;C:\Users\Javi\Documents\GitHub\PBRBox\ext\assimp\lib\Release;C:\Users\Javi\Documents\GitHub\PBRBox\ext\DevIL\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>DevIL.lib;ILU.lib;ILUT.lib;opengl32.lib;glew32.lib;freeglut.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\ext\glew-2.0.0\lib\Release\x64;..\ext\freeglut\lib\x64;..\ext\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;freeglut.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -202,14 +202,6 @@
     <None Include="..\x64\Release\data\IrrigationTool.mtl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="EnvMap.frag" />
-    <None Include="EnvMap.vert" />
-    <None Include="Lambert.frag" />
-    <None Include="Lambert.vert" />
-    <None Include="Mirror.frag" />
-    <None Include="Mirror.vert" />
-    <None Include="NormalShader.frag" />
-    <None Include="NormalShader.vert" />
     <None Include="test.frag">
       <FileType>Discomap</FileType>
     </None>

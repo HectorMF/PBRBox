@@ -26,18 +26,21 @@ void Mesh::render(const Camera& camera)
 	glm::mat4 normal = glm::transpose(glm::inverse(view * model));
 	glm::mat4 invProjection = glm::inverse(projection);
 	glm::mat4 transView = glm::transpose(view);
+	glm::vec4 viewDir = view * model * glm::vec4(1, 0, 0, 0);
 
 	GLint m = glGetUniformLocation(m_material.shader, "camera.mModel");
 	GLint v = glGetUniformLocation(m_material.shader, "camera.mView");
 	GLint p = glGetUniformLocation(m_material.shader, "camera.mProjection");
 	GLint n = glGetUniformLocation(m_material.shader, "camera.mNormal");
 	GLint i = glGetUniformLocation(m_material.shader, "camera.mInvView");
+	GLint vd = glGetUniformLocation(m_material.shader, "camera.mViewDirection");
 
 	glUniformMatrix4fv(m, 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(v, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(p, 1, GL_FALSE, glm::value_ptr(projection));
 	glUniformMatrix4fv(n, 1, GL_FALSE, glm::value_ptr(normal));
 	glUniformMatrix4fv(i, 1, GL_FALSE, glm::value_ptr(glm::inverse(view)));
+	glUniform3fv(vd, 1, glm::value_ptr(viewDir));
 	
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	/*GLenum drawMode = GL_TRIANGLES;
