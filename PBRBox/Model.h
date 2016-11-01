@@ -23,8 +23,8 @@ public:
 	virtual void load(const std::string &file);
 	virtual void save(const std::string &file);
 
-	void render(const Camera &camera);
-	void renderNode(const Camera& camera, const ModelNode* node, glm::mat4 transform);
+	void render();
+	void renderNode(const ModelNode* node, glm::mat4 transform);
 	const std::vector<Mesh*>& getMeshes() const { return m_meshes; }
 
 	const ModelNode* getHierarchy() const { return m_hierarchy; }

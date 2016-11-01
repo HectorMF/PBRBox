@@ -10,13 +10,13 @@ Model::Model(const std::string &file)
 
 Model::~Model() { }
 
-void Model::render(const Camera& camera)
+void Model::render()
 {
-	renderNode(camera, m_hierarchy, m_hierarchy->m_transform);
+	renderNode(m_hierarchy, m_hierarchy->m_transform);
 }
 
 
-void Model::renderNode(const Camera& camera, const ModelNode* node, glm::mat4 transform)
+void Model::renderNode(const ModelNode* node, glm::mat4 transform)
 {
 	//transform *= node->M_transform;
 	glm::mat4 trans = transform * node->m_transform;
@@ -30,13 +30,13 @@ void Model::renderNode(const Camera& camera, const ModelNode* node, glm::mat4 tr
 		//mesh->getMatieral()->enable();
 		//mesh->getMatieral()->m_pShaderProgram->setUniformMatrix4fv("modelView", 1, false, (gb::Matrix4f)glGetModelView());
 		//mesh->getMatieral()->m_pShaderProgram->setUniformMatrix4fv("projection", 1, false, (gb::Matrix4f)glGetProjection());
-		mesh->render(camera);
+		mesh->render();
 		//mesh->getMatieral()->disable();
 	}
 
 	for (int i = 0; i < node->getNumChildren(); i++)
 	{
-		renderNode(camera, node->m_children[i], trans);
+		renderNode(node->m_children[i], trans);
 	}
 }
 

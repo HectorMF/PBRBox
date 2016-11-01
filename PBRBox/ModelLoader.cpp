@@ -167,7 +167,7 @@ Mesh* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
 	
 
 
-	Mesh* m = new Mesh(geometry, lambert);
+	Mesh* m = new Mesh(geometry, &lambert);
 	//m->m_boundingBox = gb::AABox3f(mins.x, mins.y, mins.z, maxes.x - mins.x, maxes.y - mins.y, maxes.z - mins.z);
 	//m->m_material_name = name.C_Str();
 	//for (auto tex : textures)

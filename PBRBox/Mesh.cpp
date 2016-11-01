@@ -4,7 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Mesh::Mesh(Geometry& geometry, Material& material)
+Mesh::Mesh(Geometry& geometry, Material* material)
 {
 	m_material = material;
 //	m_material.uploadToGPU();
@@ -15,7 +15,7 @@ Mesh::Mesh(Geometry& geometry, Material& material)
 Mesh::~Mesh()
 { }
 
-void Mesh::render(const Camera& camera)
+void Mesh::render()
 {
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	/*GLenum drawMode = GL_TRIANGLES;

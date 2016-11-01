@@ -1,11 +1,12 @@
 #version 330 core
 in vec2 UV;
 
-uniform sampler2D diffuse;
+uniform sampler2D uShadowMap;
 
 
- out vec4 fragColor;
+out vec4 fragColor;
 void main() 
 {
-    fragColor = vec4(texture2D(diffuse, UV).r, texture2D(diffuse, UV).r,texture2D(diffuse, UV).r, 1.0);    
+	float depthValue = texture(uShadowMap, UV).z;
+    fragColor = vec4(vec3(depthValue), 1.0);    
 }

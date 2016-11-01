@@ -15,17 +15,10 @@ struct Camera
 };
 
 //current transformation matrices coming from Context
-uniform mat4 uProjectionMatrix;
-uniform mat4 uViewMatrix;
-uniform mat4 uModelMatrix;
-uniform mat4 uNormalMatrix;
-uniform mat4 uInvViewMatrix;
-
-uniform mat4 uDepthBiasMatrix;
+uniform mat4 lightSpaceMatrix;
 
 uniform Camera camera;
 out vec2 uv;
-out vec4 shadowCoord;
 
 //user supplied light position
 uniform vec3 uLightPos;
@@ -37,8 +30,21 @@ out vec3 ecNormal;
 //light position in the eye coordinates (view space)
 out vec3 ecLightPos;
 
+out vec4 fragPosLightSpace;
+
+out vec3 wPos;
+out vec3 wNormal;
+out vec3 lightPos;
+
 void main() {
-	shadowCoord = uDepthBiasMatrix * vec4(position, 1.0);
+
+	lightPos = uLightPos;
+
+	
+	wPos = vec3( camera.mModel * vec4(position, 1.0));
+    wNormal = transpose(inverse(mat3( camera.mModel))) * normal;
+	fragPosLightSpace = lightSpaceMatrix * camera.mModel * vec4(position, 1.0);
+	
 	uv = aUV;
     //transform vertex into the eye space
     vec4 pos = camera.mView * camera.mModel * vec4(position, 1.0);

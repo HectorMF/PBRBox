@@ -12,7 +12,7 @@ public:
 	{
 		shader.Bind();
 
-		glUniform3f(glGetUniformLocation(shader, "uLightPos"), 3.0, 3.0, 3.0);
+		glUniform3f(glGetUniformLocation(shader, "uLightPos"), 2.0, 2.0, 2.0);
 
 		GLint d = glGetUniformLocation(shader, "material.diffuse");
 

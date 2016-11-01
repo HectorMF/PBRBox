@@ -10,8 +10,6 @@ public:
 	std::vector<Mesh*> sceneGraph;
 	Mesh* skybox;
 
-	glm::vec4 clearColor;
-
 	~Scene()
 	{
 		for (int i = 0; i < sceneGraph.size(); i++)
