@@ -30,6 +30,7 @@
 #include "GeometryUtil.h"
 #include "Texture.h"
 #include "Scene.h"
+#include "Renderer.h"
 // test scenes
 
 Camera* hostRendercam = NULL;
@@ -37,6 +38,14 @@ Camera* hostRendercam = NULL;
 int screenWidth, screenHeight;
 
 Scene scene;
+
+RenderTarget* shadowTarget;
+Renderer* renderer;
+
+Material* shadowMat;
+Material* diffuseMat;
+
+Material* depthMat;
 /* Handler for window re-size event. Called back when the window first appears and
 whenever the window is re-sized with its new width and height */
 void reshape(GLsizei newwidth, GLsizei newheight)
@@ -69,10 +78,14 @@ void initializeScene()
 	envMat.shader = Shader("shaders\\EnvMap.vert", "shaders\\EnvMap.frag");
 	envMat.environment = environment;
 
-	Material diffuseMat;
-	diffuseMat.shader = Shader("shaders\\Lambert.vert", "shaders\\Lambert.frag");
-	diffuseMat.environment = environment;
-	diffuseMat.diffuse = diffuse;
+	diffuseMat = new Material();
+	diffuseMat->shader = Shader("shaders\\Lambert.vert", "shaders\\Lambert.frag");
+	diffuseMat->environment = environment;
+	diffuseMat->diffuse = diffuse;
+
+
+	depthMat = new Material();
+	depthMat->shader = Shader("shaders\\Diffuse.vert", "shaders\\Diffuse.frag");
 
 	//Model* model = new Model("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\x64\\Release\\data\\BB8 New\\bb8.fbx");
 	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
@@ -83,20 +96,37 @@ void initializeScene()
 	scene.clearColor = glm::vec4(1, 0, 1, 1);
 	scene.skybox = skyBoxQuad;
 
-	Mesh* groundPlane = new Mesh(Shapes::plane(5, 5), mirrorMat);
+	Mesh* groundPlane = new Mesh(Shapes::plane(5, 5), *diffuseMat);
+	
 	scene.add(groundPlane);
 
-	Geometry sphereMesh = Shapes::sphere(.2);
+
+	Mesh* depthQuad = new Mesh(Shapes::renderQuad(), *depthMat);
+	depthQuad->transform = glm::translate(depthQuad->transform, glm::vec3(0, 1, 0));
+	scene.add(depthQuad);
+
+	Geometry sphereMesh = Shapes::sphere(.1);
 
 	for (int x = -2; x <= 2; x++)
 	{
 		for (int z = -2; z <= 2; z++)
 		{
-			Mesh* sphere = new Mesh(sphereMesh, diffuseMat);
+			Mesh* sphere = new Mesh(sphereMesh, *diffuseMat);
 			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
 			scene.add(sphere);
 		}
 	}
+
+	Geometry lightMesh = Shapes::sphere(.1);
+	Mesh* light = new Mesh(lightMesh, mirrorMat);
+	light->transform = glm::translate(light->transform, glm::vec3(3,3,3));
+	//scene.add(light);
+	
+	renderer = new Renderer();
+	shadowTarget = new RenderTarget();
+
+	shadowMat = new Material();
+	shadowMat->shader = Shader("shaders\\Shadow.vert", "shaders\\Shadow.frag");
 
 
 	//Model* model = new Model("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\IrrigationTool.obj");
@@ -113,8 +143,27 @@ void disp(void)
 
 	// build a new camera for each frame on the CPU
 	interactiveCamera->buildRenderCamera(hostRendercam);
-	
-	scene.render(*hostRendercam);
+
+	renderer->setRenderTarget(*shadowTarget);
+
+	renderer->setOverrideMaterial(*shadowMat);
+
+	renderer->render(scene, *hostRendercam);
+
+	renderer->clearRenderTarget();
+
+	renderer->clearOverideMaterial();
+
+	diffuseMat->shadowTex = shadowTarget->depthTexture;
+
+	int t = glGetUniformLocation(depthMat->shader, "diffuse");
+	glUniform1i(t, 3);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, shadowTarget->depthTexture);
+	//glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(shadowTarget->depthTexture));
+
+
+	renderer->render(scene, *hostRendercam);
 
 	glutSwapBuffers();
 }

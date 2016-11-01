@@ -3,6 +3,7 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 aUV;
 
+
 struct Camera
 {
 	vec3 mViewDirection;
@@ -20,8 +21,11 @@ uniform mat4 uModelMatrix;
 uniform mat4 uNormalMatrix;
 uniform mat4 uInvViewMatrix;
 
+uniform mat4 uDepthBiasMatrix;
+
 uniform Camera camera;
 out vec2 uv;
+out vec4 shadowCoord;
 
 //user supplied light position
 uniform vec3 uLightPos;
@@ -34,6 +38,7 @@ out vec3 ecNormal;
 out vec3 ecLightPos;
 
 void main() {
+	shadowCoord = uDepthBiasMatrix * vec4(position, 1.0);
 	uv = aUV;
     //transform vertex into the eye space
     vec4 pos = camera.mView * camera.mModel * vec4(position, 1.0);

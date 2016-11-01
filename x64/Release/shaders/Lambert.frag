@@ -4,8 +4,10 @@ in vec3 ecPosition;
 in vec3 ecNormal;
 in vec3 ecLightPos;
 in vec2 uv;
+in vec4 shadowCoord;
 
 uniform sampler2D uEnvMap;
+uniform sampler2DShadow uShadowMap;
 
 struct Camera
 {
@@ -128,6 +130,13 @@ vec3 reflect(vec3 I, vec3 N) {
 }
 
 void main() {
+
+
+	float visibility = 1.0;
+	if ( texture( uShadowMap, shadowCoord.xy ).z  <  shadowCoord.z){
+		visibility = 0.5;
+	}
+
      //normalize the normal, we do it here instead of vertex
      //shader for smoother gradients
     vec3 N = normalize(ecNormal);
@@ -162,6 +171,7 @@ void main() {
 	vec4 reflection = texture2D(uEnvMap, envMapEquirect(reflectionWorld));
    
     //reflection vector in the world space. We negate wcEyeDir as the reflect function expect incident vector pointing towards the surface
- 
-    fragColor = vec4(Fresnel_Shlick(vec3(1), VdotH), 1.0);//toGamma(finalColor);    
+	vec4 color = vec4(visibility * vec3(1), 1);
+
+    fragColor = vec4(visibility, visibility, visibility, 1);;//vec4(Fresnel_Shlick(vec3(1), VdotH), 1.0);//toGamma(finalColor);    
 }

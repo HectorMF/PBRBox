@@ -12,7 +12,7 @@ public:
 	{
 		shader.Bind();
 
-		glUniform3f(glGetUniformLocation(shader, "uLightPos"), 10.0, 10.0, 10.0);
+		glUniform3f(glGetUniformLocation(shader, "uLightPos"), 3.0, 3.0, 3.0);
 
 		GLint d = glGetUniformLocation(shader, "material.diffuse");
 
@@ -26,6 +26,10 @@ public:
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, environment);
 
+		glUniform1i(glGetUniformLocation(shader, "uShadowMap"), 2);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, shadowTex);
+
 	}
 
 	void Unbind()
@@ -35,6 +39,6 @@ public:
 
 	Texture diffuse;
 	Texture environment;
-
+	GLuint shadowTex;
 	Shader shader;
 };
