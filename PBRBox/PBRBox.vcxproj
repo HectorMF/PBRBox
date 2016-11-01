@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="GeometryUtil.h" />
     <ClInclude Include="Light.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="SpotLight.h" />
     <ClInclude Include="StandardMaterial.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stdafx.h" />

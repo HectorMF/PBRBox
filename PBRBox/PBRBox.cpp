@@ -66,6 +66,12 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 
 void initializeScene()
 {
+	Texture color = Texture("data\\iron\\basecolor.png");
+	Texture metallic = Texture("data\\iron\\metallic.png");
+	Texture normal = Texture("data\\iron\\normal.png");
+	Texture roughness = Texture("data\\iron\\roughness.png");
+	//Texture specular = Texture();
+
 	Texture diffuse = Texture("data\\BB8 New\\Body diff MAP.jpg");
 	Texture environment = Texture("data\\Mono_Lake_B\\Mono_Lake_B_HiRes_TMap.jpg");
 
@@ -84,7 +90,7 @@ void initializeScene()
 	diffuseMat = new Material();
 	diffuseMat->shader = Shader("shaders\\Lambert.vert", "shaders\\Lambert.frag");
 	diffuseMat->environment = environment;
-	diffuseMat->diffuse = diffuse;
+	diffuseMat->diffuse = color;
 
 
 	depthMat = new Material();
@@ -109,9 +115,9 @@ void initializeScene()
 
 	Geometry sphereMesh = Shapes::sphere(.2);
 
-	for (int x = -2; x <= 2; x++)
+	for (int x = -1; x <= 1; x++)
 	{
-		for (int z = -2; z <= 2; z++)
+		for (int z = -1; z <= 1; z++)
 		{
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat);
 			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
@@ -119,7 +125,7 @@ void initializeScene()
 		}
 	}
 
-	Geometry lightMesh = Shapes::sphere(.2);
+	Geometry lightMesh = Shapes::sphere(.4);
 	Mesh* light = new Mesh(lightMesh, mirrorMat);
 	light->transform = glm::translate(light->transform, glm::vec3(1,1,1));
 	scene.add(light);

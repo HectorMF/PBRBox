@@ -209,7 +209,7 @@ void main() {
 	
 	float shadow = ShadowCalculation(fragPosLightSpace);   
 	shadow = min(shadow, 0.75);
-    vec3 lighting =  (1.0 - shadow) * finalColor * reflection.rgb;  
+    vec3 lighting =  (1.0 - shadow) * finalColor ;//* reflection.rgb;  
     //reflection vector in the world space. We negate wcEyeDir as the reflect function expect incident vector pointing towards the surface
     fragColor = vec4(lighting, 1.0);//toGamma(finalColor);    
 }

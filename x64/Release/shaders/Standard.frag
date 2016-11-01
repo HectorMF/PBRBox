@@ -14,7 +14,6 @@ in vec3 wPos;
 in vec3 wNormal;
 in vec3 lightPos;
 
-
 struct Camera
 {
 	vec3 mViewDirection;
@@ -24,7 +23,9 @@ struct Camera
 	mat4 mNormal;
 	mat4 mModel;
 };
+
 uniform Camera camera;
+
 struct Material {
     sampler2D diffuse;
     sampler2D specular;

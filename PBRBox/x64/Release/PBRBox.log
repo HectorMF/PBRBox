@@ -1,4 +1,40 @@
-﻿  PBRBox.cpp
+﻿  stdafx.cpp
+  Camera.cpp
+Camera.cpp(9): warning C4305: '=': truncation from 'double' to 'float'
+Camera.cpp(11): warning C4305: '=': truncation from 'double' to 'float'
+Camera.cpp(61): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+Camera.cpp(78): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+Camera.cpp(83): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+Camera.cpp(89): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+Camera.cpp(117): warning C4305: 'argument': truncation from 'double' to 'float'
+Camera.cpp(127): warning C4305: 'initializing': truncation from 'double' to 'float'
+Camera.cpp(128): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+Camera.cpp(132): warning C4305: 'initializing': truncation from 'double' to 'float'
+Camera.cpp(144): warning C4305: 'initializing': truncation from 'double' to 'float'
+  Geometry.cpp
+Geometry.cpp(14): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
+Geometry.cpp(19): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
+Geometry.cpp(114): warning C4018: '<': signed/unsigned mismatch
+  Mesh.cpp
+  Model.cpp
+c:\users\hector\documents\github\pbrbox\pbrbox\ModelNode.h(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\ModelNode.h(54): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+  ModelInstance.cpp
+c:\users\hector\documents\github\pbrbox\pbrbox\ModelNode.h(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\ModelNode.h(54): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+  ModelLoader.cpp
+c:\users\hector\documents\github\pbrbox\pbrbox\ModelNode.h(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\ModelNode.h(54): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+ModelLoader.cpp(37): warning C4018: '<': signed/unsigned mismatch
+ModelLoader.cpp(58): warning C4018: '<': signed/unsigned mismatch
+ModelLoader.cpp(75): warning C4018: '<': signed/unsigned mismatch
+ModelLoader.cpp(121): warning C4018: '<': signed/unsigned mismatch
+ModelLoader.cpp(140): warning C4018: '<': signed/unsigned mismatch
+ModelLoader.cpp(144): warning C4018: '<': signed/unsigned mismatch
+  ModelNode.cpp
+c:\users\hector\documents\github\pbrbox\pbrbox\ModelNode.h(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\ModelNode.h(54): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+  PBRBox.cpp
 c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(37): warning C4305: 'argument': truncation from 'double' to 'float'
 c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(38): warning C4305: 'argument': truncation from 'double' to 'float'
 c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(39): warning C4305: 'argument': truncation from 'double' to 'float'
@@ -18,13 +54,12 @@ c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(132): warning C424
 c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(133): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
 c:\users\hector\documents\github\pbrbox\pbrbox\Renderer.h(80): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
 PBRBox.cpp(57): warning C4244: 'argument': conversion from 'GLsizei' to 'float', possible loss of data
-PBRBox.cpp(73): warning C4129: 'N': unrecognized character escape sequence
-PBRBox.cpp(110): warning C4305: 'argument': truncation from 'double' to 'float'
-PBRBox.cpp(122): warning C4305: 'argument': truncation from 'double' to 'float'
-PBRBox.cpp(194): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+PBRBox.cpp(79): warning C4129: 'N': unrecognized character escape sequence
+PBRBox.cpp(116): warning C4305: 'argument': truncation from 'double' to 'float'
+PBRBox.cpp(128): warning C4305: 'argument': truncation from 'double' to 'float'
+PBRBox.cpp(200): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
   Generating code
-  20 of 1311 functions ( 1.5%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    21 functions had inline decision re-evaluated but remain unchanged
+c:\users\hector\documents\github\pbrbox\pbrbox\modelloader.cpp(44): warning C4715: 'ModelLoader::load': not all control paths return a value
+  All 1311 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
   PBRBox.vcxproj -> C:\Users\Hector\Documents\GitHub\PBRBox\x64\Release\PBRBox.exe
