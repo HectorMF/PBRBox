@@ -3,11 +3,15 @@
 in vec3 ecPosition;
 in vec3 ecNormal;
 in vec3 ecLightPos;
-in vec2 uv;
+in vec2 uv1;
 in vec4 shadowCoord;
 
 uniform sampler2D uEnvMap;
 uniform sampler2D uShadowMap;
+uniform sampler2D uMetallicMap;
+uniform sampler2D uReflectionMap;
+uniform sampler2D uRoughnessMap;
+uniform sampler2D uNormalMap;
 
 in vec4 fragPosLightSpace;
 in vec3 wPos;
@@ -47,7 +51,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     // Calculate bias (based on depth map resolution and slope)
     vec3 normal = normalize(wNormal);
     vec3 lightDir = normalize(lightPos - wPos);
-    float bias = max(0.05 * (1.0 - dot(wNormal, lightDir)), 0.005);
+    float bias = max(0.01 * (1.0 - dot(wNormal, lightDir)), 0.005);
     // Check whether current frag pos is in shadow
     // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
     // PCF
@@ -170,11 +174,63 @@ vec3 reflect(vec3 I, vec3 N) {
     return I - 2.0 * dot(N, I) * N;
 }
 
-void main() {
+vec3 EnvBRDFApprox( vec3 SpecularColor, float Roughness, float NoV ) {
+    const vec4 c0 = vec4(-1.0, -0.0275, -0.572, 0.022 );
+    const vec4 c1 = vec4( 1.0, 0.0425, 1.04, -0.04 );
+    vec4 r = Roughness * c0 + c1;
+    float a004 = min( r.x * r.x, exp2( -9.28 * NoV ) ) * r.x + r.y;
+    vec2 AB = vec2( -1.04, 1.04 ) * a004 + r.zw;
+    return SpecularColor * AB.x + AB.y;
+}
+float saturate(float f) {
+    return clamp(f, 0.0, 1.0);
+}
 
+
+mat3 cotangentFrame(vec3 N, vec3 p, vec2 uv) {
+  // get edge vectors of the pixel triangle
+  vec3 dp1 = dFdx(p);
+  vec3 dp2 = dFdy(p);
+  vec2 duv1 = dFdx(uv);
+  vec2 duv2 = dFdy(uv);
+
+  // solve the linear system
+  vec3 dp2perp = cross(dp2, N);
+  vec3 dp1perp = cross(N, dp1);
+  vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
+  vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
+
+  // construct a scale-invariant frame 
+  float invmax = 1.0 / sqrt(max(dot(T,T), dot(B,B)));
+  return mat3(T * invmax, B * invmax, N);
+}
+
+vec3 perturb(vec3 map, vec3 N, vec3 V, vec2 texcoord) {
+  mat3 TBN = cotangentFrame(N, -V, texcoord);
+  return normalize(TBN * map);
+}
+
+vec3 getNormal() {
+    vec3 normalRGB = texture2D(uNormalMap, vec2(uv1.x, 1 - uv1.y)).rgb;
+    vec3 normalMap = normalRGB * 2.0 - 1.0;
+
+    normalMap.y *= -1.0;
+
+    vec3 N = normalize(ecNormal);
+    vec3 V = normalize(-ecPosition);
+
+    vec3 normalView = perturb(normalMap, N, V, vec2(uv1.x, 1 - uv1.y));
+    vec3 normalWorld = vec3(camera.mInvView * vec4(normalView, 0.0));
+    return normalWorld;
+}
+
+void main() {
+	vec2 uv = vec2(uv1.x, 1 - uv1.y);
      //normalize the normal, we do it here instead of vertex
      //shader for smoother gradients
-    vec3 N = normalize(ecNormal);
+	vec3 nn = texture2D(uNormalMap, uv).rgb;
+	
+    vec3 N = normalize(getNormal());
     vec3 L = normalize(ecLightPos - ecPosition);
 	vec3 H = normalize( camera.mViewDirection + (normalize(-ecLightPos)));
    
@@ -201,15 +257,64 @@ void main() {
     //direction towards the camera in the world space
     vec3 wcEyeDir = vec3(camera.mInvView * vec4(ecEyeDir, 0.0));
     //surface normal in the world space
-    vec3 wcNormal = vec3(camera.mInvView * vec4(ecNormal, 0.0));
+
+    //vec3 wcNormal = vec3(camera.mInvView * vec4(N, 0.0));
+	vec3 wcNormal =  N;
+	
     vec3 reflectionWorld = reflect(-wcEyeDir, normalize(wcNormal));
-	vec4 reflection = texture2D(uEnvMap, envMapEquirect(reflectionWorld));
+	vec4 reflection;
 	
 	vec3 ambient = vec3(.4);
+	bool isMetallic = (texture2D(uMetallicMap, uv).r + texture2D(uMetallicMap, uv).g + texture2D(uMetallicMap, uv).b )> 0.0;
 	
+	if(isMetallic)
+		reflection = texture2D(uReflectionMap, envMapEquirect(reflectionWorld));
+	else
+		reflection = vec4(1);//texture2D(uEnvMap, envMapEquirect(reflectionWorld));
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	float uIor = 1.4;
+	float metalness = texture2D(uMetallicMap, uv).r;
+	float roughness = texture2D(uRoughnessMap, uv).r;
+	vec3 albedo = texture2D(material.diffuse, uv).rgb;
+
+	
+	vec3 F0 = vec3(abs((1.0 - uIor) / (1.0 + uIor)));
+    F0 = F0 * F0;
+    //F0 = vec3(0.04); //0.04 is default for non-metals in UE4
+    F0 = mix(F0, albedo, metalness);
+
+    //float NdotV = saturate( dot( normalWorld, eyeDirWorld ) );
+	float NdotV = saturate( dot( wcNormal, ecEyeDir ) );
+    vec3 reflectance = EnvBRDFApprox( F0, roughness, NdotV );
+	 
+	 
+	 
+	 
+	 
+	vec3 diffuseColor = albedo * (1.0 - metalness);
+
+    //TODO: No kd? so not really energy conserving
+    //we could use disney brdf for irradiance map to compensate for that like in Frostbite
+	vec3 reflectionColor = texture2D(uEnvMap, envMapEquirect(reflectionWorld)).rgb;
+	vec3 irradianceColor = texture2D(uReflectionMap, envMapEquirect(reflectionWorld)).rgb;
+    vec3 color = diffuseColor * irradianceColor + reflectionColor * reflectance;
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
 	float shadow = ShadowCalculation(fragPosLightSpace);   
 	shadow = min(shadow, 0.75);
-    vec3 lighting =  (1.0 - shadow) * finalColor ;//* reflection.rgb;  
+    vec3 lighting =  (1.0 - shadow) * color;  
     //reflection vector in the world space. We negate wcEyeDir as the reflect function expect incident vector pointing towards the surface
-    fragColor = vec4(lighting, 1.0);//toGamma(finalColor);    
+    fragColor = vec4(color, 1.0);//toGamma(finalColor);    
 }
