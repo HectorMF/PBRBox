@@ -47,7 +47,7 @@ public:
 		overrideMaterial->Bind();
 		renderTarget->Bind();
 
-		glViewport(0, 0, 512, 512);
+		glViewport(0, 0, 2048, 2048);
 		glClearDepth(1.0);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		//glEnable(GL_DEPTH_TEST);

@@ -3,7 +3,6 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 aUV;
 
-
 struct Camera
 {
 	vec3 mViewDirection;
@@ -18,7 +17,7 @@ struct Camera
 uniform mat4 lightSpaceMatrix;
 
 uniform Camera camera;
-out vec2 uv;
+out vec2 uv1;
 
 //user supplied light position
 uniform vec3 uLightPos;
@@ -45,7 +44,7 @@ void main() {
     wNormal = transpose(inverse(mat3( camera.mModel))) * normal;
 	fragPosLightSpace = lightSpaceMatrix * camera.mModel * vec4(position, 1.0);
 	
-	uv = aUV;
+	uv1 = aUV;
     //transform vertex into the eye space
     vec4 pos = camera.mView * camera.mModel * vec4(position, 1.0);
     ecPosition = pos.xyz;

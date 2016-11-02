@@ -27,7 +27,7 @@ void ModelInstance::renderNode(const ModelNode* node, glm::mat4 transform, Shade
 
 	for (int i = 0; i < node->getNumMeshes(); i++)
 	{
-		Mesh* mesh = m_modelData->getMeshes()[node->m_meshes[i]];
+//		Mesh* mesh = m_modelData->getMeshes()[node->m_meshes[i]];
 		//mesh->getMatieral()->enable();
 		//mesh->getMatieral()->m_pShaderProgram->setUniformMatrix4fv("modelView", 1, false, (gb::Matrix4f)glGetModelView());
 		//mesh->getMatieral()->m_pShaderProgram->setUniformMatrix4fv("projection", 1, false, (gb::Matrix4f)glGetProjection());

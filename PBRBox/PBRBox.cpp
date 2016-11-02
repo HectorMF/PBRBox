@@ -66,14 +66,17 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 
 void initializeScene()
 {
-	Texture color = Texture("data\\iron\\basecolor.png");
-	Texture metallic = Texture("data\\iron\\metallic.png");
-	Texture normal = Texture("data\\iron\\normal.png");
-	Texture roughness = Texture("data\\iron\\roughness.png");
+
+	Texture color = Texture("data\\cerberus\\Cerberus_A.png");
+	Texture metallic = Texture("data\\cerberus\\Cerberus_M.jpg");
+	Texture normal = Texture("data\\cerberus\\Cerberus_N.jpg");
+	Texture roughness = Texture("data\\cerberus\\Cerberus_R.jpg");
+	Texture UV = Texture("data\\cerberus\\Cerberus_UV.jpg");
 	//Texture specular = Texture();
 
 	Texture diffuse = Texture("data\\BB8 New\\Body diff MAP.jpg");
-	Texture environment = Texture("data\\Mono_Lake_B\\Mono_Lake_B_HiRes_TMap.jpg");
+	Texture environment = Texture("data\\Mono_Lake_B\\Mono_Lake_B_Env.hdr");
+	Texture reflection = Texture("data\\Mono_Lake_B\\Mono_Lake_B_Ref.hdr");
 
 	Material normalMat;
 	normalMat.shader = Shader("shaders\\NormalShader.vert", "shaders\\\NormalShader.frag");
@@ -90,27 +93,37 @@ void initializeScene()
 	diffuseMat = new Material();
 	diffuseMat->shader = Shader("shaders\\Lambert.vert", "shaders\\Lambert.frag");
 	diffuseMat->environment = environment;
+	diffuseMat->reflection = reflection;
+	diffuseMat->metallic = metallic;
+	diffuseMat->roughness = roughness;
 	diffuseMat->diffuse = color;
+	diffuseMat->normal = normal;
+	diffuseMat->uv = UV;
 
 
 	depthMat = new Material();
 	depthMat->shader = Shader("shaders\\Diffuse.vert", "shaders\\Diffuse.frag");
 
-	//Model* model = new Model("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\x64\\Release\\data\\BB8 New\\bb8.fbx");
+	Model* model = new Model("data\\cerberus\\Cerberus.obj");
 	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
 	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
+	
+	Geometry* gun = model->m_meshes[0];
 
+	Mesh* gun1 = new Mesh(*gun, diffuseMat);
+	scene.add(gun1);
 
 	Mesh* skyBoxQuad = new Mesh(Shapes::renderQuad(), envMat);
 	scene.skybox = skyBoxQuad;
 
 	Mesh* groundPlane = new Mesh(Shapes::plane(3, 3), diffuseMat);
 	
-	scene.add(groundPlane);
+	//scene.add(groundPlane);
 
 
 	depthQuad = new Mesh(Shapes::renderQuad(), depthMat);
-	depthQuad->transform = glm::translate(depthQuad->transform, glm::vec3(0, 1, 0));
+	depthQuad->transform = glm::scale(depthQuad->transform, glm::vec3(.25,.25, 0));
+
 	//scene.add(depthQuad);
 
 	Geometry sphereMesh = Shapes::sphere(.2);
@@ -121,13 +134,13 @@ void initializeScene()
 		{
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat);
 			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
-			scene.add(sphere);
+			///scene.add(sphere);
 		}
 	}
 
 	Geometry lightMesh = Shapes::sphere(.4);
 	Mesh* light = new Mesh(lightMesh, mirrorMat);
-	light->transform = glm::translate(light->transform, glm::vec3(1,1,1));
+	light->transform = glm::translate(light->transform, glm::vec3(0,2,0));
 	scene.add(light);
 	
 	renderer = new Renderer();
@@ -168,9 +181,12 @@ void disp(void)
 	//glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(shadowTarget->depthTexture));
 
 	renderer->render(scene, *hostRendercam);
-//	depthQuad->m_material->Bind();
-//	depthQuad->render();
-//	depthQuad->m_material->Unbind();
+	glDisable(GL_DEPTH_TEST);
+	depthQuad->m_material->Bind();
+	depthQuad->render();
+	depthQuad->m_material->Unbind();
+
+	glEnable(GL_DEPTH_TEST);
 	glutSwapBuffers();
 }
 

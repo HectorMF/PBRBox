@@ -1,8 +1,5 @@
 #include "ModelLoader.h"
 
-Material lambert;
-
-
 ModelLoader::ModelLoader() {}
 ModelLoader::~ModelLoader() {}
 
@@ -17,14 +14,10 @@ glm::mat4 aiTransformToGLM(aiMatrix4x4t<float> &t)
 
 bool ModelLoader::load(Model* model, const std::string &file)
 {
-	lambert.diffuse = Texture("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\x64\\Release\\data\\BB8 New\\Body diff MAP.jpg");
-	lambert.environment = Texture("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\x64\\Release\\data\\Mono_Lake_B\\Mono_Lake_B_HiRes_TMap.jpg");
-	lambert.shader = Shader("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\Lambert.vert", "C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\Lambert.frag");
-
 	std::string fullpath = file;
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(fullpath, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_GenSmoothNormals);
+	const aiScene* scene = importer.ReadFile(fullpath, aiProcess_PreTransformVertices|aiProcessPreset_TargetRealtime_Quality);
 
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 	{
@@ -104,7 +97,7 @@ void ModelLoader::processHierarchy(aiNode* node, ModelNode* targetParent, glm::m
 	return mNode;
 }*/
 
-Mesh* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
+Geometry* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
 {
 	// Data to fill
 	std::vector<unsigned int> indices;
@@ -158,21 +151,18 @@ Mesh* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
 		getMaterialOfType(textures, material, aiTextureType_SPECULAR, "DiffuseTex");
 	}
 
-	Geometry geometry;
-	geometry.setIndices(indices);
-	geometry.setVertices(vertices);
-	geometry.setNormals(normals);
-	geometry.setUVs(texCoords);
-
-	
+	Geometry* geometry = new Geometry();
+	geometry->setIndices(indices);
+	geometry->setVertices(vertices);
+	geometry->setNormals(normals);
+	geometry->setUVs(texCoords);
 
 
-	Mesh* m = new Mesh(geometry, &lambert);
 	//m->m_boundingBox = gb::AABox3f(mins.x, mins.y, mins.z, maxes.x - mins.x, maxes.y - mins.y, maxes.z - mins.z);
 	//m->m_material_name = name.C_Str();
 	//for (auto tex : textures)
 	//	m->m_textureData.push_back(tex.second);
-	return m;
+	return geometry;
 }
 
 void ModelLoader::getMaterialOfType(std::map<aiTextureType, std::tuple<std::string, std::string>>& textures, aiMaterial* mat, aiTextureType type, std::string typeName)

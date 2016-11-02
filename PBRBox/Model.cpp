@@ -22,15 +22,15 @@ void Model::renderNode(const ModelNode* node, glm::mat4 transform)
 	glm::mat4 trans = transform * node->m_transform;
 	for (int i = 0; i < node->getNumMeshes(); i++)
 	{
-		Mesh* mesh = m_meshes[node->m_meshes[i]];
+		Geometry* mesh = m_meshes[node->m_meshes[i]];
 
 		
 		//glUniformMatrix4fv(glGetUniformLocation(mesh->m_material.shader, "camera.mModel"), 1, GL_FALSE, glm::value_ptr(trans));
-		mesh->transform = trans;
+		//mesh->transform = trans;
 		//mesh->getMatieral()->enable();
 		//mesh->getMatieral()->m_pShaderProgram->setUniformMatrix4fv("modelView", 1, false, (gb::Matrix4f)glGetModelView());
 		//mesh->getMatieral()->m_pShaderProgram->setUniformMatrix4fv("projection", 1, false, (gb::Matrix4f)glGetProjection());
-		mesh->render();
+		//mesh->render();
 		//mesh->getMatieral()->disable();
 	}
 
