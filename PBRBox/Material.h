@@ -48,6 +48,7 @@ public:
 		glUniform1i(glGetUniformLocation(shader, "uUVMap"), 7);
 		glActiveTexture(GL_TEXTURE7);
 		glBindTexture(GL_TEXTURE_2D, uv);
+
 	}
 
 	void Unbind()

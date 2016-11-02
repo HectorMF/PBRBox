@@ -128,13 +128,24 @@ void initializeScene()
 
 	Geometry sphereMesh = Shapes::sphere(.2);
 
-	for (int x = -1; x <= 1; x++)
+	for (int x = 2; x <= 2; x++)
 	{
-		for (int z = -1; z <= 1; z++)
+		for (int z = -2; z <= 2; z++)
 		{
-			Mesh* sphere = new Mesh(sphereMesh, diffuseMat);
+
+			Material* diffuseMat1 = new Material();
+			diffuseMat1->shader = Shader("shaders\\Lambert.vert", "shaders\\Lambert.frag");
+			diffuseMat1->environment = environment;
+			diffuseMat1->reflection = reflection;
+			diffuseMat1->metallic = metallic;
+			diffuseMat1->roughness = roughness;
+			diffuseMat1->diffuse = color;
+			diffuseMat1->normal = normal;
+			diffuseMat1->uv = UV;
+
+			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
-			///scene.add(sphere);
+			scene.add(sphere);
 		}
 	}
 

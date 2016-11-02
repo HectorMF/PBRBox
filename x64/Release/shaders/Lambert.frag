@@ -29,6 +29,16 @@ struct Camera
 	mat4 mModel;
 };
 uniform Camera camera;
+
+struct PBRMaterial
+{
+	sampler2D albedo;
+	sampler2D metallic;
+	sampler2D roughness;
+	sampler2D normal;
+};
+
+
 struct Material {
     sampler2D diffuse;
     sampler2D specular;
@@ -211,7 +221,7 @@ vec3 perturb(vec3 map, vec3 N, vec3 V, vec2 texcoord) {
 }
 
 vec3 getNormal() {
-    vec3 normalRGB = texture2D(uNormalMap, vec2(uv1.x, 1 - uv1.y)).rgb;
+    vec3 normalRGB = texture2D(uNormalMap, vec2(uv1.x, uv1.y)).rgb;
     vec3 normalMap = normalRGB * 2.0 - 1.0;
 
     normalMap.y *= -1.0;
@@ -219,13 +229,13 @@ vec3 getNormal() {
     vec3 N = normalize(ecNormal);
     vec3 V = normalize(-ecPosition);
 
-    vec3 normalView = perturb(normalMap, N, V, vec2(uv1.x, 1 - uv1.y));
+    vec3 normalView = perturb(normalMap, N, V, vec2(uv1.x, uv1.y));
     vec3 normalWorld = vec3(camera.mInvView * vec4(normalView, 0.0));
     return normalWorld;
 }
 
 void main() {
-	vec2 uv = vec2(uv1.x, 1 - uv1.y);
+	vec2 uv = vec2(uv1.x,  uv1.y);
      //normalize the normal, we do it here instead of vertex
      //shader for smoother gradients
 	vec3 nn = texture2D(uNormalMap, uv).rgb;
