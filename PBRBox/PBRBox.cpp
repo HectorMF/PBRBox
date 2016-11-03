@@ -31,6 +31,8 @@
 #include "Texture.h"
 #include "Scene.h"
 #include "Renderer.h"
+
+#include "PBRMaterial.h"
 // test scenes
 
 Camera* hostRendercam = NULL;
@@ -43,7 +45,7 @@ RenderTarget* shadowTarget;
 Renderer* renderer;
 
 Material* shadowMat;
-Material* diffuseMat;
+PBRMaterial* diffuseMat;
 
 Material* depthMat;
 Mesh* depthQuad;
@@ -90,15 +92,17 @@ void initializeScene()
 	envMat->shader = Shader("shaders\\EnvMap.vert", "shaders\\EnvMap.frag");
 	envMat->environment = environment;
 
-	diffuseMat = new Material();
-	diffuseMat->shader = Shader("shaders\\Lambert.vert", "shaders\\Lambert.frag");
+	diffuseMat = new PBRMaterial();
+	diffuseMat->setAlbedoMap(color);
+	diffuseMat->setMetalnessMap(metallic);
+	diffuseMat->setRoughnessMap(roughness);
+	diffuseMat->setNormalMap(normal);
+
+
 	diffuseMat->environment = environment;
-	diffuseMat->reflection = reflection;
-	diffuseMat->metallic = metallic;
-	diffuseMat->roughness = roughness;
-	diffuseMat->diffuse = color;
-	diffuseMat->normal = normal;
-	diffuseMat->uv = UV;
+	diffuseMat->m_reflectionMap = reflection;
+
+
 
 
 	depthMat = new Material();
@@ -133,15 +137,14 @@ void initializeScene()
 		for (int z = -2; z <= 2; z++)
 		{
 
-			Material* diffuseMat1 = new Material();
-			diffuseMat1->shader = Shader("shaders\\Lambert.vert", "shaders\\Lambert.frag");
-			diffuseMat1->environment = environment;
-			diffuseMat1->reflection = reflection;
-			diffuseMat1->metallic = metallic;
-			diffuseMat1->roughness = roughness;
-			diffuseMat1->diffuse = color;
-			diffuseMat1->normal = normal;
-			diffuseMat1->uv = UV;
+			PBRMaterial* diffuseMat1 = new PBRMaterial();
+
+			diffuseMat->environment = environment;
+			diffuseMat->m_reflectionMap = reflection;
+			diffuseMat->setAlbedoMap(color);
+			diffuseMat->setMetalnessMap(metallic);
+			diffuseMat->setRoughnessMap(roughness);
+			diffuseMat->setNormalMap(normal);
 
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));

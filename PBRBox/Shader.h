@@ -14,6 +14,12 @@ class Shader
 {
 public:
 	GLuint m_program;
+	std::vector<std::string> flags;
+
+	void addFlag(std::string flag)
+	{
+		flags.push_back(flag);
+	}
 
 	unsigned int getProgram() const { return m_program; }
 
@@ -21,6 +27,7 @@ public:
 		m_program = 0;
 	}
 
+	shader(const )
 	// Constructor generates the shader on the fly
 	Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 	{

@@ -1,160 +1,62 @@
-#version 330 core
-//vertex position, normal and light position in the eye/view space
-in vec3 ecPosition;
-in vec3 ecNormal;
-in vec3 ecLightPos;
-in vec2 uv;
-in vec4 shadowCoord;
 
-uniform sampler2D uEnvMap;
-uniform sampler2D uShadowMap;
+#ifdef USE_ALBEDO_MAP
+	uniform sampler2D uAlbedo;
+	vec3 getAlbedo() 
+	{
+		return texture2D(uAlbedo, vTexCord0).rgb;
+	}
+#else
+	uniform vec4 uAlbedo; 
+	vec3 getAlbedo() 
+	{
+		return uAlbedo.rgb;
+	}
+#endif
 
-in vec4 fragPosLightSpace;
-in vec3 wPos;
-in vec3 wNormal;
-in vec3 lightPos;
+#ifdef USE_ROUGHNESS_MAP
+	uniform sampler2D uRoughness;
+	float getRoughness() 
+	{
+		return texture2D(uRoughness, vTexCord0).r;
+	}
+#else
+	uniform float uRoughness;
+	float getRoughness() 
+	{
+		return uRoughness;
+	}
+#endif
 
-struct Camera
-{
-	vec3 mViewDirection;
-	mat4 mProjection;
-	mat4 mView;
-	mat4 mInvView;
-	mat4 mNormal;
-	mat4 mModel;
-};
+#ifdef USE_METALNESS_MAP
+	uniform sampler2D uMetalness;
+	float getMetalness() {
+		return texture2D(uMetalness, vTexCord0).r;
+	}
+#else
+	uniform float uMetalness;
+	float getMetalness() {
+		return uMetalness;
+	}
+#endif
 
-uniform Camera camera;
+#ifdef USE_NORMAL_MAP
+	uniform sampler2D uNormal;
+	#pragma glslify: perturb = require('glsl-perturb-normal')
+	vec3 getNormal() {
+		vec3 normalRGB = texture2D(uNormal, vTexCord0).rgb;
+		vec3 normalMap = normalRGB * 2.0 - 1.0;
 
-struct Material {
-    sampler2D diffuse;
-    sampler2D specular;
-    float     shininess;
-};  
+		normalMap.y *= -1.0;
 
-uniform Material material;
+		vec3 N = normalize(vNormalView);
+		vec3 V = normalize(vEyeDirView);
 
-float ShadowCalculation(vec4 fragPosLightSpace)
-{
-  // perform perspective divide
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    // Transform to [0,1] range
-    projCoords = projCoords * 0.5 + 0.5;
-    // Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-    float closestDepth = texture(uShadowMap, projCoords.xy).r; 
-    // Get depth of current fragment from light's perspective
-    float currentDepth = projCoords.z;
-    // Calculate bias (based on depth map resolution and slope)
-    vec3 normal = normalize(wNormal);
-    vec3 lightDir = normalize(lightPos - wPos);
-    float bias = max(0.05 * (1.0 - dot(wNormal, lightDir)), 0.005);
-    // Check whether current frag pos is in shadow
-    // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
-    // PCF
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(uShadowMap, 0);
-    for(int x = -1; x <= 1; ++x)
-    {
-        for(int y = -1; y <= 1; ++y)
-        {
-            float pcfDepth = texture(uShadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
-            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
-        }    
-    }
-    shadow /= 9.0;
-    
-    // Keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
-    if(projCoords.z > 1.0)
-        shadow = 0.0;
-        
-    return shadow;
-}
-
-out vec4 fragColor;
-
-
-const float PI = 3.14159265;
-const float TwoPI = 6.28318530718;
-
-vec2 envMapEquirect(vec3 wcNormal, float flipEnvMap) {
-  //I assume envMap texture has been flipped the WebGL way (pixel 0,0 is a the bottom)
-  //therefore we flip wcNorma.y as acos(1) = 0
-  float phi = acos(wcNormal.y);
-  float theta = atan(flipEnvMap * wcNormal.x, wcNormal.z) + PI;
-  return vec2(theta / TwoPI, phi / PI);
-}
-
-vec2 envMapEquirect(vec3 wcNormal) {
-    //-1.0 for left handed coordinate system oriented texture (usual case)
-    return envMapEquirect(wcNormal, -1.0);
-}
-
-const float gamma = 2.2;
-
-vec3 toLinear(vec3 v) {
-  return pow(v, vec3(gamma));
-}
-
-vec4 toLinear(vec4 v) {
-  return vec4(toLinear(v.rgb), v.a);
-}
-
-vec3 toGamma(vec3 v) {
-  return pow(v, vec3(1.0 / gamma));
-}
-
-vec4 toGamma(vec4 v) {
-  return vec4(toGamma(v.rgb), v.a);
-}
-float lambert(vec3 lightDirection, vec3 surfaceNormal) 
-{
-  return max(0.0, dot(lightDirection, surfaceNormal));
-}
-
-vec3 reflect(vec3 I, vec3 N) {
-    return I - 2.0 * dot(N, I) * N;
-}
-
-void main() {
-
-     //normalize the normal, we do it here instead of vertex
-     //shader for smoother gradients
-    vec3 N = normalize(ecNormal);
-    vec3 L = normalize(ecLightPos - ecPosition);
-	vec3 H = normalize( camera.mViewDirection + (normalize(-ecLightPos)));
-   
-	//Geometric term
-	float NdotH = max(dot(N, H), 0.0);
-	float VdotH = max(dot(camera.mViewDirection, H), 0.000001);
-	  
-    //calculate direction towards the light
-
-    //diffuse intensity
-    float Id = lambert(L, N);
-	
-	//surface and light color, full white
-    vec4 baseColor = toLinear(vec4(1.0)); 
-    vec4 lightColor = toLinear(vec4(1.0)); 
-
-    //lighting in the linear space
-	vec3 specular = Fresnel_Shlick(vec3(.333), VdotH);
-	
-    vec3 finalColor = texture2D(material.diffuse, uv).rgb;
-
-    //direction towards they eye (camera) in the view (eye) space
-    vec3 ecEyeDir = normalize(-ecPosition);
-    //direction towards the camera in the world space
-    vec3 wcEyeDir = vec3(camera.mInvView * vec4(ecEyeDir, 0.0));
-    //surface normal in the world space
-    vec3 wcNormal = vec3(camera.mInvView * vec4(ecNormal, 0.0));
-    vec3 reflectionWorld = reflect(-wcEyeDir, normalize(wcNormal));
-	vec4 reflection = texture2D(uEnvMap, envMapEquirect(reflectionWorld));
-	
-	vec3 ambient = vec3(.4);
-	
-	float shadow = ShadowCalculation(fragPosLightSpace);   
-	shadow = min(shadow, 0.75);
-    vec3 lighting = reflection.rgb + (1.0 - shadow) * finalColor;  
-    //reflection vector in the world space. We negate wcEyeDir as the reflect function expect incident vector pointing towards the surface
-    fragColor = vec4(lighting, 1.0);//toGamma(finalColor);    
-}
+		vec3 normalView = perturb(normalMap, N, V, vTexCord0);
+		vec3 normalWorld = vec3(uInverseViewMatrix * vec4(normalView, 0.0));
+		return normalWorld;
+	}
+#else
+	vec3 getNormal() {
+		return normalize(vNormalWorld);
+	}
+#endif

@@ -14,40 +14,15 @@ public:
 
 		glUniform3f(glGetUniformLocation(shader.getProgram(), "uLightPos"), 2.0, 2.0, 2.0);
 
-		GLint d = glGetUniformLocation(shader.getProgram(), "material.diffuse");
+		GLint d = glGetUniformLocation(shader.getProgram(), "uEnvMap");
 
 		glUniform1i(d, 0);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuse);
-
-		GLint e = glGetUniformLocation(shader.getProgram(), "uEnvMap");
-
-		glUniform1i(e, 1);
-		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, environment);
 
-		glUniform1i(glGetUniformLocation(shader.getProgram(), "uShadowMap"), 2);
-		glActiveTexture(GL_TEXTURE2);
+		glUniform1i(glGetUniformLocation(shader.getProgram(), "uShadowMap"), 1);
+		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, shadowTex);
-		glUniform1i(glGetUniformLocation(shader.getProgram(), "uMetallicMap"), 3);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, metallic);
-
-		glUniform1i(glGetUniformLocation(shader.getProgram(), "uReflectionMap"), 4);
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, reflection);
-
-		glUniform1i(glGetUniformLocation(shader.getProgram(), "uRoughnessMap"),5);
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, roughness);
-
-		glUniform1i(glGetUniformLocation(shader.getProgram(), "uNormalMap"), 6);
-		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_2D, normal);
-
-		glUniform1i(glGetUniformLocation(shader.getProgram(), "uUVMap"), 7);
-		glActiveTexture(GL_TEXTURE7);
-		glBindTexture(GL_TEXTURE_2D, uv);
 	}
 
 	void Unbind()
@@ -55,13 +30,6 @@ public:
 		shader.Unbind();
 	}
 
-	GLuint uv;
-	GLuint normal;
-	GLuint reflection;
-	GLuint metallic;
-	GLuint roughness;
-
-	GLuint diffuse;
 	Texture environment;
 	GLuint shadowTex;
 
