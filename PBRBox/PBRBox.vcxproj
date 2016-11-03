@@ -152,6 +152,7 @@
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="GeometryUtil.h" />
+    <ClInclude Include="Environment.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
@@ -171,6 +172,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="ToneMapping.h" />
     <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>

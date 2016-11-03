@@ -1,4 +1,46 @@
 #version 330 core
+
+float A = 0.15;
+float B = 0.50;
+float C = 0.10;
+float D = 0.20;
+float E = 0.02;
+float F = 0.30;
+float W = 11.2;
+
+vec3 Uncharted2Tonemap(vec3 x) {
+   return ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
+}
+
+//Based on Filmic Tonemapping Operators http://filmicgames.com/archives/75
+vec3 tonemapUncharted2(vec3 color) {
+    float ExposureBias = 2.0;
+    vec3 curr = Uncharted2Tonemap(ExposureBias * color);
+
+    vec3 whiteScale = 1.0 / Uncharted2Tonemap(vec3(W));
+    return curr * whiteScale;
+}
+
+
+
+vec3 tonemapFilmic(vec3 color) {
+    vec3 x = max(vec3(0.0), color - 0.004);
+    return (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //vertex position, normal and light position in the eye/view space
 in vec3 ecPosition;
 in vec3 ecNormal;
@@ -7,11 +49,17 @@ in vec2 uv1;
 in vec4 shadowCoord;
 
 uniform sampler2D uEnvMap;
-uniform sampler2D uShadowMap;
-uniform sampler2D uMetallicMap;
 uniform sampler2D uReflectionMap;
+
+uniform sampler2D uShadowMap;
+
+uniform sampler2D uAlbedoMap;
+uniform sampler2D uMetallicMap;
 uniform sampler2D uRoughnessMap;
 uniform sampler2D uNormalMap;
+
+
+
 
 in vec4 fragPosLightSpace;
 in vec3 wPos;
@@ -29,6 +77,7 @@ struct Camera
 	mat4 mModel;
 };
 uniform Camera camera;
+
 
 struct PBRMaterial
 {
@@ -157,6 +206,7 @@ vec2 envMapEquirect(vec3 wcNormal) {
     //-1.0 for left handed coordinate system oriented texture (usual case)
     return envMapEquirect(wcNormal, -1.0);
 }
+
 
 const float gamma = 2.2;
 
@@ -325,6 +375,9 @@ void main() {
 	float shadow = ShadowCalculation(fragPosLightSpace);   
 	shadow = min(shadow, 0.75);
     vec3 lighting =  (1.0 - shadow) * color;  
+	
+	
+	color = color;
     //reflection vector in the world space. We negate wcEyeDir as the reflect function expect incident vector pointing towards the surface
     fragColor = vec4(color, 1.0);//toGamma(finalColor);    
 }

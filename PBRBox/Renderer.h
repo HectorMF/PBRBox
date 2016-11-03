@@ -60,12 +60,12 @@ public:
 
 		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
-		int t = glGetUniformLocation(overrideMaterial->shader, "lightSpaceMatrix");
+		int t = glGetUniformLocation(overrideMaterial->shader.getProgram(), "lightSpaceMatrix");
 		glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
 		for (int i = 0; i < scene.sceneGraph.size(); i++)
 		{
-			t = glGetUniformLocation(overrideMaterial->shader, "model");
+			t = glGetUniformLocation(overrideMaterial->shader.getProgram(), "model");
 			glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(scene.sceneGraph[i]->transform));
 
 			scene.sceneGraph[i]->render();
@@ -100,12 +100,12 @@ public:
 			glm::mat4 transView = glm::transpose(view);
 			glm::vec4 viewDir = view * model * glm::vec4(1, 0, 0, 0);
 
-			GLint mm = glGetUniformLocation(m->shader, "camera.mModel");
-			GLint v = glGetUniformLocation(m->shader, "camera.mView");
-			GLint p = glGetUniformLocation(m->shader, "camera.mProjection");
-			GLint n = glGetUniformLocation(m->shader, "camera.mNormal");
-			GLint ii = glGetUniformLocation(m->shader, "camera.mInvView");
-			GLint vd = glGetUniformLocation(m->shader, "camera.mViewDirection");
+			GLint mm = glGetUniformLocation(m->shader.getProgram(), "camera.mModel");
+			GLint v = glGetUniformLocation(m->shader.getProgram(), "camera.mView");
+			GLint p = glGetUniformLocation(m->shader.getProgram(), "camera.mProjection");
+			GLint n = glGetUniformLocation(m->shader.getProgram(), "camera.mNormal");
+			GLint ii = glGetUniformLocation(m->shader.getProgram(), "camera.mInvView");
+			GLint vd = glGetUniformLocation(m->shader.getProgram(), "camera.mViewDirection");
 
 			glUniformMatrix4fv(mm, 1, GL_FALSE, glm::value_ptr(model));
 			glUniformMatrix4fv(v, 1, GL_FALSE, glm::value_ptr(view));
@@ -146,7 +146,7 @@ public:
 
 			glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
-			int t = glGetUniformLocation(m->shader, "lightSpaceMatrix");
+			int t = glGetUniformLocation(m->shader.getProgram(), "lightSpaceMatrix");
 			glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
 			glm::mat4 model = scene.sceneGraph[i]->transform;
@@ -158,12 +158,12 @@ public:
 			glm::mat4 transView = glm::transpose(view);
 			glm::vec4 viewDir = view * model * glm::vec4(1, 0, 0, 0);
 
-			GLint mm = glGetUniformLocation(m->shader, "camera.mModel");
-			GLint v = glGetUniformLocation(m->shader, "camera.mView");
-			GLint p = glGetUniformLocation(m->shader, "camera.mProjection");
-			GLint n = glGetUniformLocation(m->shader, "camera.mNormal");
-			GLint ii = glGetUniformLocation(m->shader, "camera.mInvView");
-			GLint vd = glGetUniformLocation(m->shader, "camera.mViewDirection");
+			GLint mm = glGetUniformLocation(m->shader.getProgram(), "camera.mModel");
+			GLint v = glGetUniformLocation(m->shader.getProgram(), "camera.mView");
+			GLint p = glGetUniformLocation(m->shader.getProgram(), "camera.mProjection");
+			GLint n = glGetUniformLocation(m->shader.getProgram(), "camera.mNormal");
+			GLint ii = glGetUniformLocation(m->shader.getProgram(), "camera.mInvView");
+			GLint vd = glGetUniformLocation(m->shader.getProgram(), "camera.mViewDirection");
 
 			glUniformMatrix4fv(mm, 1, GL_FALSE, glm::value_ptr(model));
 			glUniformMatrix4fv(v, 1, GL_FALSE, glm::value_ptr(view));

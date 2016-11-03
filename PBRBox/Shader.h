@@ -13,14 +13,14 @@
 class Shader
 {
 public:
-	GLuint Program;
+	GLuint m_program;
 
-	operator unsigned int() const { return Program; }
-
+	unsigned int getProgram() const { return m_program; }
 
 	Shader() {
-
+		m_program = 0;
 	}
+
 	// Constructor generates the shader on the fly
 	Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 	{
@@ -81,15 +81,15 @@ public:
 			std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
 		}
 		// Shader Program
-		this->Program = glCreateProgram();
-		glAttachShader(this->Program, vertex);
-		glAttachShader(this->Program, fragment);
-		glLinkProgram(this->Program);
+		m_program = glCreateProgram();
+		glAttachShader(m_program, vertex);
+		glAttachShader(m_program, fragment);
+		glLinkProgram(m_program);
 		// Print linking errors if any
-		glGetProgramiv(this->Program, GL_LINK_STATUS, &success);
+		glGetProgramiv(m_program, GL_LINK_STATUS, &success);
 		if (!success)
 		{
-			glGetProgramInfoLog(this->Program, 512, NULL, infoLog);
+			glGetProgramInfoLog(m_program, 512, NULL, infoLog);
 			std::cout << vertexPath << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
 		}
 		// Delete the shaders as they're linked into our program now and no longer necessery
@@ -100,7 +100,7 @@ public:
 	// Uses the current shader
 	void Bind()
 	{
-		glUseProgram(this->Program);
+		glUseProgram(m_program);
 	}
 
 	void Unbind()

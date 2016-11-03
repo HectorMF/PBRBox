@@ -26,14 +26,14 @@ bool ModelLoader::load(Model* model, const std::string &file)
 	}
 
 	// Retrieve the directory path of the filepath
-	//this->model.path = path.substr(0, path.find_last_of('/'));
+	//model.path = path.substr(0, path.find_last_of('/'));
 	for (int i = 0; i < scene->mNumMeshes; i++)
-		model->m_meshes.push_back(this->processMesh(scene->mMeshes[i], scene));
+		model->m_meshes.push_back(processMesh(scene->mMeshes[i], scene));
 	// Process ASSIMP's root node recursively
 //	model->m_hierarchy = scene->mRootNode->mTransformation;
 	model->m_hierarchy = new ModelNode();
 	model->m_hierarchy->m_transform = glm::mat4();
-	this->processHierarchy(scene->mRootNode, model->m_hierarchy, glm::mat4());
+	processHierarchy(scene->mRootNode, model->m_hierarchy, glm::mat4());
 }
 
 void ModelLoader::processHierarchy(aiNode* node, ModelNode* targetParent, glm::mat4 accTransform)

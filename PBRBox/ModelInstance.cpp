@@ -20,7 +20,7 @@ void ModelInstance::render(Shader& shader)
 void ModelInstance::renderNode(const ModelNode* node, glm::mat4 transform, Shader& shader)
 {
 	//transform *= node->M_transform;
-	GLint modelLoc = glGetUniformLocation(shader.Program, "uModelMatrix");
+	GLint modelLoc = glGetUniformLocation(shader.getProgram(), "uModelMatrix");
 
 	glm::mat4 trans = transform * node->m_transform;
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(trans));
