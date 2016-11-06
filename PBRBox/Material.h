@@ -10,7 +10,7 @@ class Material
 public:
 	void Bind()
 	{
-		shader.Bind();
+		shader.bind();
 
 		glUniform3f(glGetUniformLocation(shader.getProgram(), "uLightPos"), 2.0, 2.0, 2.0);
 
@@ -27,7 +27,7 @@ public:
 
 	void Unbind()
 	{
-		shader.Unbind();
+		shader.unbind();
 	}
 
 	Texture environment;

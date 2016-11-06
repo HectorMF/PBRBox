@@ -14,20 +14,51 @@ class Shader
 {
 public:
 	GLuint m_program;
+
+	std::string m_version;
 	std::vector<std::string> flags;
+
+	operator GLuint() const { return m_program; }
+
+	
+	void setVersion(int version)
+	{
+		m_version = "#version " + version;
+	}
 
 	void addFlag(std::string flag)
 	{
 		flags.push_back(flag);
 	}
 
-	unsigned int getProgram() const { return m_program; }
-
-	Shader() {
-		m_program = 0;
+	void clearFlags()
+	{
+		flags.clear();
 	}
 
-	shader(const )
+	unsigned int getProgram() const { return m_program; }
+
+	Shader(){
+		m_program = 0;
+		setVersion(450);
+	}
+
+	~Shader()
+	{
+
+	}
+
+	// Uses the current shader
+	void bind()
+	{
+		glUseProgram(m_program);
+	}
+
+	void unbind()
+	{
+		glUseProgram(0);
+	}
+
 	// Constructor generates the shader on the fly
 	Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 	{
@@ -102,17 +133,6 @@ public:
 		// Delete the shaders as they're linked into our program now and no longer necessery
 		glDeleteShader(vertex);
 		glDeleteShader(fragment);
-
-	}
-	// Uses the current shader
-	void Bind()
-	{
-		glUseProgram(m_program);
-	}
-
-	void Unbind()
-	{
-		glUseProgram(0);
 	}
 };
 

@@ -1,26 +1,35 @@
-﻿  PBRBox.cpp
-c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(37): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(38): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(39): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(40): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(66): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(67): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(71): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(76): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\hector\documents\github\pbrbox\pbrbox\ModelNode.h(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-c:\users\hector\documents\github\pbrbox\pbrbox\ModelNode.h(54): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(80): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(85): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(101): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(103): warning C4018: '<': signed/unsigned mismatch
-c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(131): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(132): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(133): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\hector\documents\github\pbrbox\pbrbox\Renderer.h(80): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-c:\users\hector\documents\github\pbrbox\pbrbox\PBRMaterial.h(30): warning C4305: '=': truncation from 'double' to 'float'
-c:\users\hector\documents\github\pbrbox\pbrbox\PBRMaterial.h(51): error C2059: syntax error: ','
-PBRBox.cpp(59): warning C4244: 'argument': conversion from 'GLsizei' to 'float', possible loss of data
-PBRBox.cpp(84): warning C4129: 'N': unrecognized character escape sequence
-PBRBox.cpp(133): warning C4305: 'argument': truncation from 'double' to 'float'
-PBRBox.cpp(155): warning C4305: 'argument': truncation from 'double' to 'float'
-PBRBox.cpp(230): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+﻿Build started 11/5/2016 6:44:27 PM.
+     1>Project "C:\Users\Javi\Documents\GitHub\PBRBox\PBRBox\PBRBox.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\CL.exe /c /I"..\ext\glew-2.0.0\include" /I..\ext\freeglut\include /I"..\ext\glm-0.9.8.1\glm" /I..\ext\assimp\include /Zi /nologo /W3 /WX- /sdl /Od /Oi /GL /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yu"stdafx.h" /Fp"x64\Release\PBRBox.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc140.pdb" /Gd /TP /errorReport:prompt PBRBox.cpp
+         PBRBox.cpp
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(37): warning C4305: 'argument': truncation from 'double' to 'float'
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(38): warning C4305: 'argument': truncation from 'double' to 'float'
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(39): warning C4305: 'argument': truncation from 'double' to 'float'
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(40): warning C4305: 'argument': truncation from 'double' to 'float'
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(66): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(67): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(71): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(76): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(54): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(80): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(85): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(101): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(103): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(131): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(132): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(133): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\Renderer.h(80): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\PBRMaterial.h(30): warning C4305: '=': truncation from 'double' to 'float'
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\PBRMaterial.h(61): error C3861: 'to_linear': identifier not found
+     1>PBRBox.cpp(59): warning C4244: 'argument': conversion from 'GLsizei' to 'float', possible loss of data
+     1>PBRBox.cpp(84): warning C4129: 'N': unrecognized character escape sequence
+     1>PBRBox.cpp(133): warning C4305: 'argument': truncation from 'double' to 'float'
+     1>PBRBox.cpp(155): warning C4305: 'argument': truncation from 'double' to 'float'
+     1>PBRBox.cpp(230): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+     1>Done Building Project "C:\Users\Javi\Documents\GitHub\PBRBox\PBRBox\PBRBox.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:01.66
