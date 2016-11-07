@@ -28,39 +28,45 @@ uniform vec3 uLightPos;
 out vec2 uv;
 
 
-//vertex position in the eye coordinates (view space)
-out vec3 ecPosition;
-//normal in the eye coordinates (view space)
-out vec3 ecNormal;
-//light position in the eye coordinates (view space)
-out vec3 ecLightPos;
-
 out vec4 fragPosLightSpace;
 
-out vec3 wPos;
-out vec3 wNormal;
+
 out vec3 lightPos;
 
 
+out vec3 VSPosition;
+out vec3 VSNormal;
+out vec3 vLightPosition;
 
-void main() {
+out vec3 WSPosition;
+out vec3 WSNormal;
+out vec3 EyePosition;
 
+void main() 
+{
+	vec4 wsPosition = camera.mModel * vec4(position, 1.0);
+	vec4 vsPosition = camera.mView * wsPosition;
+	vec4 vsNormal = camera.mNormal * vec4(normal, 1.0);
+	VSPosition = vsPosition.xyz;
+	VSNormal = vsNormal.xyz;
+	
+	WSPosition = wsPosition.xyz;
+	WSNormal = (camera.mInvView * vsNormal).xyz;
+	
+	
+	vec4 eyeDirViewSpace	= vsPosition - vec4( 0, 0, 0, 1 );
+	EyePosition	= -vec3( camera.mInvView * eyeDirViewSpace );
+	
 	lightPos = uLightPos;
 	uv = aUV;
 	
-	wPos = vec3( camera.mModel * vec4(position, 1.0));
-    wNormal = transpose(inverse(mat3( camera.mModel))) * normal;
+	
 	
 	fragPosLightSpace = lightSpaceMatrix * camera.mModel * vec4(position, 1.0);
 	
 
-    //transform vertex into the eye space
-    vec4 pos = camera.mView * camera.mModel * vec4(position, 1.0);
-    ecPosition = pos.xyz;
-    ecNormal = vec3(camera.mNormal * vec4(normal, 1.0));
-
-    ecLightPos = vec3(camera.mView * camera.mModel * vec4(uLightPos, 1.0));
+	vLightPosition = (camera.mView * camera.mModel * vec4(uLightPos, 1.0)).xyz;
 
     //project the vertex, the rest is handled by WebGL
-    gl_Position = camera.mProjection * pos;
+    gl_Position = camera.mProjection * vsPosition;
 }

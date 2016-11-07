@@ -111,6 +111,12 @@ void Geometry::uploadToGPU()
 
 	std::vector<PackedVertex> gpuVertices;
 
+	if (m_normals.size() < getNumVertices())
+		m_normals.resize(getNumVertices());
+
+	if(m_texCoords.size() < getNumVertices())
+		m_texCoords.resize(getNumVertices());
+
 	for (int i = 0; i < getNumVertices(); i++)
 	{
 		PackedVertex vertex;

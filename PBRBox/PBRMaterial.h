@@ -25,15 +25,17 @@ class PBRMaterial : public Material
 
 	//environment information
 public:
-	Texture m_reflectionMap;
-	Texture m_irradianceMap;
+	GLuint m_radianceMap;
+	GLuint m_irradianceMap;
+
+
 	Texture m_hammersleyPointMap;
 
 	PBRMaterial()
 	{
 		shader = Shader("shaders\\Standard.vert", "shaders\\Standard.frag");
 		m_ior = 1.4;
-		m_albedo = glm::vec4(1, 0, 0, 1);
+		m_albedo = glm::vec4(.5, .5, .5, 1);
 		m_roughness = .5f;
 		m_metalness = 0.0;
 	}
@@ -56,7 +58,18 @@ public:
 			m_dirty = false;
 		}
 
-		glUniform3f(glGetUniformLocation(shader.getProgram(), "uLightPos"), 0.0, -10.0, 0.0);
+
+		GLint d = glGetUniformLocation(shader.getProgram(), "uRadianceMap");
+		glUniform1i(d, 4);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_radianceMap);
+
+		GLint d1 = glGetUniformLocation(shader.getProgram(), "uIrradianceMap");
+		glUniform1i(d1, 5);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
+
+		glUniform3f(glGetUniformLocation(shader.getProgram(), "uLightPos"), 0.0, 10.0, 0.0);
 
 
 		unsigned int albedoLoc = glGetUniformLocation(shader, "uAlbedo");

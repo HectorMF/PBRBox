@@ -190,4 +190,56 @@ namespace Shapes
 	{
 
 	}
+
+	Geometry skybox()
+	{
+		Geometry g;
+		g.addVertex({ -1.0f, 1.0f, -1.0f });
+		g.addVertex({ -1.0f, -1.0f, -1.0f });
+		g.addVertex({ 1.0f, -1.0f, -1.0f });
+		g.addVertex({ 1.0f, -1.0f, -1.0f });
+		g.addVertex({ 1.0f,  1.0f, -1.0f });
+		g.addVertex({ -1.0f,  1.0f, -1.0f });
+
+		g.addVertex({ -1.0f, -1.0f,  1.0f });
+		g.addVertex({ -1.0f, -1.0f, -1.0f });
+		g.addVertex({ -1.0f,  1.0f, -1.0f });
+		g.addVertex({ -1.0f,  1.0f, -1.0f });
+		g.addVertex({ -1.0f,  1.0f,  1.0f });
+		g.addVertex({ -1.0f, -1.0f,  1.0f });
+
+		g.addVertex({ 1.0f, -1.0f, -1.0f });
+		g.addVertex({ 1.0f, -1.0f,  1.0f });
+		g.addVertex({ 1.0f,  1.0f,  1.0f });
+		g.addVertex({ 1.0f,  1.0f,  1.0f });
+		g.addVertex({ 1.0f,  1.0f, -1.0f });
+		g.addVertex({ 1.0f, -1.0f, -1.0f });
+
+		g.addVertex({ -1.0f, -1.0f,  1.0f });
+		g.addVertex({ -1.0f,  1.0f,  1.0f });
+		g.addVertex({ 1.0f,  1.0f,  1.0f });
+		g.addVertex({ 1.0f,  1.0f,  1.0f });
+		g.addVertex({ 1.0f, -1.0f,  1.0f });
+		g.addVertex({ -1.0f, -1.0f,  1.0f });
+
+		g.addVertex({ -1.0f,  1.0f, -1.0f });
+		g.addVertex({ 1.0f,  1.0f, -1.0f });
+		g.addVertex({ 1.0f,  1.0f,  1.0f });
+		g.addVertex({ 1.0f,  1.0f,  1.0f });
+		g.addVertex({ -1.0f,  1.0f,  1.0f });
+		g.addVertex({ -1.0f,  1.0f, -1.0f });
+
+		g.addVertex({ -1.0f, -1.0f, -1.0f });
+		g.addVertex({ -1.0f, -1.0f,  1.0f });
+		g.addVertex({ 1.0f, -1.0f, -1.0f });
+		g.addVertex({ 1.0f, -1.0f, -1.0f });
+		g.addVertex({ -1.0f, -1.0f,  1.0f });
+		g.addVertex({ 1.0f, -1.0f,  1.0f });
+
+		//g.setVertices(skyboxVertices);
+		//g.setNormals(normals);
+		//g.setUVs(uvs);
+		//g.setIndices(indices);
+		return g;
+	}
 }

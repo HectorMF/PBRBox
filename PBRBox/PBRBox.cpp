@@ -33,6 +33,8 @@
 #include "Renderer.h"
 
 #include "PBRMaterial.h"
+#include "SkyboxMaterial.h"
+#include "DDS.h"
 // test scenes
 
 Camera* hostRendercam = NULL;
@@ -50,7 +52,7 @@ PBRMaterial* diffuseMat;
 Material* depthMat;
 Mesh* depthQuad;
 
-Material* envMat;
+SkyboxMaterial* envMat;
 /* Handler for window re-size event. Called back when the window first appears and
 whenever the window is re-sized with its new width and height */
 void reshape(GLsizei newwidth, GLsizei newheight)
@@ -68,6 +70,9 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 
 void initializeScene()
 {
+	GLuint skybox = create_texture("data\\Bridge\\Skybox_Bridge.dds");
+	GLuint radiance = create_texture("data\\Bridge\\Radiance_Bridge.dds");
+	GLuint irradiance = create_texture("data\\Bridge\\Irradiance_Bridge.dds");
 
 	Texture color = Texture("data\\cerberus\\Cerberus_A.png");
 	Texture metallic = Texture("data\\cerberus\\Cerberus_M.jpg");
@@ -88,9 +93,8 @@ void initializeScene()
 	mirrorMat->shader = Shader("shaders\\Mirror.vert", "shaders\\Mirror.frag");
 	mirrorMat->environment = environment;
 
-	envMat = new Material();
-	envMat->shader = Shader("shaders\\EnvMap.vert", "shaders\\EnvMap.frag");
-	envMat->environment = environment;
+	envMat = new SkyboxMaterial();
+	envMat->m_cubeMap = skybox;
 
 	diffuseMat = new PBRMaterial();
 	diffuseMat->setAlbedoMap(color);
@@ -98,9 +102,8 @@ void initializeScene()
 	diffuseMat->setRoughnessMap(roughness);
 	diffuseMat->setNormalMap(normal);
 
-
-	diffuseMat->environment = environment;
-	diffuseMat->m_reflectionMap = reflection;
+	diffuseMat->m_radianceMap = radiance;
+	diffuseMat->m_irradianceMap = irradiance;
 
 
 
@@ -117,7 +120,7 @@ void initializeScene()
 	Mesh* gun1 = new Mesh(*gun, diffuseMat);
 	scene.add(gun1);
 
-	Mesh* skyBoxQuad = new Mesh(Shapes::renderQuad(), envMat);
+	Mesh* skyBoxQuad = new Mesh(Shapes::cube(2), envMat);
 	scene.skybox = skyBoxQuad;
 
 	Mesh* groundPlane = new Mesh(Shapes::plane(3, 3), diffuseMat);
@@ -134,14 +137,15 @@ void initializeScene()
 
 	for (int x = 2; x <= 2; x++)
 	{
-		for (int z = -2; z <= 2; z++)
+		for (int z = -5; z <= 5; z++)
 		{
 
 			PBRMaterial* diffuseMat1 = new PBRMaterial();
 
-			diffuseMat1->environment = environment;
-			diffuseMat1->m_reflectionMap = reflection;
-			diffuseMat1->setRoughness((z + 2) *.25);
+			diffuseMat1->m_radianceMap = radiance;
+			diffuseMat1->m_irradianceMap = irradiance;
+
+			diffuseMat1->setRoughness((z + 5)/10.0f);
 
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
