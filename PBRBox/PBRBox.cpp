@@ -139,12 +139,9 @@ void initializeScene()
 
 			PBRMaterial* diffuseMat1 = new PBRMaterial();
 
-			diffuseMat->environment = environment;
-			diffuseMat->m_reflectionMap = reflection;
-			diffuseMat->setAlbedoMap(color);
-			diffuseMat->setMetalnessMap(metallic);
-			diffuseMat->setRoughnessMap(roughness);
-			diffuseMat->setNormalMap(normal);
+			diffuseMat1->environment = environment;
+			diffuseMat1->m_reflectionMap = reflection;
+			diffuseMat1->setRoughness((z + 2) *.25);
 
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
@@ -196,9 +193,9 @@ void disp(void)
 
 	renderer->render(scene, *hostRendercam);
 	glDisable(GL_DEPTH_TEST);
-	depthQuad->m_material->Bind();
+	depthQuad->m_material->bind();
 	depthQuad->render();
-	depthQuad->m_material->Unbind();
+	depthQuad->m_material->unbind();
 
 	glEnable(GL_DEPTH_TEST);
 	glutSwapBuffers();

@@ -8,6 +8,7 @@ class Texture
 public:
 	unsigned int id;
 	operator unsigned int() const { return id; }
+	
 	Texture(){}
 	Texture(std::string file)
 	{

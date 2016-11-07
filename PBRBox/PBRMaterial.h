@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Material.h"
+#include "MathUtil.h"
 
 class PBRMaterial : public Material 
 {
-
 	bool m_dirty;
 
 	//material information
@@ -18,6 +18,11 @@ class PBRMaterial : public Material
 	Texture m_roughnessMap;
 	Texture m_metalnessMap;
 
+	bool hasAlbedoMap;
+	bool hasNormalMap;
+	bool hasRoughnessMap;
+	bool hasMetalnessMap;
+
 	//environment information
 public:
 	Texture m_reflectionMap;
@@ -26,23 +31,41 @@ public:
 
 	PBRMaterial()
 	{
-		shader = Shader("shaders\\Lambert.vert", "shaders\\Lambert.frag");
+		shader = Shader("shaders\\Standard.vert", "shaders\\Standard.frag");
 		m_ior = 1.4;
-		m_albedo = glm::vec4(0, 0, 0, 1);
+		m_albedo = glm::vec4(1, 0, 0, 1);
 		m_roughness = .5f;
 		m_metalness = 0.0;
 	}
 
-	void Bind()
+	void bind()
 	{
 		shader.bind();
+		if (m_dirty)
+		{
+			shader.clearFlags();
+			if(hasAlbedoMap)
+				shader.addFlag("#define USE_ALBEDO_MAP");
+			if(hasRoughnessMap)
+				shader.addFlag("#define USE_ROUGHNESS_MAP");
+			if(hasMetalnessMap)
+				shader.addFlag("#define USE_METALNESS_MAP");
+			if(hasNormalMap)
+				shader.addFlag("#define USE_NORMAL_MAP");
+			//shader.compile();
+			m_dirty = false;
+		}
+
+		glUniform3f(glGetUniformLocation(shader.getProgram(), "uLightPos"), 0.0, -10.0, 0.0);
+
 
 		unsigned int albedoLoc = glGetUniformLocation(shader, "uAlbedo");
 		unsigned int roughnessLoc = glGetUniformLocation(shader, "uRoughness");
 		unsigned int metalnessLoc = glGetUniformLocation(shader, "uMetalness");
 		unsigned int normalLoc = glGetUniformLocation(shader, "uNormal");
+		unsigned int iorLoc = glGetUniformLocation(shader, "uIOR");
 
-		glUniform1i(albedoLoc, 2);
+		/*glUniform1i(albedoLoc, 2);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, m_albedoMap);
 
@@ -56,15 +79,12 @@ public:
 
 		glUniform1i(normalLoc, 5);
 		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, m_normalMap);
+		glBindTexture(GL_TEXTURE_2D, m_normalMap);*/
 
-		glm::vec3 albedo = m_albedo;
-		albedo = glm::pow(albedo, glm::vec3(2.2));
-		return glm::vec4(albedo, m_albedo.a);
-		glUniform3fv(albedoLoc, glm::pow(m_albedo, 2.2);
+		glUniform4fv(albedoLoc, 1, glm::value_ptr(sRGBToLinear(m_albedo)));
 		glUniform1f(roughnessLoc, m_roughness);
 		glUniform1f(metalnessLoc, m_metalness);
-
+		glUniform1f(iorLoc, m_ior);
 	}
 
 	void setAlbedo(const glm::vec4& albedo)

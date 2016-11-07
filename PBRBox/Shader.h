@@ -38,6 +38,11 @@ public:
 
 	unsigned int getProgram() const { return m_program; }
 
+	inline unsigned int getUniform(std::string val)
+	{
+		return glGetUniformLocation(m_program, val.c_str());
+	}
+
 	Shader(){
 		m_program = 0;
 		setVersion(450);

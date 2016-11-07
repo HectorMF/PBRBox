@@ -1,11 +1,12 @@
 #version 330 core
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 uv;
+layout (location = 2) in vec2 aUV;
 
 struct Camera
 {
-	vec3 mViewDirection;
+	vec3 vViewPos;
+	vec3 vViewDirection;
 	mat4 mProjection;
 	mat4 mView;
 	mat4 mInvView;
@@ -17,11 +18,15 @@ uniform Camera camera;
 
 //current transformation matrices coming from Context
 uniform mat4 lightSpaceMatrix;
-
-out vec2 uvOut;
-
 //user supplied light position
 uniform vec3 uLightPos;
+
+
+
+
+
+out vec2 uv;
+
 
 //vertex position in the eye coordinates (view space)
 out vec3 ecPosition;
@@ -36,16 +41,19 @@ out vec3 wPos;
 out vec3 wNormal;
 out vec3 lightPos;
 
+
+
 void main() {
 
 	lightPos = uLightPos;
-
+	uv = aUV;
 	
 	wPos = vec3( camera.mModel * vec4(position, 1.0));
     wNormal = transpose(inverse(mat3( camera.mModel))) * normal;
+	
 	fragPosLightSpace = lightSpaceMatrix * camera.mModel * vec4(position, 1.0);
 	
-	uvOut = uv;
+
     //transform vertex into the eye space
     vec4 pos = camera.mView * camera.mModel * vec4(position, 1.0);
     ecPosition = pos.xyz;

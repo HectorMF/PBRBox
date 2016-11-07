@@ -8,7 +8,7 @@ enum TextureType { Diffuse, Environment };
 class Material
 {
 public:
-	void Bind()
+	virtual void bind()
 	{
 		shader.bind();
 
@@ -25,7 +25,7 @@ public:
 		glBindTexture(GL_TEXTURE_2D, shadowTex);
 	}
 
-	void Unbind()
+	virtual void unbind()
 	{
 		shader.unbind();
 	}

@@ -44,7 +44,7 @@ public:
 
 	void renderShadow(Scene& scene)
 	{
-		overrideMaterial->Bind();
+		overrideMaterial->bind();
 		renderTarget->Bind();
 
 		glViewport(0, 0, 2048, 2048);
@@ -72,7 +72,7 @@ public:
 		}
 		
 		renderTarget->Unbind();
-		overrideMaterial->Unbind();
+		overrideMaterial->unbind();
 	}
 
 	void render(Scene& scene, Camera& camera)
@@ -89,7 +89,7 @@ public:
 		if (scene.skybox)
 		{
 			Material* m = (!overrideMaterial) ? (scene.skybox->m_material) : overrideMaterial;
-			m->Bind();
+			m->bind();
 
 			glm::mat4 model = scene.skybox->transform;
 			glm::mat4 view = glm::lookAt(camera.position, camera.position + camera.view, camera.up);
@@ -100,6 +100,10 @@ public:
 			glm::mat4 transView = glm::transpose(view);
 			glm::vec4 viewDir = view * model * glm::vec4(1, 0, 0, 0);
 
+
+
+			
+			GLint vp = glGetUniformLocation(m->shader.getProgram(), "camera.vViewPos");
 			GLint mm = glGetUniformLocation(m->shader.getProgram(), "camera.mModel");
 			GLint v = glGetUniformLocation(m->shader.getProgram(), "camera.mView");
 			GLint p = glGetUniformLocation(m->shader.getProgram(), "camera.mProjection");
@@ -113,9 +117,11 @@ public:
 			glUniformMatrix4fv(n, 1, GL_FALSE, glm::value_ptr(normal));
 			glUniformMatrix4fv(ii, 1, GL_FALSE, glm::value_ptr(glm::inverse(view)));
 
-			glUniform3fv(vd, 1, glm::value_ptr(viewDir));
+			glUniform3fv(vd, 1, glm::value_ptr(camera.view));
+			glUniform3fv(vp, 1, glm::value_ptr(camera.position));
+
 			scene.skybox->render();
-			m->Unbind();
+			m->unbind();
 		}
 
 		glClear(GL_DEPTH_BUFFER_BIT);
@@ -125,7 +131,7 @@ public:
 		{
 			Material* m = (!overrideMaterial)? (scene.sceneGraph[i]->m_material): overrideMaterial;
 
-			m->Bind();
+			m->bind();
 
 			glm::mat4 biasMatrix(
 					0.5, 0.0, 0.0, 0.0,
@@ -174,7 +180,7 @@ public:
 
 			scene.sceneGraph[i]->render();
 
-			m->Unbind();
+			m->unbind();
 		}
 
 		if (renderTarget)
