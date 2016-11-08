@@ -52,7 +52,7 @@ PBRMaterial* diffuseMat;
 Material* depthMat;
 Mesh* depthQuad;
 
-SkyboxMaterial* envMat;
+Material* envMat;
 /* Handler for window re-size event. Called back when the window first appears and
 whenever the window is re-sized with its new width and height */
 void reshape(GLsizei newwidth, GLsizei newheight)
@@ -70,9 +70,9 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 
 void initializeScene()
 {
-	GLuint skybox = create_texture("data\\Bridge\\Skybox_Bridge.dds");
-	GLuint radiance = create_texture("data\\Bridge\\Radiance_Bridge.dds");
-	GLuint irradiance = create_texture("data\\Bridge\\Irradiance_Bridge.dds");
+	GLuint skybox = create_texture("data\\Mono_Lake_B\\output_iem.ktx");
+	GLuint radiance = create_texture("data\\Mono_Lake_B\\output_pmrem.ktx");
+	GLuint irradiance = create_texture("data\\Mono_Lake_B\\output_iem.hdr");
 
 	Texture color = Texture("data\\cerberus\\Cerberus_A.png");
 	Texture metallic = Texture("data\\cerberus\\Cerberus_M.jpg");
@@ -93,8 +93,9 @@ void initializeScene()
 	mirrorMat->shader = Shader("shaders\\Mirror.vert", "shaders\\Mirror.frag");
 	mirrorMat->environment = environment;
 
-	envMat = new SkyboxMaterial();
-	envMat->m_cubeMap = skybox;
+	envMat = new Material();
+	envMat->shader = Shader("shaders\\EnvMap.vert", "shaders\\EnvMap.frag");
+	envMat->environment = skybox;
 
 	diffuseMat = new PBRMaterial();
 	diffuseMat->setAlbedoMap(color);
@@ -120,7 +121,7 @@ void initializeScene()
 	Mesh* gun1 = new Mesh(*gun, diffuseMat);
 	scene.add(gun1);
 
-	Mesh* skyBoxQuad = new Mesh(Shapes::cube(2), envMat);
+	Mesh* skyBoxQuad = new Mesh(Shapes::renderQuad(), envMat);
 	scene.skybox = skyBoxQuad;
 
 	Mesh* groundPlane = new Mesh(Shapes::plane(3, 3), diffuseMat);

@@ -30,7 +30,7 @@ public:
 		shader.unbind();
 	}
 
-	Texture environment;
+	GLuint environment;
 	GLuint shadowTex;
 
 	Shader shader;
