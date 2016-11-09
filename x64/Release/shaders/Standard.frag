@@ -2,7 +2,7 @@
 const float PI = 3.14159265;
 const float TwoPI = 6.28318530718;
 
-in vec2 uv;
+varying in vec2 uv;
 
 out vec4 fragColor;
 
@@ -20,8 +20,33 @@ in vec3 WSPosition;
 in vec3 WSNormal;
 in vec3 EyePosition;
 
-uniform samplerCube uRadianceMap;
-uniform samplerCube uIrradianceMap;
+uniform sampler2D uRadianceMap;
+uniform sampler2D uIrradianceMap;
+
+
+vec4 sample_equirectangular_map(vec3 dir, sampler2D sampler, float lod) 
+{
+	vec2 uv;
+	uv.x = atan( dir.z, dir.x );
+	uv.y = acos( dir.y );
+	uv /= vec2( 2 * PI, PI );
+	
+ 	return textureLod( sampler, uv, lod );
+}
+
+
+vec2 envMapEquirect(vec3 wcNormal, float flipEnvMap) {
+  //I assume envMap texture has been flipped the WebGL way (pixel 0,0 is a the bottom)
+  //therefore we flip wcNorma.y as acos(1) = 0
+  float phi = acos(wcNormal.y);
+  float theta = atan(flipEnvMap * wcNormal.x, wcNormal.z) + PI;
+  return vec2(theta / TwoPI, phi / PI);
+}
+
+vec2 envMapEquirect(vec3 wcNormal) {
+    //-1.0 for left handed coordinate system oriented texture (usual case)
+    return envMapEquirect(wcNormal, -1.0);
+}
 
 #ifdef USE_ALBEDO_MAP
 	uniform sampler2D uAlbedo;
@@ -110,7 +135,6 @@ vec3 fix_cube_lookup( vec3 v, float cube_size, float lod ) {
 	if (abs(v.z) != M) v.z *= scale;
 	return v;
 }
-
 
 
 
@@ -222,16 +246,27 @@ vec3 EnvBRDFApprox( vec3 SpecularColor, float Roughness, float NoV )
 
 void main() 
 {
+
 	float roughness = getRoughness();
 	float roughness4 = pow(roughness, 4);
 	float metalness = getMetalness();
 	vec3 albedo = getAlbedo();
 	vec3 normal = getNormal();
 	
-	vec3 N = normalize(WSNormal);
+	vec3 ecEyeDir = normalize(-VSPosition);
+    //direction towards the camera in the world space
+    vec3 wcEyeDir = vec3(camera.mInvView * vec4(ecEyeDir, 0.0));
+	
+	vec3 N = normalize( WSNormal );
+	vec3 V = wcEyeDir;
 	vec3 L = vLightPosition - WSPosition;
-	vec3 V = -VSPosition;
 	vec3 H = normalize(L + V);
+	vec3 R = reflect(-V, N);
+        
+	//vec3 N = normalize(VSNormal);
+	
+	//vec3 V = normalize(-VSPosition);
+	//
 	
     float NdotH = saturate(dot(N, H));
     float LdotH = saturate(dot(L, H));
@@ -239,24 +274,25 @@ void main()
     float NdotV = saturate(dot(N, V));
 	float VdotH = saturate(dot(V, H));
 
-	vec3 diffuseColor	= albedo - albedo * metalness;
+	vec3 diffuseColor	= albedo * (1 - metalness);
 	vec3 specularColor = mix(vec3(0.04), albedo, metalness );
+	vec3 fresnel = Fresnel_Schlick(specularColor, NdotV);
 	
 	int numMips			= 7;
+	float lod = (1.0 - roughness)*(numMips - 1.0);
 	float mip			= numMips - 1 + log2(roughness);
-	vec3 lookup			= -reflect( V, N );
-	lookup			= fix_cube_lookup( lookup, 512, mip );
-	vec3 radiance		= textureLod( uRadianceMap, lookup, mip ).rgb;
-	vec3 irradiance		= texture( uIrradianceMap, N ).rgb;
+	vec3 lookup			= -reflect(V, N);
+	//lookup			= fix_cube_lookup(lookup, 256, mip );
+	vec3 radiance		= textureLod(uRadianceMap, envMapEquirect(R), mip).rgb;
+	vec3 irradiance		= texture(uIrradianceMap, envMapEquirect(N)).rgb;
 	
-	vec3 reflectance = EnvBRDFApprox( specularColor, roughness4, NdotV );
+	vec3 reflectance = EnvBRDFApprox(specularColor, roughness4, NdotV);
 	
 	vec3 diffuse  		= diffuseColor * irradiance;
-    vec3 specular 		= radiance * reflectance;
+    vec3 specular 		= reflectance * radiance;
 	vec3 color			= diffuse + specular;
 	
-	
-	fragColor = vec4(irradiance, 1.0);
+	fragColor = vec4(color, 1.0);
 	
 	
 	

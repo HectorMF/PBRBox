@@ -25,6 +25,7 @@ class PBRMaterial : public Material
 
 	//environment information
 public:
+	GLuint m_sampler;
 	GLuint m_radianceMap;
 	GLuint m_irradianceMap;
 
@@ -35,7 +36,7 @@ public:
 	{
 		shader = Shader("shaders\\Standard.vert", "shaders\\Standard.frag");
 		m_ior = 1.4;
-		m_albedo = glm::vec4(.5, .5, .5, 1);
+		m_albedo = glm::vec4(1, 1, 1, 1);
 		m_roughness = .5f;
 		m_metalness = 0.0;
 	}
@@ -60,14 +61,15 @@ public:
 
 
 		GLint d = glGetUniformLocation(shader.getProgram(), "uRadianceMap");
-		glUniform1i(d, 4);
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_radianceMap);
+		glUniform1i(d, 7);
+		glActiveTexture(GL_TEXTURE7);
+		glBindTexture(GL_TEXTURE_2D, m_radianceMap);
 
 		GLint d1 = glGetUniformLocation(shader.getProgram(), "uIrradianceMap");
-		glUniform1i(d1, 5);
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
+		glUniform1i(d1, 8);
+		glActiveTexture(GL_TEXTURE8);
+		glBindTexture(GL_TEXTURE_2D, m_irradianceMap);
+		
 
 		glUniform3f(glGetUniformLocation(shader.getProgram(), "uLightPos"), 0.0, 10.0, 0.0);
 

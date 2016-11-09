@@ -25,7 +25,7 @@ uniform vec3 uLightPos;
 
 
 
-out vec2 uv;
+varying out vec2 uv;
 
 
 out vec4 fragPosLightSpace;
@@ -44,18 +44,20 @@ out vec3 EyePosition;
 
 void main() 
 {
+	vec4 a_normal = vec4(normal, 0.0) * 2.0 - 1.0;
+
 	vec4 wsPosition = camera.mModel * vec4(position, 1.0);
 	vec4 vsPosition = camera.mView * wsPosition;
-	vec4 vsNormal = camera.mNormal * vec4(normal, 1.0);
+	vec4 vsNormal = camera.mNormal * vec4(normal, 0.0);
 	VSPosition = vsPosition.xyz;
 	VSNormal = vsNormal.xyz;
 	
+	vec3 wcNormal = normalize(vec3(camera.mInvView * vec4(VSNormal, 0.0)));
+	
 	WSPosition = wsPosition.xyz;
-	WSNormal = (camera.mInvView * vsNormal).xyz;
+	WSNormal = wcNormal;//normalize(camera.mInvView * vsNormal).xyz;
 	
-	
-	vec4 eyeDirViewSpace	= vsPosition - vec4( 0, 0, 0, 1 );
-	EyePosition	= -vec3( camera.mInvView * eyeDirViewSpace );
+	EyePosition	= normalize(camera.vViewPos - vec3(wsPosition));
 	
 	lightPos = uLightPos;
 	uv = aUV;

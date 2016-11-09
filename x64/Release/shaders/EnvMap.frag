@@ -23,5 +23,5 @@ vec2 envMapEquirect(vec3 wcNormal) {
 }
 
 void main() {
-    fragColor = vec4(vec3(envMapEquirect(normalize(wcNormal)),0),1);//texture2D(uEnvMap, envMapEquirect(normalize(wcNormal)));
+    fragColor = texture2D(uEnvMap, envMapEquirect(normalize(wcNormal)));
 }

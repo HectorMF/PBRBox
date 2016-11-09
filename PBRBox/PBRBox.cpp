@@ -47,7 +47,6 @@ RenderTarget* shadowTarget;
 Renderer* renderer;
 
 Material* shadowMat;
-PBRMaterial* diffuseMat;
 
 Material* depthMat;
 Mesh* depthQuad;
@@ -70,15 +69,10 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 
 void initializeScene()
 {
-	GLuint skybox = create_texture("data\\Mono_Lake_B\\output_iem.ktx");
-	GLuint radiance = create_texture("data\\Mono_Lake_B\\output_pmrem.ktx");
-	GLuint irradiance = create_texture("data\\Mono_Lake_B\\output_iem.hdr");
+	GLuint skybox = create_texture("data\\Temp2\\output_skybox.dds");
+	GLuint radiance = create_texture("data\\Temp2\\output_pmrem.dds");
+	GLuint irradiance = create_texture("data\\Temp2\\output_iem.dds");
 
-	Texture color = Texture("data\\cerberus\\Cerberus_A.png");
-	Texture metallic = Texture("data\\cerberus\\Cerberus_M.jpg");
-	Texture normal = Texture("data\\cerberus\\Cerberus_N.jpg");
-	Texture roughness = Texture("data\\cerberus\\Cerberus_R.jpg");
-	Texture UV = Texture("data\\cerberus\\Cerberus_UV.jpg");
 	//Texture specular = Texture();
 
 	Texture diffuse = Texture("data\\BB8 New\\Body diff MAP.jpg");
@@ -91,21 +85,21 @@ void initializeScene()
 
 	Material* mirrorMat = new Material();
 	mirrorMat->shader = Shader("shaders\\Mirror.vert", "shaders\\Mirror.frag");
-	mirrorMat->environment = environment;
+	mirrorMat->environment = skybox;
 
 	envMat = new Material();
 	envMat->shader = Shader("shaders\\EnvMap.vert", "shaders\\EnvMap.frag");
 	envMat->environment = skybox;
 
-	diffuseMat = new PBRMaterial();
-	diffuseMat->setAlbedoMap(color);
-	diffuseMat->setMetalnessMap(metallic);
-	diffuseMat->setRoughnessMap(roughness);
-	diffuseMat->setNormalMap(normal);
+	PBRMaterial* gunMat = new PBRMaterial();
+	gunMat->setAlbedoMap(Texture("data\\cerberus\\Cerberus_A.png"));
+	gunMat->setMetalnessMap(Texture("data\\cerberus\\Cerberus_M.jpg"));
+	gunMat->setRoughnessMap(Texture("data\\cerberus\\Cerberus_N.jpg"));
+	gunMat->setNormalMap(Texture("data\\cerberus\\Cerberus_R.jpg"));
 
-	diffuseMat->m_radianceMap = radiance;
-	diffuseMat->m_irradianceMap = irradiance;
-
+	gunMat->m_radianceMap = radiance;
+	gunMat->m_irradianceMap = irradiance;
+	//gunMat->m_sampler = initSampler();
 
 
 
@@ -118,14 +112,16 @@ void initializeScene()
 	
 	Geometry* gun = model->m_meshes[0];
 
-	Mesh* gun1 = new Mesh(*gun, diffuseMat);
-	scene.add(gun1);
+	Mesh* gun1 = new Mesh(*gun, gunMat);
+
+	gun1->transform = glm::scale(gun1->transform, glm::vec3(.5, .5, .5));
+	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, .5, 0));
+	//scene.add(gun1);
 
 	Mesh* skyBoxQuad = new Mesh(Shapes::renderQuad(), envMat);
 	scene.skybox = skyBoxQuad;
 
-	Mesh* groundPlane = new Mesh(Shapes::plane(3, 3), diffuseMat);
-	
+	Mesh* groundPlane = new Mesh(Shapes::plane(7, 7), depthMat);
 	//scene.add(groundPlane);
 
 
@@ -134,9 +130,9 @@ void initializeScene()
 
 	//scene.add(depthQuad);
 
-	Geometry sphereMesh = Shapes::sphere(.2);
+	Geometry sphereMesh = Shapes::sphere(.2,128);
 
-	for (int x = 2; x <= 2; x++)
+	for (int x = -5; x <= 5; x++)
 	{
 		for (int z = -5; z <= 5; z++)
 		{
@@ -145,7 +141,7 @@ void initializeScene()
 
 			diffuseMat1->m_radianceMap = radiance;
 			diffuseMat1->m_irradianceMap = irradiance;
-
+			diffuseMat1->setMetalness((x + 5) / 10.0f);
 			diffuseMat1->setRoughness((z + 5)/10.0f);
 
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
@@ -157,7 +153,7 @@ void initializeScene()
 	Geometry lightMesh = Shapes::sphere(.4);
 	Mesh* light = new Mesh(lightMesh, mirrorMat);
 	light->transform = glm::translate(light->transform, glm::vec3(0,2,0));
-	scene.add(light);
+	//scene.add(light);
 	
 	renderer = new Renderer();
 	renderer->clearColor = glm::vec4(1, 0, 1, 1);
@@ -167,7 +163,7 @@ void initializeScene()
 	shadowMat->shader = Shader("shaders\\Shadow.vert", "shaders\\Shadow.frag");
 
 	depthMat->shadowTex = shadowTarget->depthTexture;
-	diffuseMat->shadowTex = shadowTarget->depthTexture;
+	gunMat->shadowTex = shadowTarget->depthTexture;
 	//Model* model = new Model("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\IrrigationTool.obj");
 	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
 	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
