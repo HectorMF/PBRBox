@@ -52,7 +52,7 @@ GLuint create_texture(char const* Filename)
 
 
 */
-GLuint  create_texture(char const* Filename)
+GLuint create_texture(char const* Filename)
 {
 	gli::texture Texture = gli::load(Filename);
 	if (Texture.empty())

@@ -50,7 +50,7 @@ Material* shadowMat;
 
 Material* depthMat;
 Mesh* depthQuad;
-
+Mesh* gun1;
 Material* envMat;
 /* Handler for window re-size event. Called back when the window first appears and
 whenever the window is re-sized with its new width and height */
@@ -69,6 +69,8 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 
 void initializeScene()
 {
+
+	shadowTarget = new RenderTarget();
 	GLuint skybox = create_texture("data\\Temp2\\output_skybox.dds");
 	GLuint radiance = create_texture("data\\Temp2\\output_pmrem.dds");
 	GLuint irradiance = create_texture("data\\Temp2\\output_iem.dds");
@@ -94,8 +96,8 @@ void initializeScene()
 	PBRMaterial* gunMat = new PBRMaterial();
 	gunMat->setAlbedoMap(Texture("data\\cerberus\\Cerberus_A.png"));
 	gunMat->setMetalnessMap(Texture("data\\cerberus\\Cerberus_M.jpg"));
-	gunMat->setRoughnessMap(Texture("data\\cerberus\\Cerberus_N.jpg"));
-	gunMat->setNormalMap(Texture("data\\cerberus\\Cerberus_R.jpg"));
+	gunMat->setRoughnessMap(Texture("data\\cerberus\\Cerberus_R.jpg"));
+	gunMat->setNormalMap(Texture("data\\cerberus\\Cerberus_N.jpg"));
 
 	gunMat->m_radianceMap = radiance;
 	gunMat->m_irradianceMap = irradiance;
@@ -112,17 +114,30 @@ void initializeScene()
 	
 	Geometry* gun = model->m_meshes[0];
 
-	Mesh* gun1 = new Mesh(*gun, gunMat);
+	gun1 = new Mesh(*gun, gunMat);
 
-	gun1->transform = glm::scale(gun1->transform, glm::vec3(.5, .5, .5));
-	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, .5, 0));
-	//scene.add(gun1);
+	//gun1->transform = glm::scale(gun1->transform, glm::vec3(.5, .5, .5));
+	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, 2, 0));
+	scene.add(gun1);
 
 	Mesh* skyBoxQuad = new Mesh(Shapes::renderQuad(), envMat);
 	scene.skybox = skyBoxQuad;
 
-	Mesh* groundPlane = new Mesh(Shapes::plane(7, 7), depthMat);
-	//scene.add(groundPlane);
+
+
+
+	PBRMaterial* diffuseMat = new PBRMaterial();
+
+	diffuseMat->m_radianceMap = radiance;
+	diffuseMat->m_irradianceMap = irradiance;
+	diffuseMat->setAlbedoMap(Texture("data\\iron\\basecolor.png"));
+	diffuseMat->setMetalnessMap(Texture("data\\iron\\metallic.png"));
+	diffuseMat->setRoughnessMap(Texture("data\\iron\\roughness.png"));
+	diffuseMat->setNormalMap(Texture("data\\iron\\normal.png"));
+	diffuseMat->shadowTex = shadowTarget->depthTexture;
+
+	Mesh* groundPlane = new Mesh(Shapes::plane(7, 7), diffuseMat);
+	scene.add(groundPlane);
 
 
 	depthQuad = new Mesh(Shapes::renderQuad(), depthMat);
@@ -130,7 +145,7 @@ void initializeScene()
 
 	//scene.add(depthQuad);
 
-	Geometry sphereMesh = Shapes::sphere(.2,128);
+	Geometry sphereMesh = Shapes::sphere(.2);
 
 	for (int x = -5; x <= 5; x++)
 	{
@@ -143,7 +158,7 @@ void initializeScene()
 			diffuseMat1->m_irradianceMap = irradiance;
 			diffuseMat1->setMetalness((x + 5) / 10.0f);
 			diffuseMat1->setRoughness((z + 5)/10.0f);
-
+			diffuseMat1->shadowTex = shadowTarget->depthTexture;
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
 			scene.add(sphere);
@@ -157,7 +172,7 @@ void initializeScene()
 	
 	renderer = new Renderer();
 	renderer->clearColor = glm::vec4(1, 0, 1, 1);
-	shadowTarget = new RenderTarget();
+	
 
 	shadowMat = new Material();
 	shadowMat->shader = Shader("shaders\\Shadow.vert", "shaders\\Shadow.frag");
@@ -174,6 +189,7 @@ void initializeScene()
 // display function called by glutMainLoop(), gets executed every frame 
 void disp(void)
 {
+	gun1->transform = glm::rotate(gun1->transform, .005f, glm::vec3(0,1,0));
 	// if camera has moved, reset the accumulation buffer
 
 	// build a new camera for each frame on the CPU

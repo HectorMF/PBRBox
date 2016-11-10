@@ -34,11 +34,15 @@ public:
 
 	PBRMaterial()
 	{
-		shader = Shader("shaders\\Standard.vert", "shaders\\Standard.frag");
+		shader = Shader("shaders\\Standard.vert", "shaders\\Standard.frag", false);
+		shader.setVersion(330);
+		shader.compile();
 		m_ior = 1.4;
 		m_albedo = glm::vec4(1, 1, 1, 1);
 		m_roughness = .5f;
 		m_metalness = 0.0;
+		m_dirty = false;
+		
 	}
 
 	void bind()
@@ -55,10 +59,13 @@ public:
 				shader.addFlag("#define USE_METALNESS_MAP");
 			if(hasNormalMap)
 				shader.addFlag("#define USE_NORMAL_MAP");
-			//shader.compile();
+			shader.compile();
 			m_dirty = false;
 		}
 
+		glUniform1i(glGetUniformLocation(shader.getProgram(), "uShadowMap"), 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, shadowTex);
 
 		GLint d = glGetUniformLocation(shader.getProgram(), "uRadianceMap");
 		glUniform1i(d, 7);
@@ -80,22 +87,42 @@ public:
 		unsigned int normalLoc = glGetUniformLocation(shader, "uNormal");
 		unsigned int iorLoc = glGetUniformLocation(shader, "uIOR");
 
-		/*glUniform1i(albedoLoc, 2);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, m_albedoMap);
+		if (hasAlbedoMap)
+		{
+			glUniform1i(albedoLoc, 2);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, m_albedoMap);
+		}
 
-		glUniform1i(metalnessLoc, 3);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, m_metalnessMap);
+		if (hasRoughnessMap)
+		{
+			glUniform1i(roughnessLoc, 4);
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_2D, m_roughnessMap);
+		}
 
-		glUniform1i(roughnessLoc, 4);
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, m_roughnessMap);
+		if (hasMetalnessMap)
+		{
+			glUniform1i(metalnessLoc, 3);
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, m_metalnessMap);
+		}
 
-		glUniform1i(normalLoc, 5);
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, m_normalMap);*/
+		if (hasNormalMap)
+		{
+			glUniform1i(normalLoc, 5);
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(GL_TEXTURE_2D, m_normalMap);
 
+		}
+
+	
+
+	
+
+	
+
+	
 		glUniform4fv(albedoLoc, 1, glm::value_ptr(sRGBToLinear(m_albedo)));
 		glUniform1f(roughnessLoc, m_roughness);
 		glUniform1f(metalnessLoc, m_metalness);
@@ -110,11 +137,15 @@ public:
 	void setAlbedoMap(const Texture& albedo)
 	{
 		m_albedoMap = albedo;
+		hasAlbedoMap = true;
+		m_dirty = true;
 	}
 
 	void setNormalMap(const Texture& normals)
 	{
 		m_normalMap = normals;
+		hasNormalMap = true;
+		m_dirty = true;
 	}
 
 	void setMetalness(const float& metalness)
@@ -125,6 +156,8 @@ public:
 	void setMetalnessMap(const Texture& metalness)
 	{
 		m_metalnessMap = metalness;
+		hasMetalnessMap = true;
+		m_dirty = true;
 	}
 
 	void setRoughness(const float& roughness)
@@ -135,6 +168,8 @@ public:
 	void setRoughnessMap(const Texture& roughness)
 	{
 		m_roughnessMap = roughness;
+		hasRoughnessMap = true;
+		m_dirty = true;
 	}
 
 	void setIOR(const float& ior)

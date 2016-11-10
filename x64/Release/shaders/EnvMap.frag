@@ -1,7 +1,5 @@
-#version 330
-
 in vec3 wcNormal;
-
+#define USE_ALBEDO_MAP
 uniform sampler2D uEnvMap;
 
 out vec4 fragColor;

@@ -1,8 +1,8 @@
-#version 330 core
+
 const float PI = 3.14159265;
 const float TwoPI = 6.28318530718;
 
-varying in vec2 uv;
+in vec2 uv;
 
 out vec4 fragColor;
 
@@ -11,6 +11,7 @@ out vec4 fragColor;
 in vec4 fragPosLightSpace;
 
 
+in vec3 lightPos;
 
 in vec3 VSPosition;
 in vec3 VSNormal;
@@ -20,9 +21,61 @@ in vec3 WSPosition;
 in vec3 WSNormal;
 in vec3 EyePosition;
 
+struct Camera
+{
+	vec3 vViewPos;
+	vec3 vViewDirection;
+	mat4 mProjection;
+	mat4 mView;
+	mat4 mInvView;
+	mat4 mNormal;
+	mat4 mModel;
+};
+
+uniform Camera camera;
+
 uniform sampler2D uRadianceMap;
 uniform sampler2D uIrradianceMap;
 
+uniform sampler2D uShadowMap;
+
+
+
+float ShadowCalculation(vec4 fragPosLightSpace, vec3 wcPosition, vec3 wcNormal)
+{
+  // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // Transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(uShadowMap, projCoords.xy).r; 
+    // Get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // Calculate bias (based on depth map resolution and slope)
+ 
+    vec3 lightDir = normalize(lightPos - wcPosition);
+    float bias = max(0.01 * (1.0 - dot(wcNormal, lightDir)), 0.005);
+    // Check whether current frag pos is in shadow
+    // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+    // PCF
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(uShadowMap, 0);
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(uShadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
+        }    
+    }
+    shadow /= 9.0;
+    
+    // Keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
+    if(projCoords.z > 1.0)
+        shadow = 0.0;
+        
+    return shadow;
+}
 
 vec4 sample_equirectangular_map(vec3 dir, sampler2D sampler, float lod) 
 {
@@ -90,18 +143,46 @@ vec2 envMapEquirect(vec3 wcNormal) {
 
 #ifdef USE_NORMAL_MAP
 	uniform sampler2D uNormal;
-	#pragma glslify: perturb = require('glsl-perturb-normal')
-	vec3 getNormal() {
+	
+	mat3 cotangentFrame(vec3 N, vec3 p, vec2 uv) {
+	  // get edge vectors of the pixel triangle
+	  vec3 dp1 = dFdx(p);
+	  vec3 dp2 = dFdy(p);
+	  vec2 duv1 = dFdx(uv);
+	  vec2 duv2 = dFdy(uv);
+
+	  // solve the linear system
+	  vec3 dp2perp = cross(dp2, N);
+	  vec3 dp1perp = cross(N, dp1);
+	  vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
+	  vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
+
+	  // construct a scale-invariant frame 
+	  float invmax = 1.0 / sqrt(max(dot(T,T), dot(B,B)));
+	  return mat3(T * invmax, B * invmax, N);
+	}
+
+	vec3 perturb(vec3 map, vec3 N, vec3 V, vec2 texcoord) {
+	  mat3 TBN = cotangentFrame(N, -V, texcoord);
+	  return normalize(TBN * map);
+	}
+
+	vec3 getNormal() 
+	{
 		vec3 normalRGB = texture2D(uNormal, uv).rgb;
 		vec3 normalMap = normalRGB * 2.0 - 1.0;
 
 		normalMap.y *= -1.0;
 
-		vec3 N = normalize(vNormalView);
-		vec3 V = normalize(vEyeDirView);
+		vec3 ecEyeDir = normalize(-VSPosition);
+		//direction towards the camera in the world space
+		vec3 wcEyeDir = vec3(camera.mInvView * vec4(ecEyeDir, 0.0));
+	
+		vec3 N = normalize(VSNormal);
+		vec3 V = normalize(wcEyeDir);
 
 		vec3 normalView = perturb(normalMap, N, V, uv);
-		vec3 normalWorld = vec3(uInverseViewMatrix * vec4(normalView, 0.0));
+		vec3 normalWorld = vec3(camera.mInvView * vec4(normalView, 0.0));
 		return normalize(normalWorld);
 	}
 #else
@@ -111,18 +192,7 @@ vec2 envMapEquirect(vec3 wcNormal) {
 #endif
 
 
-struct Camera
-{
-	vec3 vViewPos;
-	vec3 vViewDirection;
-	mat4 mProjection;
-	mat4 mView;
-	mat4 mInvView;
-	mat4 mNormal;
-	mat4 mModel;
-};
 
-uniform Camera camera;
 
 
 
@@ -219,18 +289,18 @@ float SmithGGXVisibility(in float nDotL, in float nDotV, in float roughness)
 	return 1.0 / ( gSmithV * gSmithL );
 }
 
-/*
+
 float Fr_DisneyDiffuse ( float NdotV , float NdotL , float LdotH , float linearRoughness )
 {
-	float energyBias = lerp (0 , 0.5 , linearRoughness );
-	float energyFactor = lerp (1.0 , 1.0 / 1.51 , linearRoughness );
+	float energyBias = mix (0 , 0.5 , linearRoughness );
+	float energyFactor = mix (1.0 , 1.0 / 1.51 , linearRoughness );
 	float fd90 = energyBias + 2.0 * LdotH * LdotH * linearRoughness ;
 	vec3 f0 = vec3 (1.0 , 1.0 , 1.0);
 	float lightScatter = F_Schlick ( f0 , fd90 , NdotL ).r;
 	float viewScatter = F_Schlick (f0 , fd90 , NdotV ).r;
 
 	return lightScatter * viewScatter * energyFactor ;
-}*/
+}
 
 vec3 EnvBRDFApprox( vec3 SpecularColor, float Roughness, float NoV )
 {
@@ -248,8 +318,9 @@ void main()
 {
 
 	float roughness = getRoughness();
+	float roughness2 = pow(roughness, 2.2);
 	float roughness4 = pow(roughness, 4);
-	float metalness = getMetalness();
+	float metalness = pow(getMetalness(),2.2);
 	vec3 albedo = getAlbedo();
 	vec3 normal = getNormal();
 	
@@ -257,9 +328,9 @@ void main()
     //direction towards the camera in the world space
     vec3 wcEyeDir = vec3(camera.mInvView * vec4(ecEyeDir, 0.0));
 	
-	vec3 N = normalize( WSNormal );
+	vec3 N = normal;
 	vec3 V = wcEyeDir;
-	vec3 L = vLightPosition - WSPosition;
+	vec3 L = lightPos - WSPosition;
 	vec3 H = normalize(L + V);
 	vec3 R = reflect(-V, N);
         
@@ -271,15 +342,33 @@ void main()
     float NdotH = saturate(dot(N, H));
     float LdotH = saturate(dot(L, H));
 	float NdotL = saturate(dot(N, L));
-    float NdotV = saturate(dot(N, V));
+    float NdotV = abs(dot(N, V)) + 1e-5f;
 	float VdotH = saturate(dot(V, H));
 
 	vec3 diffuseColor	= albedo * (1 - metalness);
-	vec3 specularColor = mix(vec3(0.04), albedo, metalness );
+	vec3 specularColor = mix(vec3(0.04), albedo, metalness);
+	
+	float distribution		= getNormalDistribution( roughness, NdotH );
+	//vec3 fresnel			= getFresnel( specularColor, NdotV );
+	float geom				= getGeometricShadowing( roughness, NdotV, NdotL, VdotH, L, V );
+
+	// get the specular and diffuse and combine them
+	//vec3 diffuse			= getDiffuse( diffuseColor, roughness, NdotV, NdotL, VdotH );
+	//vec3 specular			= NdotL * ( distribution * fresnel * geom );
+	
+	
+	
+	
 	vec3 fresnel = Fresnel_Schlick(specularColor, NdotV);
+	float vis = V_SmithGGXCorrelated(NdotV, NdotL, roughness);
+	float D = D_GGX(NdotH, roughness);
+	vec3 Fr = D * fresnel *vis/PI;
+	 
+	float Fd = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, roughness2 )/PI;
+	
 	
 	int numMips			= 7;
-	float lod = (1.0 - roughness)*(numMips - 1.0);
+	float lod 			= (1.0 - roughness)*(numMips - 1.0);
 	float mip			= numMips - 1 + log2(roughness);
 	vec3 lookup			= -reflect(V, N);
 	//lookup			= fix_cube_lookup(lookup, 256, mip );
@@ -292,6 +381,11 @@ void main()
     vec3 specular 		= reflectance * radiance;
 	vec3 color			= diffuse + specular;
 	
+	//vec3 color				= ( diffuse * irradiance + specular * radiance);
+	
+	float shadow = ShadowCalculation(fragPosLightSpace, WSPosition, N);   
+	shadow = min(shadow, 0.75);
+    //color *=  (1.0 - shadow);
 	fragColor = vec4(color, 1.0);
 	
 	
