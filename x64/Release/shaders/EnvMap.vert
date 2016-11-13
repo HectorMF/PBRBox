@@ -3,7 +3,8 @@ layout (location = 0) in vec3 position;
 
 struct Camera
 {
-	vec3 mViewDirection;
+	vec3 vViewPos;
+	vec3 vViewDirection;
 	mat4 mProjection;
 	mat4 mView;
 	mat4 mInvView;

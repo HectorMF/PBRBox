@@ -1,27 +1,43 @@
 #pragma once
 
+#include <bitset>
 #include "Material.h"
 #include "MathUtil.h"
 
 class PBRMaterial : public Material 
 {
+private:
+
+	void checkBit(int pos, bool val)
+	{
+		if (m_permutation[pos] != val)
+		{
+			m_permutation.set(pos, val);
+			m_dirty = true;
+		}
+	}
+
 	bool m_dirty;
 
 	//material information
 	glm::vec4 m_albedo;
 	float m_metalness;
 	float m_roughness;
-	float m_ior;
 
 	Texture m_albedoMap;
 	Texture m_normalMap;
 	Texture m_roughnessMap;
 	Texture m_metalnessMap;
 
-	bool hasAlbedoMap;
-	bool hasNormalMap;
-	bool hasRoughnessMap;
-	bool hasMetalnessMap;
+	enum TextureMap
+	{
+		Roughness = 0,
+		Normals = 1,
+		Metalness = 2,
+		Albedo = 3
+	};
+	
+	std::bitset<4> m_permutation;
 
 	//environment information
 public:
@@ -37,12 +53,10 @@ public:
 		shader = Shader("shaders\\Standard.vert", "shaders\\Standard.frag", false);
 		shader.setVersion(330);
 		shader.compile();
-		m_ior = 1.4;
 		m_albedo = glm::vec4(1, 1, 1, 1);
 		m_roughness = .5f;
 		m_metalness = 0.0;
 		m_dirty = false;
-		
 	}
 
 	void bind()
@@ -51,21 +65,22 @@ public:
 		if (m_dirty)
 		{
 			shader.clearFlags();
-			if(hasAlbedoMap)
+			if(m_permutation[TextureMap::Albedo])
 				shader.addFlag("#define USE_ALBEDO_MAP");
-			if(hasRoughnessMap)
+			if(m_permutation[TextureMap::Roughness])
 				shader.addFlag("#define USE_ROUGHNESS_MAP");
-			if(hasMetalnessMap)
+			if(m_permutation[TextureMap::Metalness])
 				shader.addFlag("#define USE_METALNESS_MAP");
-			if(hasNormalMap)
+			if(m_permutation[TextureMap::Normals])
 				shader.addFlag("#define USE_NORMAL_MAP");
 			shader.compile();
 			m_dirty = false;
 		}
 
-		glUniform1i(glGetUniformLocation(shader.getProgram(), "uShadowMap"), 1);
-		glActiveTexture(GL_TEXTURE1);
+		glUniform1i(glGetUniformLocation(shader.getProgram(), "uShadowMap"), 8);
+		glActiveTexture(GL_TEXTURE8);
 		glBindTexture(GL_TEXTURE_2D, shadowTex);
+
 
 		GLint d = glGetUniformLocation(shader.getProgram(), "uRadianceMap");
 		glUniform1i(d, 7);
@@ -73,60 +88,30 @@ public:
 		glBindTexture(GL_TEXTURE_2D, m_radianceMap);
 
 		GLint d1 = glGetUniformLocation(shader.getProgram(), "uIrradianceMap");
-		glUniform1i(d1, 8);
-		glActiveTexture(GL_TEXTURE8);
+		glUniform1i(d1, 9);
+		glActiveTexture(GL_TEXTURE9);
 		glBindTexture(GL_TEXTURE_2D, m_irradianceMap);
 		
 
-		glUniform3f(glGetUniformLocation(shader.getProgram(), "uLightPos"), 0.0, 10.0, 0.0);
+		shader.setUniform("uLightPos", 0.0, 10.0, 0.0);
 
+		if (m_permutation[TextureMap::Albedo])
+			shader.setUniform("uAlbedo", m_albedoMap);
+		else
+			shader.setUniform("uAlbedo", sRGBToLinear(m_albedo));
 
-		unsigned int albedoLoc = glGetUniformLocation(shader, "uAlbedo");
-		unsigned int roughnessLoc = glGetUniformLocation(shader, "uRoughness");
-		unsigned int metalnessLoc = glGetUniformLocation(shader, "uMetalness");
-		unsigned int normalLoc = glGetUniformLocation(shader, "uNormal");
-		unsigned int iorLoc = glGetUniformLocation(shader, "uIOR");
+		if (m_permutation[TextureMap::Roughness])
+			shader.setUniform("uRoughness", m_roughnessMap);
+		else
+			shader.setUniform("uRoughness", m_roughness);
 
-		if (hasAlbedoMap)
-		{
-			glUniform1i(albedoLoc, 2);
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, m_albedoMap);
-		}
+		if (m_permutation[TextureMap::Metalness])
+			shader.setUniform("uMetalness", m_metalnessMap);
+		else
+			shader.setUniform("uMetalness", m_metalness);
 
-		if (hasRoughnessMap)
-		{
-			glUniform1i(roughnessLoc, 4);
-			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, m_roughnessMap);
-		}
-
-		if (hasMetalnessMap)
-		{
-			glUniform1i(metalnessLoc, 3);
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, m_metalnessMap);
-		}
-
-		if (hasNormalMap)
-		{
-			glUniform1i(normalLoc, 5);
-			glActiveTexture(GL_TEXTURE5);
-			glBindTexture(GL_TEXTURE_2D, m_normalMap);
-
-		}
-
-	
-
-	
-
-	
-
-	
-		glUniform4fv(albedoLoc, 1, glm::value_ptr(sRGBToLinear(m_albedo)));
-		glUniform1f(roughnessLoc, m_roughness);
-		glUniform1f(metalnessLoc, m_metalness);
-		glUniform1f(iorLoc, m_ior);
+		if (m_permutation[TextureMap::Normals])
+			shader.setUniform("uNormal", m_normalMap);
 	}
 
 	void setAlbedo(const glm::vec4& albedo)
@@ -137,43 +122,36 @@ public:
 	void setAlbedoMap(const Texture& albedo)
 	{
 		m_albedoMap = albedo;
-		hasAlbedoMap = true;
-		m_dirty = true;
+		checkBit(TextureMap::Albedo, true);
 	}
 
 	void setNormalMap(const Texture& normals)
 	{
 		m_normalMap = normals;
-		hasNormalMap = true;
-		m_dirty = true;
+		checkBit(TextureMap::Normals, true);
 	}
 
 	void setMetalness(const float& metalness)
 	{
 		m_metalness = metalness;
+		checkBit(TextureMap::Metalness, false);
 	}
 
 	void setMetalnessMap(const Texture& metalness)
 	{
 		m_metalnessMap = metalness;
-		hasMetalnessMap = true;
-		m_dirty = true;
+		checkBit(TextureMap::Metalness, true);
 	}
 
 	void setRoughness(const float& roughness)
 	{
 		m_roughness = roughness;
+		checkBit(TextureMap::Roughness, false);
 	}
 
 	void setRoughnessMap(const Texture& roughness)
 	{
 		m_roughnessMap = roughness;
-		hasRoughnessMap = true;
-		m_dirty = true;
-	}
-
-	void setIOR(const float& ior)
-	{
-		m_ior = ior;
+		checkBit(TextureMap::Roughness, true);
 	}
 };

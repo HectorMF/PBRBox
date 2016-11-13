@@ -69,7 +69,6 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 
 void initializeScene()
 {
-
 	shadowTarget = new RenderTarget();
 	GLuint skybox = create_texture("data\\Temp2\\output_skybox.dds");
 	GLuint radiance = create_texture("data\\Temp2\\output_pmrem.dds");
@@ -102,8 +101,6 @@ void initializeScene()
 	gunMat->m_radianceMap = radiance;
 	gunMat->m_irradianceMap = irradiance;
 	//gunMat->m_sampler = initSampler();
-
-
 
 	depthMat = new Material();
 	depthMat->shader = Shader("shaders\\Diffuse.vert", "shaders\\Diffuse.frag");
@@ -141,7 +138,7 @@ void initializeScene()
 
 
 	depthQuad = new Mesh(Shapes::renderQuad(), depthMat);
-	depthQuad->transform = glm::scale(depthQuad->transform, glm::vec3(.25,.25, 0));
+	depthQuad->transform = glm::scale(depthQuad->transform, glm::vec3(.25, .25, 0));
 
 	//scene.add(depthQuad);
 
@@ -189,7 +186,7 @@ void initializeScene()
 // display function called by glutMainLoop(), gets executed every frame 
 void disp(void)
 {
-	gun1->transform = glm::rotate(gun1->transform, .005f, glm::vec3(0,1,0));
+	gun1->transform = glm::rotate(gun1->transform, .001f, glm::vec3(0,1,0));
 	// if camera has moved, reset the accumulation buffer
 
 	// build a new camera for each frame on the CPU

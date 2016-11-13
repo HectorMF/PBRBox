@@ -318,9 +318,13 @@ void main()
 {
 
 	float roughness = getRoughness();
+	
+	
 	float roughness2 = pow(roughness, 2.2);
 	float roughness4 = pow(roughness, 4);
+
 	float metalness = pow(getMetalness(),2.2);
+	
 	vec3 albedo = getAlbedo();
 	vec3 normal = getNormal();
 	
@@ -348,6 +352,17 @@ void main()
 	vec3 diffuseColor	= albedo * (1 - metalness);
 	vec3 specularColor = mix(vec3(0.04), albedo, metalness);
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	float distribution		= getNormalDistribution( roughness, NdotH );
 	//vec3 fresnel			= getFresnel( specularColor, NdotV );
 	float geom				= getGeometricShadowing( roughness, NdotV, NdotL, VdotH, L, V );
@@ -372,8 +387,16 @@ void main()
 	float mip			= numMips - 1 + log2(roughness);
 	vec3 lookup			= -reflect(V, N);
 	//lookup			= fix_cube_lookup(lookup, 256, mip );
+	
+	
+	
+	
+	
 	vec3 radiance		= textureLod(uRadianceMap, envMapEquirect(R), mip).rgb;
 	vec3 irradiance		= texture(uIrradianceMap, envMapEquirect(N)).rgb;
+	
+	
+	
 	
 	vec3 reflectance = EnvBRDFApprox(specularColor, roughness4, NdotV);
 	
@@ -381,11 +404,35 @@ void main()
     vec3 specular 		= reflectance * radiance;
 	vec3 color			= diffuse + specular;
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	
+	
 	//vec3 color				= ( diffuse * irradiance + specular * radiance);
 	
 	float shadow = ShadowCalculation(fragPosLightSpace, WSPosition, N);   
-	shadow = min(shadow, 0.75);
-    //color *=  (1.0 - shadow);
+	shadow = min(shadow, 0.15);
+   // color *=  (1.0 - shadow);
 	fragColor = vec4(color, 1.0);
 	
 	

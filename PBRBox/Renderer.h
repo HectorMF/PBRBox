@@ -102,22 +102,15 @@ public:
 
 			view = glm::mat4(glm::mat3(view));
 
-			GLint vp = glGetUniformLocation(m->shader.getProgram(), "camera.vViewPos");
-			GLint mm = glGetUniformLocation(m->shader.getProgram(), "camera.mModel");
-			GLint v = glGetUniformLocation(m->shader.getProgram(), "camera.mView");
-			GLint p = glGetUniformLocation(m->shader.getProgram(), "camera.mProjection");
-			GLint n = glGetUniformLocation(m->shader.getProgram(), "camera.mNormal");
-			GLint ii = glGetUniformLocation(m->shader.getProgram(), "camera.mInvView");
-			GLint vd = glGetUniformLocation(m->shader.getProgram(), "camera.mViewDirection");
 
-			glUniformMatrix4fv(mm, 1, GL_FALSE, glm::value_ptr(model));
-			glUniformMatrix4fv(v, 1, GL_FALSE, glm::value_ptr(view));
-			glUniformMatrix4fv(p, 1, GL_FALSE, glm::value_ptr(projection));
-			glUniformMatrix4fv(n, 1, GL_FALSE, glm::value_ptr(normal));
-			glUniformMatrix4fv(ii, 1, GL_FALSE, glm::value_ptr(glm::inverse(view)));
+			m->shader.setUniform("camera.vViewPos", camera.position);
+			m->shader.setUniform("camera.vViewDirection", camera.view);
 
-			glUniform3fv(vd, 1, glm::value_ptr(camera.view));
-			glUniform3fv(vp, 1, glm::value_ptr(camera.position));
+			m->shader.setUniform("camera.mModel", model);
+			m->shader.setUniform("camera.mView", view);
+			m->shader.setUniform("camera.mProjection", projection);
+			m->shader.setUniform("camera.mNormal", normal);
+			m->shader.setUniform("camera.mInvView", glm::inverse(view));
 
 			scene.skybox->render();
 			m->unbind();

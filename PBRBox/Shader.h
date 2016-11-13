@@ -9,7 +9,10 @@
 #include <iostream>
 
 #include <GL/glew.h>
+#include "Texture.h"
 
+
+#include <glm/gtc/type_ptr.hpp>
 class Shader
 {
 	std::string m_version;
@@ -20,6 +23,8 @@ public:
 	std::string fragmentCode;
 
 	std::vector<std::string> flags;
+
+	unsigned int m_boundTextures;
 
 	operator GLuint() const { return m_program; }
 
@@ -47,6 +52,7 @@ public:
 
 	Shader(){
 		m_program = 0;
+		m_boundTextures = 0;
 		m_version = "";
 	}
 
@@ -55,14 +61,86 @@ public:
 
 	}
 
+	void setUniform(const std::string name, float x, float y, float z)
+	{
+		unsigned int location = getUniform(name);
+		glUniform3f(location, x, y, z);
+	}
+
+	void setUniform(const std::string name, float x, float y, float z, float w)
+	{
+		unsigned int location = getUniform(name);
+		glUniform4f(location, x, y, z, w);
+	}
+
+	void setUniform(const std::string name, const glm::vec3 & v)
+	{
+		unsigned int location = getUniform(name);
+		glUniform3fv(location, 1, glm::value_ptr(v));
+	}
+
+	void setUniform(const std::string name, const glm::vec4 & v)
+	{
+		unsigned int location = getUniform(name);
+		glUniform4fv(location, 1, glm::value_ptr(v));
+	}
+
+	void setUniform(const std::string name, const glm::mat4 &m)
+	{
+		unsigned int location = getUniform(name);
+		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m));
+	}
+
+	void setUniform(const std::string name, const glm::mat3 & m)
+	{
+		unsigned int location = getUniform(name);
+		glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(m));
+	}
+
+	void setUniform(const std::string name, float val)
+	{
+		unsigned int location = getUniform(name);
+		glUniform1f(location, val);
+	}
+
+	void setUniform(const std::string name, int val)
+	{
+		unsigned int location = getUniform(name);
+		glUniform1i(location, val);
+	}
+
+	void setUniform(const std::string name, bool val)
+	{
+		unsigned int location = getUniform(name);
+		glUniform1i(location, val);
+	}
+
+	void setUniform(const std::string name, Texture texture)
+	{
+		unsigned int location = getUniform(name);
+		glUniform1i(location, m_boundTextures);
+		glActiveTexture(GL_TEXTURE0 + m_boundTextures);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		m_boundTextures++;
+	}
+
 	// Uses the current shader
 	void bind()
 	{
 		glUseProgram(m_program);
+		assert(m_boundTextures == 0);
 	}
 
 	void unbind()
 	{
+		for (int i = 0; i < m_boundTextures; i++)
+		{
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+
+		m_boundTextures = 0; 
+
 		glUseProgram(0);
 	}
 
@@ -119,9 +197,11 @@ public:
 		glDeleteShader(vertex);
 		glDeleteShader(fragment);
 	}
+
 	// Constructor generates the shader on the fly
 	Shader(const GLchar* vertexPath, const GLchar* fragmentPath, bool autoCompile = true)
 	{
+		m_boundTextures = 0;
 		// 1. Retrieve the vertex/fragment source code from filePath
 		std::ifstream vShaderFile;
 		std::ifstream fShaderFile;
