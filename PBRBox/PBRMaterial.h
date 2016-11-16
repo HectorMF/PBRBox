@@ -85,12 +85,12 @@ public:
 		GLint d = glGetUniformLocation(shader.getProgram(), "uRadianceMap");
 		glUniform1i(d, 7);
 		glActiveTexture(GL_TEXTURE7);
-		glBindTexture(GL_TEXTURE_2D, m_radianceMap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_radianceMap);
 
 		GLint d1 = glGetUniformLocation(shader.getProgram(), "uIrradianceMap");
 		glUniform1i(d1, 9);
 		glActiveTexture(GL_TEXTURE9);
-		glBindTexture(GL_TEXTURE_2D, m_irradianceMap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
 		
 
 		shader.setUniform("uLightPos", 0.0, 10.0, 0.0);

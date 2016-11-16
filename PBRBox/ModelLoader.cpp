@@ -103,6 +103,8 @@ Geometry* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
 	std::vector<unsigned int> indices;
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
+	std::vector<glm::vec3> tangents;
+	std::vector<glm::vec3> bitangents;
 	std::vector<glm::vec2> texCoords;
 
 	glm::vec3 mins(FLT_MAX, FLT_MAX, FLT_MAX);
@@ -126,6 +128,8 @@ Geometry* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
 
 		vertices.push_back(vertex);
 		normals.push_back(normal);
+		tangents.push_back({ mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z });
+		bitangents.push_back({ mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z });
 		texCoords.push_back(texCoord);
 	}
 
@@ -155,8 +159,9 @@ Geometry* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
 	geometry->setIndices(indices);
 	geometry->setVertices(vertices);
 	geometry->setNormals(normals);
-	geometry->setUVs(texCoords);
-
+	geometry->setTangents(tangents);
+	geometry->setBitangents(bitangents);
+	geometry->setTexCoords(texCoords);
 
 	//m->m_boundingBox = gb::AABox3f(mins.x, mins.y, mins.z, maxes.x - mins.x, maxes.y - mins.y, maxes.z - mins.z);
 	//m->m_material_name = name.C_Str();

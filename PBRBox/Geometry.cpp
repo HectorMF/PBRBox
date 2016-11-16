@@ -34,6 +34,16 @@ const std::vector<glm::vec3>& Geometry::getNormals() const
 	return m_normals;
 }
 
+const std::vector<glm::vec3>& Geometry::getTangents() const
+{
+	return m_tangents;
+}
+
+const std::vector<glm::vec3>& Geometry::getBitangents() const
+{
+	return m_bitangents;
+}
+
 const std::vector<glm::vec2>& Geometry::getTexCoords() const
 {
 	return m_texCoords;
@@ -54,7 +64,17 @@ void Geometry::setNormals(std::vector<glm::vec3> normals)
 	m_normals = normals;
 }
 
-void Geometry::setUVs(std::vector<glm::vec2> uvs)
+void Geometry::setTangents(std::vector<glm::vec3> tangents)
+{
+	m_tangents = tangents;
+}
+
+void Geometry::setBitangents(std::vector<glm::vec3> bitangents)
+{
+	m_bitangents = bitangents;
+}
+
+void Geometry::setTexCoords(std::vector<glm::vec2> uvs)
 {
 	m_texCoords = uvs;
 }
@@ -101,28 +121,35 @@ void Geometry::uploadToGPU()
 {
 	//if (initialized) return;
 	//initialized = true;
-	//the VBO contains interleaved vertex data for better data locality,
+	//the VBO contains interleaved vertex data for better data locality? research seems to indicate that this could be pointless
+	//To do: make sure we dont need to align this for better speed
 	struct PackedVertex
 	{
 		glm::vec3 position;
 		glm::vec3 normal;
+		glm::vec3 tangent;
+		glm::vec3 bitangent;
 		glm::vec2 texCoord;
 	};
 
-	std::vector<PackedVertex> gpuVertices;
+	std::vector<PackedVertex> gpuVertices; 
 
 	if (m_normals.size() < getNumVertices())
 		m_normals.resize(getNumVertices());
 
 	if(m_texCoords.size() < getNumVertices())
 		m_texCoords.resize(getNumVertices());
+	if (m_tangents.size() < getNumVertices())
+		computeTangents();
 
 	for (int i = 0; i < getNumVertices(); i++)
 	{
 		PackedVertex vertex;
-		vertex.position = getVertices()[i];
-		vertex.normal = getNormals()[i];
-		vertex.texCoord = getTexCoords()[i];
+		vertex.position = m_vertices[i];
+		vertex.normal = m_normals[i];
+		vertex.tangent = m_tangents[i];
+		vertex.bitangent = m_bitangents[i];
+		vertex.texCoord = m_texCoords[i];
 		gpuVertices.push_back(vertex);
 	}
 
@@ -142,12 +169,23 @@ void Geometry::uploadToGPU()
 	//Positions
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(PackedVertex), (GLvoid*)0);
+
 	//Normals
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(PackedVertex), (GLvoid*)offsetof(PackedVertex, normal));
-	//Texture Coords
+
+	//Tangent
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(PackedVertex), (GLvoid*)offsetof(PackedVertex, texCoord));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(PackedVertex), (GLvoid*)offsetof(PackedVertex, tangent));
+
+	//Bitangent
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(PackedVertex), (GLvoid*)offsetof(PackedVertex, bitangent));
+
+	//Texture Coords
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(PackedVertex), (GLvoid*)offsetof(PackedVertex, texCoord));
+
 
 	glBindVertexArray(0);
 }

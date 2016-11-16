@@ -103,8 +103,8 @@ public:
 			view = glm::mat4(glm::mat3(view));
 
 
-			m->shader.setUniform("camera.vViewPos", camera.position);
-			m->shader.setUniform("camera.vViewDirection", camera.view);
+			m->shader.setUniform("camera.position", camera.position);
+			m->shader.setUniform("camera.viewDirection", camera.view);
 
 			m->shader.setUniform("camera.mModel", model);
 			m->shader.setUniform("camera.mView", view);
@@ -157,13 +157,14 @@ public:
 			glm::vec4 viewDir = view * model * glm::vec4(1, 0, 0, 0);
 
 
-			GLint vp = glGetUniformLocation(m->shader.getProgram(), "camera.vViewPos");
+			GLint vp = glGetUniformLocation(m->shader.getProgram(), "camera.position");
+			GLint vd = glGetUniformLocation(m->shader.getProgram(), "camera.viewDirection");
 			GLint mm = glGetUniformLocation(m->shader.getProgram(), "camera.mModel");
 			GLint v = glGetUniformLocation(m->shader.getProgram(), "camera.mView");
 			GLint p = glGetUniformLocation(m->shader.getProgram(), "camera.mProjection");
 			GLint n = glGetUniformLocation(m->shader.getProgram(), "camera.mNormal");
 			GLint ii = glGetUniformLocation(m->shader.getProgram(), "camera.mInvView");
-			GLint vd = glGetUniformLocation(m->shader.getProgram(), "camera.mViewDirection");
+
 
 			glUniformMatrix4fv(mm, 1, GL_FALSE, glm::value_ptr(model));
 			glUniformMatrix4fv(v, 1, GL_FALSE, glm::value_ptr(view));

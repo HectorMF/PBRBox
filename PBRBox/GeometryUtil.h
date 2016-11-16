@@ -11,7 +11,7 @@ namespace Shapes
 		g.setVertices({ { 1, 1, 0 },{ -1, 1, 0 },{ 1, -1, 0 },{ -1, -1, 0 } });
 		g.setIndices({ 0, 1, 2, 1, 2, 3 });
 		g.setNormals({ { 0, 0, 1 },{ 0, 0, 1 },{ 0, 0, 1 },{ 0, 0, 1 } });
-		g.setUVs({ { 1, 1 },{ 0, 1 },{ 1, 0 },{ 0, 0 } });
+		g.setTexCoords({ { 1, 1 },{ 0, 1 },{ 1, 0 },{ 0, 0 } });
 		return g;
 	}
 
@@ -111,7 +111,7 @@ namespace Shapes
 		Geometry sphere;
 		sphere.setVertices(vertices);
 		sphere.setNormals(normals);
-		sphere.setUVs(uvs);
+		sphere.setTexCoords(uvs);
 		sphere.setIndices(indices);
 		return sphere;
 	}
@@ -171,7 +171,7 @@ namespace Shapes
 		Geometry g;
 		g.setVertices(vertices);
 		g.setNormals(normals);
-		g.setUVs(uvs);
+		g.setTexCoords(uvs);
 		g.setIndices(indices);
 		return g;
 	}

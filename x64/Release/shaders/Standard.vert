@@ -1,11 +1,23 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 aUV;
+layout (location = 2) in vec3 tangent;
+layout (location = 3) in vec3 bitangent;
+layout (location = 4) in vec2 uv;
+
+out V2F
+{
+	vec3 position;
+	vec3 normal;
+	vec3 tangent;
+	vec3 bitangent;
+    vec2 uv;
+} vs_out;
+
 
 struct Camera
 {
-	vec3 vViewPos;
-	vec3 vViewDirection;
+	vec3 position;
+	vec3 viewDirection;
 	mat4 mProjection;
 	mat4 mView;
 	mat4 mInvView;
@@ -15,16 +27,15 @@ struct Camera
 
 uniform Camera camera;
 
+/*struct Light
+{
+	vec3
+};*/
+
 //current transformation matrices coming from Context
 uniform mat4 lightSpaceMatrix;
 //user supplied light position
 uniform vec3 uLightPos;
-
-
-
-
-
-out vec2 uv;
 
 
 out vec4 fragPosLightSpace;
@@ -56,10 +67,14 @@ void main()
 	WSPosition = wsPosition.xyz;
 	WSNormal = wcNormal;//normalize(camera.mInvView * vsNormal).xyz;
 	
-	EyePosition	= normalize(camera.vViewPos - vec3(wsPosition));
+	EyePosition	= normalize(camera.position - vec3(wsPosition));
 	
 	lightPos = uLightPos;
-	uv = aUV;
+	
+	vs_out.position = position;
+	vs_out.tangent = tangent;
+	vs_out.bitangent = bitangent;
+	vs_out.uv = uv;
 	
 	
 	

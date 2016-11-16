@@ -2,7 +2,26 @@
 const float PI = 3.14159265;
 const float TwoPI = 6.28318530718;
 
-in vec2 uv;
+
+
+in V2F
+{
+	vec3 position;
+	vec3 normal;
+	vec3 tangent;
+	vec3 bitangent;
+    vec2 uv;
+} fs_in;
+
+
+
+
+
+
+
+
+
+
 
 out vec4 fragColor;
 
@@ -23,8 +42,8 @@ in vec3 EyePosition;
 
 struct Camera
 {
-	vec3 vViewPos;
-	vec3 vViewDirection;
+	vec3 position;
+	vec3 viewDirection;
 	mat4 mProjection;
 	mat4 mView;
 	mat4 mInvView;
@@ -34,8 +53,8 @@ struct Camera
 
 uniform Camera camera;
 
-uniform sampler2D uRadianceMap;
-uniform sampler2D uIrradianceMap;
+uniform samplerCube uRadianceMap;
+uniform samplerCube uIrradianceMap;
 
 uniform sampler2D uShadowMap;
 
@@ -105,7 +124,7 @@ vec2 envMapEquirect(vec3 wcNormal) {
 	uniform sampler2D uAlbedo;
 	vec3 getAlbedo() 
 	{
-		return texture2D(uAlbedo, uv).rgb;
+		return texture2D(uAlbedo, fs_in.uv).rgb;
 	}
 #else
 	uniform vec4 uAlbedo; 
@@ -119,7 +138,7 @@ vec2 envMapEquirect(vec3 wcNormal) {
 	uniform sampler2D uRoughness;
 	float getRoughness() 
 	{
-		return texture2D(uRoughness, uv).r;
+		return texture2D(uRoughness, fs_in.uv).r;
 	}
 #else
 	uniform float uRoughness;
@@ -132,7 +151,7 @@ vec2 envMapEquirect(vec3 wcNormal) {
 #ifdef USE_METALNESS_MAP
 	uniform sampler2D uMetalness;
 	float getMetalness() {
-		return texture2D(uMetalness, uv).r;
+		return texture2D(uMetalness, fs_in.uv).r;
 	}
 #else
 	uniform float uMetalness;
@@ -169,7 +188,7 @@ vec2 envMapEquirect(vec3 wcNormal) {
 
 	vec3 getNormal() 
 	{
-		vec3 normalRGB = texture2D(uNormal, uv).rgb;
+		vec3 normalRGB = texture2D(uNormal, fs_in.uv).rgb;
 		vec3 normalMap = normalRGB * 2.0 - 1.0;
 
 		normalMap.y *= -1.0;
@@ -181,7 +200,7 @@ vec2 envMapEquirect(vec3 wcNormal) {
 		vec3 N = normalize(VSNormal);
 		vec3 V = normalize(wcEyeDir);
 
-		vec3 normalView = perturb(normalMap, N, V, uv);
+		vec3 normalView = perturb(normalMap, N, V, fs_in.uv);
 		vec3 normalWorld = vec3(camera.mInvView * vec4(normalView, 0.0));
 		return normalize(normalWorld);
 	}
@@ -384,16 +403,18 @@ void main()
 	
 	int numMips			= 7;
 	float lod 			= (1.0 - roughness)*(numMips - 1.0);
-	float mip			= numMips - 1 + log2(roughness);
+	float mip			= numMips - 1 + log2(roughness2);
 	vec3 lookup			= -reflect(V, N);
 	//lookup			= fix_cube_lookup(lookup, 256, mip );
 	
+	//float3 vReflection = 2.0f * vNormal * dot(vViewDirection, vNormal) - vViewDirection;
+	//float fA = fRoughness * fRoughness;
+	//vReflection = lerp(vNormal, vReflection, (1.0f - fA) * (sqrt(1.0f - fA) + fA));
 	
 	
 	
-	
-	vec3 radiance		= textureLod(uRadianceMap, envMapEquirect(R), mip).rgb;
-	vec3 irradiance		= texture(uIrradianceMap, envMapEquirect(N)).rgb;
+	vec3 radiance		= textureLod(uRadianceMap, R, mip).rgb;
+	vec3 irradiance		= texture(uIrradianceMap, N).rgb;
 	
 	
 	
@@ -432,8 +453,8 @@ void main()
 	
 	float shadow = ShadowCalculation(fragPosLightSpace, WSPosition, N);   
 	shadow = min(shadow, 0.15);
-   // color *=  (1.0 - shadow);
-	fragColor = vec4(color, 1.0);
+    //color *=  (1.0 - shadow);
+	fragColor = vec4(N, 1.0);
 	
 	
 	

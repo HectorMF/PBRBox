@@ -52,6 +52,7 @@ Material* depthMat;
 Mesh* depthQuad;
 Mesh* gun1;
 Material* envMat;
+
 /* Handler for window re-size event. Called back when the window first appears and
 whenever the window is re-sized with its new width and height */
 void reshape(GLsizei newwidth, GLsizei newheight)
@@ -70,9 +71,10 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 void initializeScene()
 {
 	shadowTarget = new RenderTarget();
-	GLuint skybox = create_texture("data\\Temp2\\output_skybox.dds");
-	GLuint radiance = create_texture("data\\Temp2\\output_pmrem.dds");
-	GLuint irradiance = create_texture("data\\Temp2\\output_iem.dds");
+	GLuint skybox = create_texture("data\\PaperMill\\output_skybox_lat.dds");
+	GLuint radiance = create_texture("data\\PaperMill\\output_pmrem.dds");
+	GLuint irradiance = create_texture("data\\PaperMill\\output_iem.dds");
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	//Texture specular = Texture();
 

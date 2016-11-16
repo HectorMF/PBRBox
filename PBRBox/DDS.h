@@ -74,7 +74,7 @@ GLuint create_texture(char const* Filename)
 
 	glm::tvec3<GLsizei> const Extent(Texture.extent());
 	GLsizei const FaceTotal = static_cast<GLsizei>(Texture.layers() * Texture.faces());
-
+	int val;
 	switch (Texture.target())
 	{
 	case gli::TARGET_1D:
@@ -84,9 +84,11 @@ GLuint create_texture(char const* Filename)
 	case gli::TARGET_1D_ARRAY:
 	case gli::TARGET_2D:
 	case gli::TARGET_CUBE:
+
+		val = (Texture.target() == gli::TARGET_2D) ? Extent.y : FaceTotal;
 		glTexStorage2D(
 			Target, static_cast<GLint>(Texture.levels()), Format.Internal,
-			Extent.x, Texture.target() == gli::TARGET_2D ? Extent.y : FaceTotal);
+			Extent.x, Extent.y);
 		break;
 	case gli::TARGET_2D_ARRAY:
 	case gli::TARGET_3D:
@@ -99,6 +101,13 @@ GLuint create_texture(char const* Filename)
 	default:
 		assert(0);
 		break;
+	}
+
+	GLenum err = glGetError();
+	if (err != GL_NO_ERROR)
+	{
+		printf("OpenGL error %08x\n", err);
+		abort();
 	}
 
 	for (std::size_t Layer = 0; Layer < Texture.layers(); ++Layer)
@@ -168,6 +177,30 @@ GLuint create_texture(char const* Filename)
 				default: assert(0); break;
 				}
 			}
+
+	float aniso = 0.0f;
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+	printf("Anisotropy %f\n", aniso);
+	aniso = 1.0f;
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+	//float aniso = 4.0f;
+	//glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+	printf("Anisotropy %f\n", aniso);
+	//BGFX_TEXTURE_MIN_ANISOTROPIC | BGFX_TEXTURE_MAG_ANISOTROPIC | BGFX_TEXTURE_U_CLAMP | BGFX_TEXTURE_V_CLAMP,
+
+	//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_U, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+
+	//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
 	return TextureName;
 }
 
