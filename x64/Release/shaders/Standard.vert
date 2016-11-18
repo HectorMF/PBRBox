@@ -72,8 +72,9 @@ void main()
 	lightPos = uLightPos;
 	
 	vs_out.position = position;
-	vs_out.tangent = tangent;
-	vs_out.bitangent = bitangent;
+	vs_out.normal = normalize(normal);
+	vs_out.tangent = normalize(tangent);
+	vs_out.bitangent = normalize(bitangent);
 	vs_out.uv = uv;
 	
 	

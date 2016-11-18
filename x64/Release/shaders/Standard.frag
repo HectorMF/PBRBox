@@ -21,8 +21,9 @@ in V2F
 
 
 
-
-
+#define maxLod 7
+#define M_INV_PI 0.31830988618
+#define M_PI 3.14159265359
 out vec4 fragColor;
 
 
@@ -162,47 +163,20 @@ vec2 envMapEquirect(vec3 wcNormal) {
 
 #ifdef USE_NORMAL_MAP
 	uniform sampler2D uNormal;
-	
-	mat3 cotangentFrame(vec3 N, vec3 p, vec2 uv) {
-	  // get edge vectors of the pixel triangle
-	  vec3 dp1 = dFdx(p);
-	  vec3 dp2 = dFdy(p);
-	  vec2 duv1 = dFdx(uv);
-	  vec2 duv2 = dFdy(uv);
 
-	  // solve the linear system
-	  vec3 dp2perp = cross(dp2, N);
-	  vec3 dp1perp = cross(N, dp1);
-	  vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
-	  vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
-
-	  // construct a scale-invariant frame 
-	  float invmax = 1.0 / sqrt(max(dot(T,T), dot(B,B)));
-	  return mat3(T * invmax, B * invmax, N);
-	}
-
-	vec3 perturb(vec3 map, vec3 N, vec3 V, vec2 texcoord) {
-	  mat3 TBN = cotangentFrame(N, -V, texcoord);
-	  return normalize(TBN * map);
-	}
-
+	//use the tangent and bitangent to calculate the world normal from tangent space
 	vec3 getNormal() 
 	{
 		vec3 normalRGB = texture2D(uNormal, fs_in.uv).rgb;
+		//convert from rgb to tangent space
 		vec3 normalMap = normalRGB * 2.0 - 1.0;
-
-		normalMap.y *= -1.0;
-
-		vec3 ecEyeDir = normalize(-VSPosition);
-		//direction towards the camera in the world space
-		vec3 wcEyeDir = vec3(camera.mInvView * vec4(ecEyeDir, 0.0));
-	
-		vec3 N = normalize(VSNormal);
-		vec3 V = normalize(wcEyeDir);
-
-		vec3 normalView = perturb(normalMap, N, V, fs_in.uv);
-		vec3 normalWorld = vec3(camera.mInvView * vec4(normalView, 0.0));
-		return normalize(normalWorld);
+		//what does this do? handedness?
+		//normalMap.y *= -1.0;
+		
+		mat3 TBN = transpose(mat3(fs_in.tangent, fs_in.bitangent, fs_in.normal));
+		vec3 normal = (camera.mModel * vec4(normalMap * TBN,0)).rgb;
+		
+		return normalize(normal);
 	}
 #else
 	vec3 getNormal() {
@@ -331,14 +305,221 @@ vec3 EnvBRDFApprox( vec3 SpecularColor, float Roughness, float NoV )
 	return SpecularColor * AB.x + AB.y;
 }
 
+
+
+
+
+
+//--------------------------------------------------------------------------------------------------
+vec3 pow3(vec3 a, float b)
+{
+return vec3(pow(a.x,b),pow(a.y,b),pow(a.z,b));
+}
+//--------------------------------------------------------------------------------------------------
+vec3 mix3(vec3 a, vec3 b, float c)
+{
+return a * (1 - c) + c * b;
+}
+//--------------------------------------------------------------------------------------------------
+ float radicalInverse_VdC(uint bits) 
+ {
+     bits = (bits << 16u) | (bits >> 16u);
+     bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+     bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+     bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+     bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+     return float(bits); // / 0x100000000
+ }
+//--------------------------------------------------------------------------------------------------
+ vec2 hammersley2d(uint i, uint N, uvec2 Random)
+ {
+	float X =  fract(float(i)/float(N) + float( Random.x & uint( 0xffff) ) / (1<<16) );
+	float Y = float(uint(radicalInverse_VdC(i)) ^ Random.y) *  2.3283064365386963e-10;
+    return vec2(X,Y);
+ }
+//--------------------------------------------------------------------------------------------------
+uvec2 ScrambleTEA(uvec2 v)
+{
+	uint y 			= v[0];
+	uint z 			= v[1];
+	uint sum 		= uint(0);
+	uint iCount 	= uint(4);
+	 for(uint i = uint(0); i < iCount; ++i)
+	{
+		sum += uint(0x9e3779b9);
+		y += (z << 4u) + 0xA341316Cu  ^ z + sum ^ (z >> 5u) + 0xC8013EA4u;
+		z += (y << 4u) + 0xAD90777Du ^ y + sum ^ (y >> 5u) +  0x7E95761Eu;
+	}
+	return uvec2(y, z);
+}
+
+
+ float normal_distrib(
+ float ndh,
+   float Roughness)
+ {
+   // use GGX / Trowbridge-Reitz, same as Disney and Unreal 4
+   // cf http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf p3
+   float alpha = Roughness * Roughness;
+   float tmp = alpha / max(1e-8,(ndh*ndh*(alpha*alpha-1.0)+1.0));
+   return tmp * tmp * M_INV_PI;
+}
+ 
+float probabilityGGX(float ndh, float vdh, float Roughness)
+{
+	return normal_distrib(ndh, Roughness) * ndh / (4.0*vdh);
+}
+ 
+//--------------------------------------------------------------------------------------------------
+float getLOD(float roughness)
+{
+ // return 3;
+  return max((maxLod-4) * min(roughness *3,1),3);
+}
+//--------------------------------------------------------------------------------------------------
+float getMipFB3(float roughness,float vdh,float ndh,float SamplesNum)
+{
+	float width = 500 ;
+	float omegaS = 1 /  (SamplesNum *probabilityGGX(ndh, vdh, max(roughness,0.01)));
+	float omegaP = 4.0 * 3.141592 / (6.0 * width * width ) ;
+	return clamp (0.5 * log2 ( omegaS / omegaP ) , 3, maxLod );
+}
+//--------------------------------------------------------------------------------------------------
+// Appoximation of joint Smith term for GGX
+// [Heitz 2014, "Understanding the Masking-Shadowing Function in Microfacet-Based BRDFs"]
+float Vis_SmithJointApprox( float Roughness, float NoV, float NoL )
+{
+	float a = Roughness * Roughness;
+	float Vis_SmithV = NoL * ( NoV * ( 1 - a ) + a );
+	float Vis_SmithL = NoV * ( NoL * ( 1 - a ) + a );
+	return 0.5 / ( Vis_SmithV + Vis_SmithL );
+}
+//--------------------------------------------------------------------------------------------------
+// [Schlick 1994, "An Inexpensive BRDF Model for Physically-Based Rendering"]
+vec3 F_Schlick( vec3 SpecularColor, float VoH )
+{
+	float Fc = pow( 1 - VoH, 5);					
+	// Anything less than 2% is physically impossible and is instead considered to be shadowing
+	return min( 50.0 * SpecularColor.g, 1) * Fc + (1 - Fc) * SpecularColor;
+}
+
+vec3 importanceSampleGGX(vec2 Xi, vec3 A, vec3 B, vec3 C, float roughness)
+{
+  float a = roughness*roughness;
+  float cosT = sqrt((1.0-Xi.y)/(1.0+(a*a-1.0)*Xi.y));
+  float sinT = sqrt(1.0-cosT*cosT);
+  float phi = 2.0*M_PI*Xi.x;
+  return (sinT*cos(phi)) * A + (sinT*sin(phi)) * B + cosT * C;
+}
+
+vec4 ComputeUE4BRDF(vec3 diffColor, float metallic, float roughness, float occlusion, int SamplesNum)
+{
+	vec3 normal_vec = getNormal();
+  //- Double-sided normal if back faces are visible
+/* if (isBackFace()) 
+  {
+    normal_vec = -normal_vec;
+  }*/
+
+  vec3 eye_vec = normalize(camera.position - WSPosition);
+  float ndv =   dot(eye_vec, normal_vec);//abs(dot(eye_vec, normal_vec)) + 1e-5f;//
+  //- Trick to remove black artefacts
+  //- Backface ? place the eye at the opposite - removes black zones
+  if (ndv < 0) 
+  {
+    eye_vec = reflect(eye_vec, normal_vec);
+    ndv = abs(ndv);
+  }
+
+
+	
+
+  //- Diffuse contribution
+  vec3 diffuseIrradiance	= texture(uIrradianceMap, normal_vec).rgb;
+  vec3 contribE 			= occlusion * diffuseIrradiance * diffColor * (1.0 - metallic);
+  vec3 specColor 			= mix3(vec3(0.04), diffColor, metallic);
+  float lerp2uniform		= max(2*(roughness  - 0.5) ,0.0001);
+
+  //- Specular contribution
+ 
+	
+  //- Create a local basis for BRDF work
+  vec3 Tp = normalize(fs_in.tangent - normal_vec*dot(fs_in.tangent, normal_vec)); // local tangent
+  vec3 Bp = normalize(fs_in.bitangent - normal_vec*dot(fs_in.bitangent, normal_vec)- Tp*dot(fs_in.bitangent, Tp)); // local bitangent
+  vec3 contribS = vec3(0.0);
+  uvec2 Random = ScrambleTEA(uvec2(gl_FragCoord.xy ));
+
+  //- Brute force sampling 
+  if (false)
+  {
+  SamplesNum = 512;
+  }
+
+  for(int i = 0; i < SamplesNum; ++i)
+  {
+    vec2 Xi 	 = hammersley2d(uint(i), uint(SamplesNum),Random);
+    vec3 Hn 	 = importanceSampleGGX(Xi,Tp,Bp,normal_vec,roughness);
+    vec3 Ln 	 = -reflect(eye_vec,Hn);
+
+    float ndl 	= max(1e-8, (dot(normal_vec, Ln)));
+    float vdh 	= max(1e-8, dot(eye_vec, Hn));
+    float ndh 	= max(1e-8, dot(normal_vec, Hn));
+	float PDF	= (4 * vdh / ndh);
+	 
+	//Blend importance sampled Irradiance with Uniform distribution Irradiance when roughness --> 1 
+	float mip = getMipFB3( roughness, vdh, ndh, SamplesNum);	
+	vec3 irr = textureLod(uRadianceMap, Ln, 0).rgb;
+	vec3 specularIrradiance = mix3(irr, diffuseIrradiance, lerp2uniform);
+	contribS +=  specularIrradiance * F_Schlick(specColor, vdh ) * clamp(Vis_SmithJointApprox( roughness, ndv, ndl ) * PDF * ndl ,0,1);
+  }
+  // Remove occlusions on shiny reflections
+  contribS *= mix(occlusion, 1.0, roughness) / float(SamplesNum);
+
+  //- Emissive
+  //vec3 contribEm = emissive_intensity * texture2D(emissive_tex, fs_in.uv).rgb;
+
+  //- Sum diffuse + spec + emissive
+  return vec4(contribS + contribE, 1.0);
+ // return vec4(contribE, 1.0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #define saturate(x) clamp(x, 0.0, 1.0)
 
 void main() 
 {
 
+
 	float roughness = getRoughness();
-	
-	
+	float occlusion = 1;
+	int nbSamples = 1;
 	float roughness2 = pow(roughness, 2.2);
 	float roughness4 = pow(roughness, 4);
 
@@ -347,6 +528,10 @@ void main()
 	vec3 albedo = getAlbedo();
 	vec3 normal = getNormal();
 	
+	
+	  vec3 eye_vec = normalize(camera.position - WSPosition);
+	float ndv = dot(eye_vec, normal);
+  
 	vec3 ecEyeDir = normalize(-VSPosition);
     //direction towards the camera in the world space
     vec3 wcEyeDir = vec3(camera.mInvView * vec4(ecEyeDir, 0.0));
@@ -453,8 +638,10 @@ void main()
 	
 	float shadow = ShadowCalculation(fragPosLightSpace, WSPosition, N);   
 	shadow = min(shadow, 0.15);
-    //color *=  (1.0 - shadow);
-	fragColor = vec4(N, 1.0);
+	//color *=  (1.0 - shadow);
+	
+	fragColor = vec4( ComputeUE4BRDF(albedo, metalness, roughness * roughness, occlusion, nbSamples).rgb,1.0f);
+	//fragColor = vec4(eye_vec, 1.0);
 	
 	
 	

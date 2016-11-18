@@ -71,9 +71,9 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 void initializeScene()
 {
 	shadowTarget = new RenderTarget();
-	GLuint skybox = create_texture("data\\PaperMill\\output_skybox_lat.dds");
-	GLuint radiance = create_texture("data\\PaperMill\\output_pmrem.dds");
-	GLuint irradiance = create_texture("data\\PaperMill\\output_iem.dds");
+	GLuint skybox = create_texture("data\\PaperMill\\PaperMill_E_3k_panorama_radiance.dds");
+	GLuint radiance = create_texture("data\\PaperMill\\PaperMill_E_3k_cube_specular.dds");
+	GLuint irradiance = create_texture("data\\PaperMill\\PaperMill_E_3k_cube_irradiance.dds");
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	//Texture specular = Texture();
