@@ -14,11 +14,11 @@ public:
 
 		glUniform3f(glGetUniformLocation(shader.getProgram(), "uLightPos"), 2.0, 2.0, 2.0);
 
-		GLint d = glGetUniformLocation(shader.getProgram(), "uEnvMap");
+		GLint d = glGetUniformLocation(shader.getProgram(), "skybox");
 
 		glUniform1i(d, 0);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, environment);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, environment);
 
 		glUniform1i(glGetUniformLocation(shader.getProgram(), "uShadowMap"), 1);
 		glActiveTexture(GL_TEXTURE1);

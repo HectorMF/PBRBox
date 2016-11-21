@@ -28,6 +28,9 @@
     <Filter Include="Header Files\Input">
       <UniqueIdentifier>{7f8fcdca-c0ff-4f9b-aaf0-5c09ff11a743}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shaders">
+      <UniqueIdentifier>{d67971bf-7a3d-4083-88f7-1beb46117755}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -151,22 +154,59 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="test.vert">
-      <Filter>Resource Files</Filter>
+    <None Include="..\x64\Release\shaders\Diffuse.frag">
+      <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="test.frag">
-      <Filter>Resource Files</Filter>
+    <None Include="..\x64\Release\shaders\Diffuse.vert">
+      <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\data\IrrigationTool.mtl">
-      <Filter>Resource Files</Filter>
+    <None Include="..\x64\Release\shaders\EnvMap.frag">
+      <Filter>Resource Files\Shaders</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="bunny.obj">
-      <Filter>Resource Files</Filter>
-    </Object>
-    <Object Include="..\x64\Release\data\IrrigationTool.obj">
-      <Filter>Resource Files</Filter>
-    </Object>
+    <None Include="..\x64\Release\shaders\EnvMap.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\ISPBR.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\ISPBR.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Lambert.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Lambert.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Mirror.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Mirror.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\NormalShader.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\NormalShader.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Shadow.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Shadow.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Skybox.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Skybox.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Standard.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Standard.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

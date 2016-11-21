@@ -209,21 +209,26 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\x64\Release\data\IrrigationTool.mtl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    <None Include="..\x64\Release\shaders\Diffuse.frag" />
+    <None Include="..\x64\Release\shaders\Diffuse.vert" />
+    <None Include="..\x64\Release\shaders\EnvMap.frag" />
+    <None Include="..\x64\Release\shaders\EnvMap.vert" />
+    <None Include="..\x64\Release\shaders\ISPBR.frag">
+      <DeploymentContent>false</DeploymentContent>
     </None>
-    <None Include="test.frag">
-      <FileType>Discomap</FileType>
-    </None>
-    <None Include="test.vert" />
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="..\x64\Release\data\IrrigationTool.obj">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </Object>
-    <Object Include="bunny.obj">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </Object>
+    <None Include="..\x64\Release\shaders\ISPBR.vert" />
+    <None Include="..\x64\Release\shaders\Lambert.frag" />
+    <None Include="..\x64\Release\shaders\Lambert.vert" />
+    <None Include="..\x64\Release\shaders\Mirror.frag" />
+    <None Include="..\x64\Release\shaders\Mirror.vert" />
+    <None Include="..\x64\Release\shaders\NormalShader.frag" />
+    <None Include="..\x64\Release\shaders\NormalShader.vert" />
+    <None Include="..\x64\Release\shaders\Shadow.frag" />
+    <None Include="..\x64\Release\shaders\Shadow.vert" />
+    <None Include="..\x64\Release\shaders\Skybox.frag" />
+    <None Include="..\x64\Release\shaders\Skybox.vert" />
+    <None Include="..\x64\Release\shaders\Standard.frag" />
+    <None Include="..\x64\Release\shaders\Standard.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

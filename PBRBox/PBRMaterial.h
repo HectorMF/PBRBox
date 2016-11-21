@@ -50,7 +50,7 @@ public:
 
 	PBRMaterial()
 	{
-		shader = Shader("shaders\\Standard.vert", "shaders\\Standard.frag", false);
+		shader = Shader("shaders\\ISPBR.vert", "shaders\\ISPBR.frag", false);
 		shader.setVersion(330);
 		shader.compile();
 		m_albedo = glm::vec4(1, 1, 1, 1);

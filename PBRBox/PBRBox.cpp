@@ -71,8 +71,8 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 void initializeScene()
 {
 	shadowTarget = new RenderTarget();
-	GLuint skybox = create_texture("data\\PaperMill\\PaperMill_E_3k_panorama_radiance.dds");
-	GLuint radiance = create_texture("data\\PaperMill\\PaperMill_E_3k_cube_specular.dds");
+	GLuint skybox = create_texture("data\\PaperMill\\PaperMill_E_3k_cube_radiance.dds");
+	GLuint radiance = create_texture("data\\PaperMill\\PaperMill_E_3k_cube_radiance.dds");
 	GLuint irradiance = create_texture("data\\PaperMill\\PaperMill_E_3k_cube_irradiance.dds");
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
@@ -116,10 +116,10 @@ void initializeScene()
 	gun1 = new Mesh(*gun, gunMat);
 
 	//gun1->transform = glm::scale(gun1->transform, glm::vec3(.5, .5, .5));
-	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, 2, 0));
+	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, 0, 0));
 	scene.add(gun1);
 
-	Mesh* skyBoxQuad = new Mesh(Shapes::renderQuad(), envMat);
+	Mesh* skyBoxQuad = new Mesh(Shapes::cube(1), envMat);
 	scene.skybox = skyBoxQuad;
 
 
@@ -146,17 +146,18 @@ void initializeScene()
 
 	Geometry sphereMesh = Shapes::sphere(.2);
 
-	for (int x = -5; x <= 5; x++)
+	for (int x = 4; x <= 4; x++)
 	{
-		for (int z = -5; z <= 5; z++)
+		for (int z = -3; z <= 4; z++)
 		{
 
 			PBRMaterial* diffuseMat1 = new PBRMaterial();
 
 			diffuseMat1->m_radianceMap = radiance;
 			diffuseMat1->m_irradianceMap = irradiance;
-			diffuseMat1->setMetalness((x + 5) / 10.0f);
-			diffuseMat1->setRoughness((z + 5)/10.0f);
+			diffuseMat1->setAlbedo(glm::vec4(1, 1, 1, 1));
+			diffuseMat1->setMetalness((x + 3) / 7.0f);
+			diffuseMat1->setRoughness(1-((z + 3) / 7.0f));
 			diffuseMat1->shadowTex = shadowTarget->depthTexture;
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
