@@ -28,16 +28,18 @@ private:
 	Texture m_normalMap;
 	Texture m_roughnessMap;
 	Texture m_metalnessMap;
+	Texture m_ambientOcclusion;
 
 	enum TextureMap
 	{
 		Roughness = 0,
 		Normals = 1,
 		Metalness = 2,
-		Albedo = 3
+		Albedo = 3,
+		AmbientOcclusion = 4
 	};
 	
-	std::bitset<4> m_permutation;
+	std::bitset<5> m_permutation;
 
 	//environment information
 public:
@@ -50,7 +52,7 @@ public:
 
 	PBRMaterial()
 	{
-		shader = Shader("shaders\\ISPBR.vert", "shaders\\ISPBR.frag", false);
+		shader = Shader("shaders\\Standard.vert", "shaders\\Standard.frag", false);
 		shader.setVersion(330);
 		shader.compile();
 		m_albedo = glm::vec4(1, 1, 1, 1);
@@ -73,6 +75,8 @@ public:
 				shader.addFlag("#define USE_METALNESS_MAP");
 			if(m_permutation[TextureMap::Normals])
 				shader.addFlag("#define USE_NORMAL_MAP");
+			if (m_permutation[TextureMap::AmbientOcclusion])
+				shader.addFlag("#define USE_AO_MAP");
 			shader.compile();
 			m_dirty = false;
 		}
@@ -112,6 +116,15 @@ public:
 
 		if (m_permutation[TextureMap::Normals])
 			shader.setUniform("uNormal", m_normalMap);
+
+		if (m_permutation[TextureMap::AmbientOcclusion])
+			shader.setUniform("uAmbientOcclusion", m_ambientOcclusion);
+	}
+
+	void setAmbientOcclusionMap(const Texture& ao)
+	{
+		m_ambientOcclusion = ao;
+		checkBit(TextureMap::AmbientOcclusion, true);
 	}
 
 	void setAlbedo(const glm::vec4& albedo)

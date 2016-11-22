@@ -184,7 +184,18 @@ vec2 envMapEquirect(vec3 wcNormal) {
 	}
 #endif
 
-
+#ifdef USE_AO_MAP
+	uniform sampler2D uAmbientOcclusion;
+	float getAO()
+	{
+		return texture2D(uAmbientOcclusion, fs_in.uv).r;
+	}
+#else
+	float getAO()
+	{
+		return 1;
+	}
+#endif
 
 
 
@@ -468,7 +479,7 @@ vec4 ComputeUE4BRDF(vec3 diffColor, float metallic, float roughness, float occlu
 	 
 	//Blend importance sampled Irradiance with Uniform distribution Irradiance when roughness --> 1 
 	float mip = getMipFB3( roughness, vdh, ndh, SamplesNum);	
-	vec3 irr = textureLod(uRadianceMap, Ln, 0).rgb;
+	vec3 irr = textureLod(uRadianceMap, Ln, mip).rgb;
 	vec3 specularIrradiance = mix3(irr, diffuseIrradiance, lerp2uniform);
 	contribS +=  specularIrradiance * F_Schlick(specColor, vdh ) * clamp(Vis_SmithJointApprox( roughness, ndv, ndl ) * PDF * ndl ,0,1);
   }
@@ -518,12 +529,12 @@ void main()
 
 
 	float roughness = getRoughness();
-	float occlusion = 1;
-	int nbSamples = 1;
+	float occlusion = getAO();
+	int nbSamples = 32;
 	float roughness2 = pow(roughness, 2.2);
 	float roughness4 = pow(roughness, 4);
 
-	float metalness = pow(getMetalness(),2.2);
+	float metalness = getMetalness();
 	
 	vec3 albedo = getAlbedo();
 	vec3 normal = getNormal();

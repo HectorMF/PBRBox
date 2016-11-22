@@ -70,6 +70,8 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 
 void initializeScene()
 {
+
+	glEnable(GL_FRAMEBUFFER_SRGB);
 	shadowTarget = new RenderTarget();
 	GLuint skybox = create_texture("data\\PaperMill\\PaperMill_E_3k_cube_radiance.dds");
 	GLuint radiance = create_texture("data\\PaperMill\\PaperMill_E_3k_cube_radiance.dds");
@@ -98,7 +100,7 @@ void initializeScene()
 	gunMat->setAlbedoMap(Texture("data\\cerberus\\Cerberus_A.png"));
 	gunMat->setMetalnessMap(Texture("data\\cerberus\\Cerberus_M.jpg"));
 	gunMat->setRoughnessMap(Texture("data\\cerberus\\Cerberus_R.jpg"));
-	gunMat->setNormalMap(Texture("data\\cerberus\\Cerberus_N.jpg"));
+	gunMat->setNormalMap(Texture("data\\cerberus\\Cerberus_N.jpg", ColorSpace::Linear));
 
 	gunMat->m_radianceMap = radiance;
 	gunMat->m_irradianceMap = irradiance;
@@ -116,7 +118,7 @@ void initializeScene()
 	gun1 = new Mesh(*gun, gunMat);
 
 	//gun1->transform = glm::scale(gun1->transform, glm::vec3(.5, .5, .5));
-	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, 0, 0));
+	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, .5, 0));
 	scene.add(gun1);
 
 	Mesh* skyBoxQuad = new Mesh(Shapes::cube(1), envMat);
@@ -129,13 +131,14 @@ void initializeScene()
 
 	diffuseMat->m_radianceMap = radiance;
 	diffuseMat->m_irradianceMap = irradiance;
-	diffuseMat->setAlbedoMap(Texture("data\\iron\\basecolor.png"));
-	diffuseMat->setMetalnessMap(Texture("data\\iron\\metallic.png"));
-	diffuseMat->setRoughnessMap(Texture("data\\iron\\roughness.png"));
-	diffuseMat->setNormalMap(Texture("data\\iron\\normal.png"));
+	diffuseMat->setAlbedoMap(Texture("data\\wornPaint\\albedo.png"));
+	diffuseMat->setMetalnessMap(Texture("data\\wornPaint\\metalness.png"));
+	diffuseMat->setRoughnessMap(Texture("data\\wornPaint\\roughness.png"));
+	diffuseMat->setAmbientOcclusionMap(Texture("data\\wornPaint\\ao.png"));
+	diffuseMat->setNormalMap(Texture("data\\wornPaint\\normal.png", ColorSpace::Linear));
 	diffuseMat->shadowTex = shadowTarget->depthTexture;
 
-	Mesh* groundPlane = new Mesh(Shapes::plane(7, 7), diffuseMat);
+	Mesh* groundPlane = new Mesh(Shapes::sphere(.5), diffuseMat);
 	scene.add(groundPlane);
 
 

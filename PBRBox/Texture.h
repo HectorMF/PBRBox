@@ -3,24 +3,55 @@
 #include <string>
 #include <GL/glew.h>
 
+enum class ColorSpace { Gamma, Linear };
 class Texture
 {
 public:
 	unsigned int id;
 	operator unsigned int() const { return id; }
-	
+
 	Texture(){}
-	Texture(std::string file)
+	Texture(std::string file, ColorSpace space = ColorSpace::Gamma)
 	{
 		int width, height, bpp;
 		unsigned char* image = stbi_load(file.c_str(), &width, &height, &bpp, 4);
 
 		glGenTextures(1, &id); /* Texture name generation */
 		glBindTexture(GL_TEXTURE_2D, id); /* Binding of texture name */
+		
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear interpolation for magnification filter */
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); /* We will use linear interpolation for minifying filter */
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image); /* Texture specification */
+		if (space == ColorSpace::Gamma)
+		{
+					glGenerateMipmap(GL_TEXTURE_2D);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear interpolation for magnification filter */
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); /* We will use linear interpolation for minifying filter */
+	
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}/* Texture specification */
+		if (space == ColorSpace::Linear)
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image); /* Texture specification */
+
+		float aniso;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+	//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+
+
+		//printf("Anisotropy %f\n", aniso);
+		//aniso = 1.0f;
+		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+		//float aniso = 4.0f;
+		//glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+		//glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+		//printf("Anisotropy %f\n", aniso);
+		//BGFX_TEXTURE_MIN_ANISOTROPIC | BGFX_TEXTURE_MAG_ANISOTROPIC | BGFX_TEXTURE_U_CLAMP | BGFX_TEXTURE_V_CLAMP,
+
 
 		stbi_image_free(image);
 	}

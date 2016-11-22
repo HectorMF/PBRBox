@@ -87,7 +87,7 @@ GLuint create_texture(char const* Filename)
 
 		val = (Texture.target() == gli::TARGET_2D) ? Extent.y : FaceTotal;
 		glTexStorage2D(
-			Target, static_cast<GLint>(Texture.levels()), Format.Internal,
+			Target, static_cast<GLint>(Texture.levels()), GL_SRGB8,
 			Extent.x, Extent.y);
 		break;
 	case gli::TARGET_2D_ARRAY:

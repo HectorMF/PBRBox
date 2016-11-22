@@ -17,9 +17,6 @@ in vec3 WSPosition;
 in vec3 WSNormal;
 in vec3 EyePosition;
 
-
-
-
 #define saturate(x) clamp(x, 0.0, 1.0)
 
 in V2F
@@ -65,7 +62,7 @@ uniform samplerCube uIrradianceMap;
 	uniform sampler2D uRoughness;
 	float getRoughness() 
 	{
-		return pow(texture2D(uRoughness, fs_in.uv).r,2.2);
+		return texture2D(uRoughness, fs_in.uv).r;
 	}
 #else
 	uniform float uRoughness;
@@ -78,7 +75,7 @@ uniform samplerCube uIrradianceMap;
 #ifdef USE_METALNESS_MAP
 	uniform sampler2D uMetalness;
 	float getMetalness() {
-		return pow(texture2D(uMetalness, fs_in.uv).r,2.2);
+		return texture2D(uMetalness, fs_in.uv).r;
 	}
 #else
 	uniform float uMetalness;
@@ -107,6 +104,19 @@ uniform samplerCube uIrradianceMap;
 #else
 	vec3 getNormal() {
 		return normalize(WSNormal);
+	}
+#endif
+
+#ifdef USE_AO_MAP
+	uniform sampler2D uAmbientOcclusion;
+	float getAO()
+	{
+		return texture2D(uAmbientOcclusion, fs_in.uv).r;
+	}
+#else
+	float getAO()
+	{
+		return 1;
 	}
 #endif
 
@@ -154,15 +164,15 @@ vec3 ImportanceSampleGGX(vec2 Xi, float Roughness, vec3 N )
 	return TangentX * H.x + TangentY * H.y + N * H.z;
 }
 
-vec3 SpecularIBL(vec3 SpecularColor, float Roughness, vec3 N, vec3 V )
+vec3 SpecularIBL(vec3 specularColor, float roughness, float occlusion, vec3 N, vec3 V )
 {
 	vec3 SpecularLighting = vec3(0);
-	uint NumSamples = uint(32);
+	uint NumSamples = uint(512);
 
 	for(uint i = uint(0); i < NumSamples; i++ )
 	{
 		vec2 Xi = Hammersley( i, NumSamples );
-		vec3 H = ImportanceSampleGGX( Xi, Roughness, N );
+		vec3 H = ImportanceSampleGGX( Xi, roughness, N );
 		vec3 L = 2 * dot( V, H ) * H - V;
 		float NoV = saturate( dot( N, V ) );
 		float NoL = saturate( dot( N, L ) );
@@ -171,29 +181,32 @@ vec3 SpecularIBL(vec3 SpecularColor, float Roughness, vec3 N, vec3 V )
 		if( NoL > 0 )
 		{
 			vec3 SampleColor = textureLod(uRadianceMap, L, 0).rgb;
-			float G = G_Smith( Roughness, NoV, NoL );
+			float G = G_Smith( roughness, NoV, NoL );
 			float Fc = pow( 1 - VoH, 5 );
-			vec3 F = (1 - Fc) * SpecularColor + Fc;
+			vec3 F = (1 - Fc) * specularColor + Fc;
 			// Incident light = SampleColor * NoL
 			// Microfacet specular = D*G*F / (4*NoL*NoV)
 			// pdf = D * NoH / (4 * VoH)
 			SpecularLighting += SampleColor * F * G * VoH / (NoH * NoV);
 		}
 	}
-	return SpecularLighting / NumSamples;
+
+	SpecularLighting *= mix(occlusion, 1.0, roughness) / NumSamples;
+
+	return SpecularLighting;
 }
 
 void main() 
 {
 	float roughness = getRoughness();
-	float occlusion = 1;
+	float ao = getAO();
 	int nbSamples = 32;
 	float roughness2 = pow(roughness, 2);
 	float roughness4 = pow(roughness, 4);
 
 	float metalness = getMetalness();
 	
-	vec3 albedo = pow(getAlbedo(),vec3(2.2));
+	vec3 albedo = getAlbedo();
 	vec3 normal = getNormal();
 	
 	
@@ -221,10 +234,10 @@ void main()
 	
 	vec3 irradiance = texture(uIrradianceMap, N).rgb;
 	
-	vec3 diffuse  		= diffuseColor * irradiance;
-    vec3 specular 		= SpecularIBL(specularColor, roughness, N, V );
+	vec3 diffuse  		= ao * diffuseColor * irradiance;
+    vec3 specular 		= SpecularIBL(specularColor, roughness, ao, N, V );
 	vec3 color			= diffuse + specular;
 
-	color = pow(color, vec3(1/2.2));
+	//color = pow(color, vec3(1/2.2));
 	fragColor = vec4(color ,1.0f);
 }
