@@ -4,7 +4,7 @@
 
 InteractiveCamera::InteractiveCamera()
 {
-	centerPosition = glm::vec3(0, .1f, 0);
+	centerPosition = glm::vec3(0, 0, 0);
 	yaw = 0;
 	pitch = 0.3;
 	radius = .5f;

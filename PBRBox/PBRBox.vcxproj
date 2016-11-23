@@ -213,6 +213,8 @@
     <None Include="..\x64\Release\shaders\Diffuse.vert" />
     <None Include="..\x64\Release\shaders\EnvMap.frag" />
     <None Include="..\x64\Release\shaders\EnvMap.vert" />
+    <None Include="..\x64\Release\shaders\FB3PBR.frag" />
+    <None Include="..\x64\Release\shaders\FB3PBR.vert" />
     <None Include="..\x64\Release\shaders\ISPBR.frag">
       <DeploymentContent>false</DeploymentContent>
     </None>

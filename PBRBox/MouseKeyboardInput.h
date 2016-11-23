@@ -14,6 +14,7 @@ void initCamera()
 
 	interactiveCamera->setResolution(scrwidth, scrheight);
 	interactiveCamera->setFOVX(45);
+	interactiveCamera->changeRadius(5);
 }
 
 // mouse event handlers

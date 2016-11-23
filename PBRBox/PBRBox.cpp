@@ -118,7 +118,7 @@ void initializeScene()
 	gun1 = new Mesh(*gun, gunMat);
 
 	//gun1->transform = glm::scale(gun1->transform, glm::vec3(.5, .5, .5));
-	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, .5, 0));
+	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, 1, 0));
 	scene.add(gun1);
 
 	Mesh* skyBoxQuad = new Mesh(Shapes::cube(1), envMat);
@@ -160,7 +160,7 @@ void initializeScene()
 			diffuseMat1->m_irradianceMap = irradiance;
 			diffuseMat1->setAlbedo(glm::vec4(1, 1, 1, 1));
 			diffuseMat1->setMetalness((x + 3) / 7.0f);
-			diffuseMat1->setRoughness(1-((z + 3) / 7.0f));
+			diffuseMat1->setRoughness((z + 3) / 7.0f);
 			diffuseMat1->shadowTex = shadowTarget->depthTexture;
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));

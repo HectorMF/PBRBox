@@ -208,5 +208,11 @@
     <None Include="..\x64\Release\shaders\Standard.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="..\x64\Release\shaders\FB3PBR.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\FB3PBR.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
