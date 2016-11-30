@@ -3,6 +3,7 @@ layout (location = 1) in vec3 normal;
 layout (location = 2) in vec3 tangent;
 layout (location = 3) in vec3 bitangent;
 layout (location = 4) in vec2 uv;
+layout (location = 5) in vec4 color;
 
 out V2F
 {
@@ -11,6 +12,7 @@ out V2F
 	vec3 tangent;
 	vec3 bitangent;
     vec2 uv;
+	vec4 color;
 } vs_out;
 
 
@@ -75,6 +77,7 @@ void main()
 	vs_out.normal = normalize(normal);
 	vs_out.tangent = normalize(tangent);
 	vs_out.bitangent = normalize(bitangent);
+	vs_out.color = color;
 	vs_out.uv = uv;
 	
 	fragPosLightSpace = lightSpaceMatrix * camera.mModel * vec4(position, 1.0);

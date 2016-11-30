@@ -30,6 +30,7 @@ in V2F
 	vec3 tangent;
 	vec3 bitangent;
     vec2 uv;
+	vec4 color;
 } fs_in;
 
 
@@ -59,7 +60,7 @@ uniform sampler2D uIntegrateBRDF;
 	uniform vec4 uAlbedo; 
 	vec3 getAlbedo() 
 	{
-		return uAlbedo.rgb;
+		return fs_in.color.rgb;//uAlbedo.rgb;
 	}
 #endif
 
@@ -214,7 +215,7 @@ vec3 approximateSpecularIBL( const in vec3 specularColor,
     // so roughness = linRoughness * linRoughness
     vec3 dominantR = getSpecularDominantDir( N, R, roughnessLinear*roughnessLinear );
 
-    vec3 dir = ( vec4(dominantR,0)).rgb;
+    vec3 dir = ( vec4(dominantR, 0)).rgb;
     vec3 prefilteredColor = prefilterEnvMap( roughnessLinear, dir );
 
 
@@ -305,5 +306,5 @@ void main()
 	//color = pow(color, vec3(1/2.2));
 
 
-	fragColor =vec4(computeIBL_UE4(N, V, diffuseColor, roughness, specularColor) ,1.0f);// vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb,1.0);
+	fragColor = vec4(computeIBL_UE4(N, V, diffuseColor, roughness, specularColor), 1.0f);// vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb,1.0);
 }

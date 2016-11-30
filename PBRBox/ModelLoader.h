@@ -20,7 +20,7 @@ protected:
 	void ModelLoader::processHierarchy(aiNode* node, ModelNode* targetParent, glm::mat4 accTransform);
 	//ModelNode* ModelLoader::processHierarchy(aiNode* node, ModelNode* parent, const aiScene* scene);
 
-	Geometry* processMesh(aiMesh* mesh, const aiScene* scene);
+	Geometry processMesh(aiMesh* mesh, const aiScene* scene);
 
 	void ModelLoader::getMaterialOfType(std::map<aiTextureType, std::tuple<std::string, std::string>>& textures, aiMaterial* mat, aiTextureType type, std::string typeName);
 };

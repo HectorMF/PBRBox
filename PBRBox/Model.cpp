@@ -15,15 +15,13 @@ void Model::render()
 	renderNode(m_hierarchy, m_hierarchy->m_transform);
 }
 
-
 void Model::renderNode(const ModelNode* node, glm::mat4 transform)
 {
 	//transform *= node->M_transform;
 	glm::mat4 trans = transform * node->m_transform;
 	for (int i = 0; i < node->getNumMeshes(); i++)
 	{
-		Geometry* mesh = m_meshes[node->m_meshes[i]];
-
+		Geometry mesh = m_meshes[node->m_meshes[i]];
 		
 		//glUniformMatrix4fv(glGetUniformLocation(mesh->m_material.shader, "camera.mModel"), 1, GL_FALSE, glm::value_ptr(trans));
 		//mesh->transform = trans;

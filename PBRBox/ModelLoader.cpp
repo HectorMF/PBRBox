@@ -97,15 +97,9 @@ void ModelLoader::processHierarchy(aiNode* node, ModelNode* targetParent, glm::m
 	return mNode;
 }*/
 
-Geometry* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
+Geometry ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
 {
-	// Data to fill
-	std::vector<unsigned int> indices;
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3> normals;
-	std::vector<glm::vec3> tangents;
-	std::vector<glm::vec3> bitangents;
-	std::vector<glm::vec2> texCoords;
+	Geometry geometry;
 
 	glm::vec3 mins(FLT_MAX, FLT_MAX, FLT_MAX);
 	glm::vec3 maxes(FLT_MIN, FLT_MIN, FLT_MIN);
@@ -115,22 +109,21 @@ Geometry* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
 	// Walk through each of the mesh's vertices
 	for (int i = 0; i < mesh->mNumVertices; i++)
 	{
-		glm::vec3 vertex(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-		glm::vec3 normal(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-		glm::vec2 texCoord(0);
+		Vertex vertex;
+		vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+		vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+		vertex.tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+		vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+		vertex.texCoord = glm::vec2(0);
 
 		//a complex mesh can can have multiple tex coords per vertex, we don't handle that
 		if (mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
-			texCoord = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+			vertex.texCoord = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+		
+		mins = glm::min(vertex.position, mins);
+		maxes = glm::max(vertex.position, maxes);
 
-		mins = glm::min(vertex, mins);
-		maxes = glm::max(vertex, maxes);
-
-		vertices.push_back(vertex);
-		normals.push_back(normal);
-		tangents.push_back({ mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z });
-		bitangents.push_back({ mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z });
-		texCoords.push_back(texCoord);
+		geometry.addVertex(vertex);
 	}
 
 	// Now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
@@ -138,8 +131,8 @@ Geometry* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		aiFace face = mesh->mFaces[i];
 		// Retrieve all indices of the face and store them in the indices vector
-		for (int j = 0; j < face.mNumIndices; j++)
-			indices.push_back(face.mIndices[j]);
+		//for (int j = 0; j < face.mNumIndices; j++)
+		geometry.addTriangle(glm::uvec3(face.mIndices[0], face.mIndices[1], face.mIndices[2]));
 	}
 
 	aiString name;
@@ -154,14 +147,6 @@ Geometry* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
 		getMaterialOfType(textures, material, aiTextureType_SPECULAR, "SpecularTex");
 		getMaterialOfType(textures, material, aiTextureType_SPECULAR, "DiffuseTex");
 	}
-
-	Geometry* geometry = new Geometry();
-	geometry->setIndices(indices);
-	geometry->setVertices(vertices);
-	geometry->setNormals(normals);
-	geometry->setTangents(tangents);
-	geometry->setBitangents(bitangents);
-	geometry->setTexCoords(texCoords);
 
 	//m->m_boundingBox = gb::AABox3f(mins.x, mins.y, mins.z, maxes.x - mins.x, maxes.y - mins.y, maxes.z - mins.z);
 	//m->m_material_name = name.C_Str();

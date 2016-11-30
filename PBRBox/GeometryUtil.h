@@ -8,7 +8,7 @@ namespace Shapes
 	Geometry renderQuad()
 	{
 		Geometry g;
-		g.setVertices({ { 1, 1, 0 },{ -1, 1, 0 },{ 1, -1, 0 },{ -1, -1, 0 } });
+		g.setPositions({ { 1, 1, 0 },{ -1, 1, 0 },{ 1, -1, 0 },{ -1, -1, 0 } });
 		g.setIndices({ 0, 1, 2, 1, 2, 3 });
 		g.setNormals({ { 0, 0, 1 },{ 0, 0, 1 },{ 0, 0, 1 },{ 0, 0, 1 } });
 		g.setTexCoords({ { 1, 1 },{ 0, 1 },{ 1, 0 },{ 0, 0 } });
@@ -39,9 +39,11 @@ namespace Shapes
 			{
 				float x = ix * segment_width - width_half;
 
-				plane.addVertex(glm::vec3(x, 0, -y));
-				plane.addNormal(glm::vec3(0, 1, 0));
-				plane.addUV(glm::vec2(ix / gridX, 1 - (iy / gridY)));
+				Vertex v;
+				v.position = glm::vec3(x, 0, -y);
+				v.normal = glm::vec3(0, 1, 0);
+				v.texCoord = glm::vec2(ix / gridX, 1 - (iy / gridY));
+				plane.addVertex(v);
 			}
 		}
 
@@ -64,10 +66,7 @@ namespace Shapes
 
 	Geometry sphere(float radius, int segments = 32)
 	{
-		std::vector<glm::vec3> vertices;
-		std::vector<glm::vec3> normals;
-		std::vector<glm::vec2> uvs;
-		std::vector<unsigned int> indices;
+		Geometry sphere;
 
 		glm::mat4 identity;
 
@@ -91,28 +90,24 @@ namespace Shapes
 				temp = matRotY * temp;
 				temp *= -radius;
 
-				vertices.push_back(temp);
-				normals.push_back(glm::normalize(temp));
-				uvs.push_back(glm::vec2(normalizedY, 1 - normalizedZ));
+				Vertex v;
+				v.position = temp;
+				v.normal= glm::normalize(temp);
+				v.texCoord = glm::vec2(normalizedY, 1 - normalizedZ);
+				sphere.addVertex(v);
 			}
 
 			if (zRotationStep > 0)
 			{
-				int verticesCount = vertices.size();
+				int verticesCount = sphere.getNumVertices();
 				unsigned int firstIndex = verticesCount - 2 * (totalYRotationSteps + 1);
 				for (; (firstIndex + totalYRotationSteps + 2) < verticesCount; firstIndex++)
 				{
-					indices.insert(indices.end(), { firstIndex, firstIndex + 1, firstIndex + totalYRotationSteps + 1 });
-					indices.insert(indices.end(), { firstIndex + totalYRotationSteps + 1, firstIndex + 1, firstIndex + totalYRotationSteps + 2 });
+					sphere.addTriangle({ firstIndex, firstIndex + 1, firstIndex + totalYRotationSteps + 1 });
+					sphere.addTriangle({ firstIndex + totalYRotationSteps + 1, firstIndex + 1, firstIndex + totalYRotationSteps + 2 });
 				}
 			}
 		}
-
-		Geometry sphere;
-		sphere.setVertices(vertices);
-		sphere.setNormals(normals);
-		sphere.setTexCoords(uvs);
-		sphere.setIndices(indices);
 		return sphere;
 	}
 
@@ -169,7 +164,7 @@ namespace Shapes
 		uvs.insert(uvs.end(), { { 1, 1 },{ 0, 1 },{ 1, 0 },{ 0, 0 } });
 
 		Geometry g;
-		g.setVertices(vertices);
+		g.setPositions(vertices);
 		g.setNormals(normals);
 		g.setTexCoords(uvs);
 		g.setIndices(indices);
@@ -194,7 +189,7 @@ namespace Shapes
 	Geometry skybox()
 	{
 		Geometry g;
-		g.addVertex({ -1.0f, 1.0f, -1.0f });
+	/*	g.addVertex({ -1.0f, 1.0f, -1.0f });
 		g.addVertex({ -1.0f, -1.0f, -1.0f });
 		g.addVertex({ 1.0f, -1.0f, -1.0f });
 		g.addVertex({ 1.0f, -1.0f, -1.0f });
@@ -235,7 +230,7 @@ namespace Shapes
 		g.addVertex({ 1.0f, -1.0f, -1.0f });
 		g.addVertex({ -1.0f, -1.0f,  1.0f });
 		g.addVertex({ 1.0f, -1.0f,  1.0f });
-
+		*/
 		//g.setVertices(skyboxVertices);
 		//g.setNormals(normals);
 		//g.setUVs(uvs);

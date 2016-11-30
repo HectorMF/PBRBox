@@ -25,7 +25,7 @@ public:
 
 	void render();
 	void renderNode(const ModelNode* node, glm::mat4 transform);
-	const std::vector<Geometry*>& getMeshes() const { return m_meshes; }
+	const std::vector<Geometry>& getMeshes() const { return m_meshes; }
 
 	const ModelNode* getHierarchy() const { return m_hierarchy; }
 	ModelNode* copyHierarchy() const { return m_hierarchy->copyNode(nullptr); }
@@ -34,6 +34,6 @@ public:
 //protected:
 	//gb::AABox3f m_AABB;
 	std::string m_fileName;
-	std::vector<Geometry*> m_meshes;
+	std::vector<Geometry> m_meshes;
 	ModelNode* m_hierarchy;
 };

@@ -113,9 +113,9 @@ void initializeScene()
 	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
 	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
 	
-	Geometry* gun = model->m_meshes[0];
+	Geometry gun = model->m_meshes[0];
 
-	gun1 = new Mesh(*gun, gunMat);
+	gun1 = new Mesh(gun, gunMat);
 
 	//gun1->transform = glm::scale(gun1->transform, glm::vec3(.5, .5, .5));
 	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, 1, 0));
@@ -123,9 +123,6 @@ void initializeScene()
 
 	Mesh* skyBoxQuad = new Mesh(Shapes::cube(1), envMat);
 	scene.skybox = skyBoxQuad;
-
-
-
 
 	PBRMaterial* diffuseMat = new PBRMaterial();
 
@@ -149,7 +146,7 @@ void initializeScene()
 
 	Geometry sphereMesh = Shapes::sphere(.2);
 
-	for (int x = 4; x <= 4; x++)
+	for (int x = -3; x <= 4; x++)
 	{
 		for (int z = -3; z <= 4; z++)
 		{
@@ -170,8 +167,8 @@ void initializeScene()
 
 	Geometry lightMesh = Shapes::sphere(.4);
 	Mesh* light = new Mesh(lightMesh, mirrorMat);
-	light->transform = glm::translate(light->transform, glm::vec3(0,2,0));
-	//scene.add(light);
+	light->transform = glm::translate(light->transform, glm::vec3(0, 2, 0));
+	//scene.add(light); 
 	
 	renderer = new Renderer();
 	renderer->clearColor = glm::vec4(1, 0, 1, 1);

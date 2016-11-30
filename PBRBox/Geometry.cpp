@@ -1,5 +1,11 @@
 #include "Geometry.h"
-
+#include <random>
+float get_random()
+{
+	static std::default_random_engine e;
+	static std::uniform_real_distribution<> dis(0, 1); // rage 0 - 1
+	return dis(e);
+}
 Geometry::Geometry() {}
 
 Geometry::~Geometry()
@@ -16,7 +22,7 @@ unsigned int Geometry::getNumIndices() const
 
 unsigned int Geometry::getNumVertices() const
 {
-	return m_vertices.size();
+	return m_positions.size();
 }
 
 const std::vector<unsigned int>& Geometry::getIndices() const
@@ -24,9 +30,9 @@ const std::vector<unsigned int>& Geometry::getIndices() const
 	return m_indices;
 }
 
-const std::vector<glm::vec3>& Geometry::getVertices() const
+const std::vector<glm::vec3>& Geometry::getPositions() const
 {
-	return m_vertices;
+	return m_positions;
 }
 
 const std::vector<glm::vec3>& Geometry::getNormals() const
@@ -49,14 +55,19 @@ const std::vector<glm::vec2>& Geometry::getTexCoords() const
 	return m_texCoords;
 }
 
+const std::vector<glm::vec4>& Geometry::getColors() const
+{
+	return m_colors;
+}
+
 void Geometry::setIndices(std::vector<unsigned int> indices)
 {
 	m_indices = indices;
 }
 
-void Geometry::setVertices(std::vector<glm::vec3> vertices)
+void Geometry::setPositions(std::vector<glm::vec3> positions)
 {
-	m_vertices = vertices;
+	m_positions = positions;
 }
 
 void Geometry::setNormals(std::vector<glm::vec3> normals)
@@ -79,6 +90,11 @@ void Geometry::setTexCoords(std::vector<glm::vec2> uvs)
 	m_texCoords = uvs;
 }
 
+void Geometry::setColors(std::vector<glm::vec4> colors)
+{
+	m_colors = colors;
+}
+
 void Geometry::addTriangle(glm::uvec3 triangle)
 {
 	m_indices.push_back(triangle.x);
@@ -97,20 +113,7 @@ void Geometry::addQuad(glm::uvec4 quad)
 	m_indices.push_back(quad.w);
 }
 
-void Geometry::addVertex(glm::vec3 vertex)
-{
-	m_vertices.push_back(vertex);
-}
 
-void Geometry::addNormal(glm::vec3 normal)
-{
-	m_normals.push_back(normal);
-}
-
-void Geometry::addUV(glm::vec2 uv)
-{
-	m_texCoords.push_back(uv);
-}
 
 unsigned int Geometry::getVAO() const
 {
@@ -123,16 +126,9 @@ void Geometry::uploadToGPU()
 	//initialized = true;
 	//the VBO contains interleaved vertex data for better data locality? research seems to indicate that this could be pointless
 	//To do: make sure we dont need to align this for better speed
-	struct PackedVertex
-	{
-		glm::vec3 position;
-		glm::vec3 normal;
-		glm::vec3 tangent;
-		glm::vec3 bitangent;
-		glm::vec2 texCoord;
-	};
 
-	std::vector<PackedVertex> gpuVertices; 
+
+	std::vector<Vertex> gpuVertices;
 
 	if (m_normals.size() < getNumVertices())
 		computeNormals();
@@ -140,15 +136,23 @@ void Geometry::uploadToGPU()
 		computeTangents();
 	if(m_texCoords.size() < getNumVertices())
 		m_texCoords.resize(getNumVertices());
-
+	if (m_colors.size() < getNumVertices())
+	{
+		m_colors.clear();
+		for (int i = 0; i < getNumVertices(); i++)
+			m_colors.push_back(glm::vec4(get_random(), get_random(), get_random(),1));
+		//m_colors.resize(getNumVertices());
+	}
+		
 	for (int i = 0; i < getNumVertices(); i++)
 	{
-		PackedVertex vertex;
-		vertex.position = m_vertices[i];
+		Vertex vertex;
+		vertex.position = m_positions[i];
 		vertex.normal = m_normals[i];
 		vertex.tangent = m_tangents[i];
 		vertex.bitangent = m_bitangents[i];
 		vertex.texCoord = m_texCoords[i];
+		vertex.color = m_colors[i];
 		gpuVertices.push_back(vertex);
 	}
 
@@ -159,7 +163,7 @@ void Geometry::uploadToGPU()
 	glBindVertexArray(m_VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, getNumVertices() * sizeof(PackedVertex), &gpuVertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, getNumVertices() * sizeof(Vertex), &gpuVertices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, getNumIndices() * sizeof(GLuint), &getIndices()[0], GL_STATIC_DRAW);
@@ -167,23 +171,27 @@ void Geometry::uploadToGPU()
 	/* this is where we designate how to split the intereleaved data */
 	//Positions
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(PackedVertex), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
 
 	//Normals
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(PackedVertex), (GLvoid*)offsetof(PackedVertex, normal));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
 
 	//Tangent
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(PackedVertex), (GLvoid*)offsetof(PackedVertex, tangent));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, tangent));
 
 	//Bitangent
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(PackedVertex), (GLvoid*)offsetof(PackedVertex, bitangent));
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, bitangent));
 
 	//Texture Coords
 	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(PackedVertex), (GLvoid*)offsetof(PackedVertex, texCoord));
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, texCoord));
+
+	//Texture Coords
+	glEnableVertexAttribArray(5);
+	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, color));
 
 
 	glBindVertexArray(0);
@@ -205,9 +213,9 @@ void Geometry::computeTangents()
 		unsigned int i3 = m_indices[triangleOffset + 2];
 
 		// Shortcuts for vertices
-		glm::vec3 & v1 = m_vertices[i1];
-		glm::vec3 & v2 = m_vertices[i2];
-		glm::vec3 & v3 = m_vertices[i3];
+		glm::vec3 & v1 = m_positions[i1];
+		glm::vec3 & v2 = m_positions[i2];
+		glm::vec3 & v3 = m_positions[i3];
 
 		// Shortcuts for UVs
 		glm::vec2 & w1 = m_texCoords[i1];
@@ -250,7 +258,7 @@ void Geometry::computeTangents()
 		triangleOffset += 3;
 	}
 
-	for (int v = 0; v < m_vertices.size(); v++)
+	for (int v = 0; v < m_positions.size(); v++)
 	{
 		glm::vec3 n = m_normals[v];
 		glm::vec3 t = m_tangents[v];
@@ -282,9 +290,9 @@ void Geometry::computeNormals()
 		unsigned int i2 = m_indices[triangleOffset + 1];
 		unsigned int i3 = m_indices[triangleOffset + 2];
 
-		glm::vec3 v1 = m_vertices[i1];
-		glm::vec3 v2 = m_vertices[i2];
-		glm::vec3 v3 = m_vertices[i3];
+		glm::vec3 v1 = m_positions[i1];
+		glm::vec3 v2 = m_positions[i2];
+		glm::vec3 v3 = m_positions[i3];
 
 		glm::vec3 u = v2 - v1;
 		glm::vec3 v = v3 - v1;
