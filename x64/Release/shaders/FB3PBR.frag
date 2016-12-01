@@ -3,7 +3,7 @@ const float PI = 3.14159265;
 const float TwoPI = 6.28318530718;
 
 float uBrightness = 1;
-int maxLOD = 7; 
+int maxLOD = 8; 
 
 out vec4 fragColor;
 
@@ -48,6 +48,8 @@ struct Camera
 uniform Camera camera;
 uniform samplerCube uRadianceMap;
 uniform samplerCube uIrradianceMap;
+uniform samplerCube uSpecularMap;
+
 uniform sampler2D uIntegrateBRDF;
 
 #ifdef USE_ALBEDO_MAP
@@ -60,7 +62,7 @@ uniform sampler2D uIntegrateBRDF;
 	uniform vec4 uAlbedo; 
 	vec3 getAlbedo() 
 	{
-		return fs_in.color.rgb;//uAlbedo.rgb;
+		return uAlbedo.rgb;
 	}
 #endif
 
@@ -126,6 +128,60 @@ uniform sampler2D uIntegrateBRDF;
 	}
 #endif
 
+#ifdef USE_VERTEX_COLORS
+	vec3 getVertexColor()
+	{
+		return fs_in.color.rgb;
+	}
+#else
+	vec3 getVertexColor()
+	{
+		return vec3(1,1,1);
+	}
+#endif
+
+
+uniform sampler2D uShadowMap;
+
+
+
+float ShadowCalculation(vec4 fragPosLightSpace, vec3 wcPosition, vec3 wcNormal)
+{
+  // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // Transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(uShadowMap, projCoords.xy).r; 
+    // Get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // Calculate bias (based on depth map resolution and slope)
+ 
+    vec3 lightDir = normalize(lightPos - wcPosition);
+    float bias = max(0.01 * (1.0 - dot(wcNormal, lightDir)), 0.005);
+    // Check whether current frag pos is in shadow
+    // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+    // PCF
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(uShadowMap, 0);
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(uShadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
+        }    
+    }
+    shadow /= 9.0;
+    
+    // Keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
+    if(projCoords.z > 1.0)
+        shadow = 0.0;
+        
+    return shadow;
+}
+
+
 
 vec3 cubemapSeamlessFixDirection(const in vec3 direction, const in float scale )
 {
@@ -171,7 +227,7 @@ float linRoughnessToMipmap( float roughnessLinear )
 vec3 prefilterEnvMap( float roughnessLinear, const in vec3 R )
 {
     float lod = linRoughnessToMipmap(roughnessLinear) * maxLOD; //( uEnvironmentMaxLod - 1.0 );
-    return textureLod(uRadianceMap, R, lod).rgb;//textureCubeLodEXTFixed( uRadianceMap, R, lod );
+    return textureLod(uSpecularMap, R, lod).rgb;//textureCubeLodEXTFixed( uRadianceMap, R, lod );
 }
 
 vec3 getSpecularDominantDir( const in vec3 N, const in vec3 R, const in float realRoughness ) {
@@ -305,6 +361,8 @@ void main()
 
 	//color = pow(color, vec3(1/2.2));
 
-
+	float shadow = ShadowCalculation(fragPosLightSpace, WSPosition, N);   
+	shadow = min(shadow, 0.35);
+	//color *=  (1.0 - shadow);
 	fragColor = vec4(computeIBL_UE4(N, V, diffuseColor, roughness, specularColor), 1.0f);// vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb,1.0);
 }

@@ -132,7 +132,7 @@ void Geometry::uploadToGPU()
 
 	if (m_normals.size() < getNumVertices())
 		computeNormals();
-	if (m_tangents.size() < getNumVertices())
+	//if (m_tangents.size() < getNumVertices())
 		computeTangents();
 	if(m_texCoords.size() < getNumVertices())
 		m_texCoords.resize(getNumVertices());

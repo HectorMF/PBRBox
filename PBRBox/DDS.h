@@ -52,6 +52,11 @@ GLuint create_texture(char const* Filename)
 
 
 */
+GLuint load_brdf(char const* filename)
+{
+	//texture.setMinFilter('NEAREST');
+}
+
 GLuint create_texture(char const* Filename)
 {
 	gli::texture Texture = gli::load(Filename);

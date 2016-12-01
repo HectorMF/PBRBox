@@ -73,9 +73,10 @@ void initializeScene()
 
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	shadowTarget = new RenderTarget();
-	GLuint skybox = create_texture("data\\PaperMill\\PaperMill_E_3k_cube_radiance.dds");
-	GLuint radiance = create_texture("data\\PaperMill\\PaperMill_E_3k_cube_radiance.dds");
-	GLuint irradiance = create_texture("data\\PaperMill\\PaperMill_E_3k_cube_irradiance.dds");
+	//GLuint brdfLUT = load_brdf("C:\Users\Javi\Downloads\envtools-1.0.3\envtools-1.0.3\bin\Release\out.raw");
+	GLuint radiance = create_texture("data\\neuroArm\\neuroArm_cube_radiance.dds");
+	GLuint irradiance = create_texture("data\\neuroArm\\neuroArm_cube_irradiance.dds");
+	GLuint specular = create_texture("data\\neuroArm\\neuroArm_cube_specular.dds");
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	//Texture specular = Texture();
@@ -90,11 +91,11 @@ void initializeScene()
 
 	Material* mirrorMat = new Material();
 	mirrorMat->shader = Shader("shaders\\Mirror.vert", "shaders\\Mirror.frag");
-	mirrorMat->environment = skybox;
+	mirrorMat->environment = irradiance;
 
 	envMat = new Material();
 	envMat->shader = Shader("shaders\\EnvMap.vert", "shaders\\EnvMap.frag");
-	envMat->environment = skybox;
+	envMat->environment = specular;
 
 	PBRMaterial* gunMat = new PBRMaterial();
 	gunMat->setAlbedoMap(Texture("data\\cerberus\\Cerberus_A.png"));
@@ -104,7 +105,7 @@ void initializeScene()
 
 	gunMat->m_radianceMap = radiance;
 	gunMat->m_irradianceMap = irradiance;
-	//gunMat->m_sampler = initSampler();
+	gunMat->m_specularMap = specular;
 
 	depthMat = new Material();
 	depthMat->shader = Shader("shaders\\Diffuse.vert", "shaders\\Diffuse.frag");
@@ -128,14 +129,16 @@ void initializeScene()
 
 	diffuseMat->m_radianceMap = radiance;
 	diffuseMat->m_irradianceMap = irradiance;
-	diffuseMat->setAlbedoMap(Texture("data\\wornPaint\\albedo.png"));
-	diffuseMat->setMetalnessMap(Texture("data\\wornPaint\\metalness.png"));
-	diffuseMat->setRoughnessMap(Texture("data\\wornPaint\\roughness.png"));
-	diffuseMat->setAmbientOcclusionMap(Texture("data\\wornPaint\\ao.png"));
-	diffuseMat->setNormalMap(Texture("data\\wornPaint\\normal.png", ColorSpace::Linear));
+	diffuseMat->m_specularMap = specular;
+	diffuseMat->setAlbedoMap(Texture("data\\iron\\albedo.png"));
+	diffuseMat->setMetalnessMap(Texture("data\\iron\\metalness.png"));
+
+	diffuseMat->setRoughnessMap(Texture("data\\iron\\roughness.png"));
+	//diffuseMat->setAmbientOcclusionMap(Texture("data\\wornPaint\\ao.png"));
+	diffuseMat->setNormalMap(Texture("data\\iron\\normal.png", ColorSpace::Linear));
 	diffuseMat->shadowTex = shadowTarget->depthTexture;
 
-	Mesh* groundPlane = new Mesh(Shapes::sphere(.5), diffuseMat);
+	Mesh* groundPlane = new Mesh(Shapes::plane(5,5), diffuseMat);
 	scene.add(groundPlane);
 
 
@@ -146,18 +149,19 @@ void initializeScene()
 
 	Geometry sphereMesh = Shapes::sphere(.2);
 
-	for (int x = -3; x <= 4; x++)
+	for (int x = -4; x <= 4; x++)
 	{
-		for (int z = -3; z <= 4; z++)
+		for (int z = -4; z <= 4; z++)
 		{
 
 			PBRMaterial* diffuseMat1 = new PBRMaterial();
 
 			diffuseMat1->m_radianceMap = radiance;
 			diffuseMat1->m_irradianceMap = irradiance;
+			diffuseMat1->m_specularMap = specular;
 			diffuseMat1->setAlbedo(glm::vec4(1, 1, 1, 1));
-			diffuseMat1->setMetalness((x + 3) / 7.0f);
-			diffuseMat1->setRoughness((z + 3) / 7.0f);
+			diffuseMat1->setMetalness((x + 4) / 8.0f);
+			diffuseMat1->setRoughness((z + 4) / 8.0f);
 			diffuseMat1->shadowTex = shadowTarget->depthTexture;
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));

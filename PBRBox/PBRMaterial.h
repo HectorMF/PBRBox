@@ -46,7 +46,7 @@ public:
 	GLuint m_sampler;
 	GLuint m_radianceMap;
 	GLuint m_irradianceMap;
-
+	GLuint m_specularMap;
 
 	Texture m_hammersleyPointMap;
 
@@ -95,6 +95,11 @@ public:
 		glUniform1i(d1, 9);
 		glActiveTexture(GL_TEXTURE9);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
+
+		GLint d2 = glGetUniformLocation(shader.getProgram(), "uSpecularMap");
+		glUniform1i(d2, 10);
+		glActiveTexture(GL_TEXTURE10);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_specularMap);
 		
 
 		shader.setUniform("uLightPos", 0.0, 10.0, 0.0);
