@@ -18,7 +18,7 @@ private:
 	}
 
 	bool m_dirty;
-
+	bool m_bUseVertexColors;
 	//material information
 	glm::vec4 m_albedo;
 	float m_metalness;
@@ -48,6 +48,8 @@ public:
 	GLuint m_irradianceMap;
 	GLuint m_specularMap;
 
+	GLuint m_BRDFLUT;
+
 	Texture m_hammersleyPointMap;
 
 	PBRMaterial()
@@ -59,6 +61,7 @@ public:
 		m_roughness = .5f;
 		m_metalness = 0.0;
 		m_dirty = false;
+		m_bUseVertexColors = false;
 	}
 
 	void bind()
@@ -77,6 +80,8 @@ public:
 				shader.addFlag("#define USE_NORMAL_MAP");
 			if (m_permutation[TextureMap::AmbientOcclusion])
 				shader.addFlag("#define USE_AO_MAP");
+			if(m_bUseVertexColors)
+				shader.addFlag("#define USE_VERTEX_COLORS");
 			shader.compile();
 			m_dirty = false;
 		}
@@ -100,6 +105,12 @@ public:
 		glUniform1i(d2, 10);
 		glActiveTexture(GL_TEXTURE10);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_specularMap);
+		
+		GLint d4 = glGetUniformLocation(shader.getProgram(), "uBRDFLUT");
+		glUniform1i(d4, 11);
+		glActiveTexture(GL_TEXTURE11);
+		glBindTexture(GL_TEXTURE_2D, m_BRDFLUT);
+
 		
 
 		shader.setUniform("uLightPos", 0.0, 10.0, 0.0);
@@ -171,5 +182,11 @@ public:
 	{
 		m_roughnessMap = roughness;
 		checkBit(TextureMap::Roughness, true);
+	}
+
+	void useVertexColors()
+	{
+		m_bUseVertexColors = true;
+		m_dirty = true;
 	}
 };

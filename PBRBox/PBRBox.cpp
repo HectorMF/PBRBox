@@ -35,6 +35,7 @@
 #include "PBRMaterial.h"
 #include "SkyboxMaterial.h"
 #include "DDS.h"
+#include "FluentMesh.h"
 // test scenes
 
 Camera* hostRendercam = NULL;
@@ -73,10 +74,17 @@ void initializeScene()
 
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	shadowTarget = new RenderTarget();
-	//GLuint brdfLUT = load_brdf("C:\Users\Javi\Downloads\envtools-1.0.3\envtools-1.0.3\bin\Release\out.raw");
-	GLuint radiance = create_texture("data\\neuroArm\\neuroArm_cube_radiance.dds");
+	GLuint brdfLUT = load_brdf("data\\out128.raw");
+	
+	/*GLuint radiance = create_texture("data\\neuroArm\\neuroArm_cube_radiance.dds");
 	GLuint irradiance = create_texture("data\\neuroArm\\neuroArm_cube_irradiance.dds");
-	GLuint specular = create_texture("data\\neuroArm\\neuroArm_cube_specular.dds");
+	GLuint specular = create_texture("data\\neuroArm\\neuroArm_cube_specular.dds");*/
+
+	GLuint radiance = create_texture("data\\pisa\\pisa_cube_radiance.dds");
+	GLuint irradiance = create_texture("data\\pisa\\pisa_cube_irradiance.dds");
+	GLuint specular = create_texture("data\\pisa\\pisa_cube_specular.dds");
+
+
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	//Texture specular = Texture();
@@ -106,7 +114,7 @@ void initializeScene()
 	gunMat->m_radianceMap = radiance;
 	gunMat->m_irradianceMap = irradiance;
 	gunMat->m_specularMap = specular;
-
+	gunMat->m_BRDFLUT = brdfLUT;
 	depthMat = new Material();
 	depthMat->shader = Shader("shaders\\Diffuse.vert", "shaders\\Diffuse.frag");
 
@@ -134,13 +142,33 @@ void initializeScene()
 	diffuseMat->setMetalnessMap(Texture("data\\iron\\metalness.png"));
 
 	diffuseMat->setRoughnessMap(Texture("data\\iron\\roughness.png"));
-	//diffuseMat->setAmbientOcclusionMap(Texture("data\\wornPaint\\ao.png"));
+	diffuseMat->setAmbientOcclusionMap(Texture("data\\iron\\ao.png"));
 	diffuseMat->setNormalMap(Texture("data\\iron\\normal.png", ColorSpace::Linear));
 	diffuseMat->shadowTex = shadowTarget->depthTexture;
-
+	diffuseMat->m_BRDFLUT = brdfLUT;
 	Mesh* groundPlane = new Mesh(Shapes::plane(5,5), diffuseMat);
 	scene.add(groundPlane);
 
+	std::vector<Geometry> fluentModel;// = loadModel("C:\\Users\\Hector\\Documents\\Gearbox\\apps\\NasalVisualization\\test01.dat");
+
+	PBRMaterial* fluentMat = new PBRMaterial();
+
+
+	fluentMat->m_radianceMap = radiance;
+	fluentMat->m_irradianceMap = irradiance;
+	fluentMat->m_specularMap = specular;
+	fluentMat->m_BRDFLUT = brdfLUT;
+	fluentMat->setAlbedo(glm::vec4(1, 1, 1, 1));
+	fluentMat->setMetalness(0);
+	fluentMat->setRoughness(.75);
+	fluentMat->shadowTex = shadowTarget->depthTexture;
+	fluentMat->useVertexColors();
+	for (int i = 0; i < fluentModel.size(); i++)
+	{
+		Mesh* fluentMesh = new Mesh(fluentModel[i], fluentMat);
+		//sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
+		scene.add(fluentMesh);
+	}
 
 	depthQuad = new Mesh(Shapes::renderQuad(), depthMat);
 	depthQuad->transform = glm::scale(depthQuad->transform, glm::vec3(.25, .25, 0));
@@ -163,6 +191,7 @@ void initializeScene()
 			diffuseMat1->setMetalness((x + 4) / 8.0f);
 			diffuseMat1->setRoughness((z + 4) / 8.0f);
 			diffuseMat1->shadowTex = shadowTarget->depthTexture;
+			diffuseMat1->m_BRDFLUT = brdfLUT;
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
 			scene.add(sphere);
@@ -176,7 +205,6 @@ void initializeScene()
 	
 	renderer = new Renderer();
 	renderer->clearColor = glm::vec4(1, 0, 1, 1);
-	
 
 	shadowMat = new Material();
 	shadowMat->shader = Shader("shaders\\Shadow.vert", "shaders\\Shadow.frag");

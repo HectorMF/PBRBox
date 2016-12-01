@@ -132,7 +132,7 @@ Geometry ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
 		aiFace face = mesh->mFaces[i];
 		// Retrieve all indices of the face and store them in the indices vector
 		//for (int j = 0; j < face.mNumIndices; j++)
-		geometry.addTriangle(glm::uvec3(face.mIndices[0], face.mIndices[1], face.mIndices[2]));
+		geometry.addTriangle(face.mIndices[0], face.mIndices[1], face.mIndices[2]);
 	}
 
 	aiString name;

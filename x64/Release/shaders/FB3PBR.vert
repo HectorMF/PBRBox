@@ -62,15 +62,15 @@ void main()
 	vec4 vsPosition = camera.mView * wsPosition;
 	vec4 vsNormal = camera.mNormal * vec4(normal, 0.0);
 	VSPosition = vsPosition.xyz;
-	VSNormal = vsNormal.xyz;
+	//VSNormal = normalize(vsNormal.xyz);
 	
 	vec3 wcNormal = normalize(vec3(camera.mInvView * vec4(VSNormal, 0.0)));
 	
 	WSPosition = wsPosition.xyz;
-	WSNormal = wcNormal;//normalize(camera.mInvView * vsNormal).xyz;
-	
+	WSNormal = normalize(vec3(camera.mModel* vec4(normal,0)));//normalize(camera.mInvView * vsNormal).xyz);
+	VSNormal = normalize(vec3(camera.mView * vec4(WSNormal,0)));
 	EyePosition	= normalize(camera.position - vec3(wsPosition));
-	
+
 	lightPos = uLightPos;
 	
 	vs_out.position = position;

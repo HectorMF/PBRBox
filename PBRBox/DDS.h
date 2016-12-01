@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gli/gli.hpp>
+#include <iostream>
 
 /*
 GLuint initSampler()
@@ -52,9 +53,37 @@ GLuint create_texture(char const* Filename)
 
 
 */
+
+static std::vector<char> ReadAllBytes(char const* filename)
+{
+	std::ifstream ifs(filename, std::ios::binary | std::ios::ate);
+	std::ifstream::pos_type pos = ifs.tellg();
+
+	std::vector<char>  result(pos);
+
+	ifs.seekg(0, std::ios::beg);
+	ifs.read(&result[0], pos);
+
+	return result;
+}
+
 GLuint load_brdf(char const* filename)
 {
-	//texture.setMinFilter('NEAREST');
+
+	std::vector<char> file = ReadAllBytes(filename);
+
+	GLuint TextureName = 0;
+	glGenTextures(1, &TextureName);
+	glBindTexture(GL_TEXTURE_2D, TextureName);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, 128, 128, 0, GL_RGBA, GL_UNSIGNED_BYTE, &file[0]);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	return TextureName;
 }
 
 GLuint create_texture(char const* Filename)

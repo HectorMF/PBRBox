@@ -50,7 +50,7 @@ uniform samplerCube uRadianceMap;
 uniform samplerCube uIrradianceMap;
 uniform samplerCube uSpecularMap;
 
-uniform sampler2D uIntegrateBRDF;
+uniform sampler2D uBRDFLUT;
 
 #ifdef USE_ALBEDO_MAP
 	uniform sampler2D uAlbedo;
@@ -136,7 +136,7 @@ uniform sampler2D uIntegrateBRDF;
 #else
 	vec3 getVertexColor()
 	{
-		return vec3(1,1,1);
+		return vec3(1, 1, 1);
 	}
 #endif
 
@@ -214,7 +214,7 @@ float occlusionHorizon( const in vec3 R, const in vec3 normal)
 
 // http://marmosetco.tumblr.com/post/81245981087
 // TODO we set a min value (10%) to avoid pure blackness (in case of pure metal)
-    float factor = clamp( 1.0 + 1.3 * dot(R, normal), 0.1, 1.0 );
+    float factor = clamp( 1.0 + 0 * dot(R, normal), 0.1, 1.0 );
     return factor * factor;
 }
 
@@ -237,7 +237,7 @@ vec3 getSpecularDominantDir( const in vec3 N, const in vec3 R, const in float re
 
 vec2 integrateBRDF( float r, float NoV )
 {
-    vec4 rgba = texture2D( uIntegrateBRDF, vec2(NoV, r ) );
+    vec4 rgba = texture2D( uBRDFLUT, vec2(NoV, r ) );
 
     const float div = 1.0/65535.0;
     float b = (rgba[3] * 65280.0 + rgba[2] * 255.0);
@@ -276,11 +276,11 @@ vec3 approximateSpecularIBL( const in vec3 specularColor,
 
 
    // marmoset tricks
-   // prefilteredColor *= occlusionHorizon( dominantR, VSNormal );
+    prefilteredColor *= occlusionHorizon( dominantR, VSNormal );
 
-	return uBrightness * prefilteredColor * integrateBRDFApprox( specularColor, roughnessLinear, NoV );
-   // vec2 envBRDF = integrateBRDF( roughnessLinear, NoV );
-   // return uBrightness * prefilteredColor * ( specularColor * envBRDF.x + envBRDF.y );
+	//return uBrightness * prefilteredColor * integrateBRDFApprox( specularColor, roughnessLinear, NoV );
+    vec2 envBRDF = integrateBRDF( roughnessLinear, NoV );
+	return uBrightness * prefilteredColor * ( specularColor * envBRDF.x + envBRDF.y );
 }
 
 
@@ -304,6 +304,7 @@ vec3 computeIBL_UE4( const in vec3 normal,
 
 void main() 
 {
+	//float vertexColor = getVertexColor();
 	float roughness = getRoughness();
 	float ao = getAO();
 	int nbSamples = 32;
@@ -312,17 +313,19 @@ void main()
 
 	float metalness = getMetalness();
 	
-	vec3 albedo = getAlbedo();
+	vec3 albedo = getAlbedo() * getVertexColor();
 	vec3 normal = getNormal();
-	
-	
+
 	vec3 eye_vec = normalize(camera.position - WSPosition);
 	float ndv = dot(eye_vec, normal);
   
 	vec3 ecEyeDir = normalize(-VSPosition);
     //direction towards the camera in the world space
     vec3 wcEyeDir = vec3(camera.mInvView * vec4(ecEyeDir, 0.0));
-	
+	//if(dot(normal, wcEyeDir) < 0)
+	//	normal*= -1;
+
+
 	vec3 N = normal;
 	vec3 V = wcEyeDir;
 	vec3 L = lightPos - WSPosition;
@@ -336,7 +339,7 @@ void main()
     float NdotV = abs(dot(N, V)) + 1e-5f;
 	float VdotH = saturate(dot(V, H));
 
-	vec3 diffuseColor = albedo * (1 - metalness);
+	vec3 diffuseColor =  albedo * (1 - metalness);
 	vec3 specularColor = mix(vec3(0.04), albedo, metalness);
 
 	//vec3 irradiance = texture(uIrradianceMap, N).rgb;
@@ -364,5 +367,7 @@ void main()
 	float shadow = ShadowCalculation(fragPosLightSpace, WSPosition, N);   
 	shadow = min(shadow, 0.35);
 	//color *=  (1.0 - shadow);
+	//vec4 t = texture2D( uBRDFLUT, fs_in.uv);
+//vec4(integrateBRDF(fs_in.uv.x, fs_in.uv.y),0,1);//
 	fragColor = vec4(computeIBL_UE4(N, V, diffuseColor, roughness, specularColor), 1.0f);// vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb,1.0);
 }

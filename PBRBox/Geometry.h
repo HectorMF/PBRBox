@@ -21,7 +21,7 @@
 
 //TODO: static vs dynamic geometry on gpu 
 
-//! A vertex handles 
+//! A mesh interleaved vertex structure
 struct Vertex
 {
 	glm::vec3 position;
@@ -32,7 +32,7 @@ struct Vertex
 	glm::vec4 color;
 };
 
-//! This class stores and manages triangular mesh data on the GPU and CPU
+//! This class stores and manages triangular geometry data in the form of index triangle lists. 
 class Geometry
 {
 public:
@@ -57,23 +57,32 @@ public:
 		m_IBO(geom.m_IBO)
 	{}
 
-	//! Uploads the Mesh data to the GPU
+	//! Uploads the Geometry data to the GPU
 	void uploadToGPU();
 
-	//! \return the OpenGL Vertex array object handle for this geometry
+	//! \return the OpenGL Vertex Array Object handle for this object
 	unsigned int getVAO() const;
-	//! This is a helper class that manages all the materials.  When we enable, we setup all the binds
+
+	//! \return the number of triangles in the mesh
+	unsigned int getNumTriangles() const;
+	//! \return the number of indices in the mesh
 	unsigned int getNumIndices() const;
-	//! This is a helper class that manages all the materials.  When we enable, we setup all the binds
+	//! \return the number of vertices in the mesh
 	unsigned int getNumVertices() const;
 
-	//! This is a helper class that manages all the materials.  When we enable, we setup all the binds
+	//! \return a read-only vector of the mesh indices
 	const std::vector<unsigned int>& getIndices() const;
+	//! \return a read-only vector of the vertex positions
 	const std::vector<glm::vec3>& getPositions() const;
+	//! \return a read-only vector of the vertex normals
 	const std::vector<glm::vec3>& getNormals() const;
+	//! \return a read-only vector of the vertex tangents
 	const std::vector<glm::vec3>& getTangents() const;
+	//! \return a read-only vector of the vertex bitangents
 	const std::vector<glm::vec3>& getBitangents() const;
+	//! \return a read-only vector of the vertex texture coordinates
 	const std::vector<glm::vec2>& getTexCoords() const;
+	//! \return a read-only vector of the vertex colors
 	const std::vector<glm::vec4>& getColors() const;
 
 	void setIndices(std::vector<unsigned int> indices);
@@ -110,8 +119,13 @@ public:
 		return vertex;
 	}
 
-	void addTriangle(glm::uvec3 triangle);
-	void addQuad(glm::uvec4 quad);
+	void setVertexColor(unsigned int index, glm::vec4 color)
+	{
+		m_colors[index] = color;
+	}
+
+	void addTriangle(unsigned int i1, unsigned int i2, unsigned int i3);
+	void addQuad(unsigned int i1, unsigned int i2, unsigned int i3, unsigned int i4);
 
 	void computeNormals();
 	void computeTangents();

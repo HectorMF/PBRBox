@@ -15,6 +15,11 @@ Geometry::~Geometry()
 	glDeleteVertexArrays(1, &m_VAO);
 }
 
+unsigned int Geometry::getNumTriangles() const
+{
+	return m_indices.size() / 3;
+}
+
 unsigned int Geometry::getNumIndices() const
 {
 	return m_indices.size();
@@ -95,22 +100,22 @@ void Geometry::setColors(std::vector<glm::vec4> colors)
 	m_colors = colors;
 }
 
-void Geometry::addTriangle(glm::uvec3 triangle)
+void Geometry::addTriangle(unsigned int i1, unsigned int i2, unsigned int i3)
 {
-	m_indices.push_back(triangle.x);
-	m_indices.push_back(triangle.y);
-	m_indices.push_back(triangle.z);
+	m_indices.push_back(i1);
+	m_indices.push_back(i2);
+	m_indices.push_back(i3);
 }
 
-void Geometry::addQuad(glm::uvec4 quad)
+void Geometry::addQuad(unsigned int i1, unsigned int i2, unsigned int i3, unsigned int i4)
 {
-	m_indices.push_back(quad.x);
-	m_indices.push_back(quad.y);
-	m_indices.push_back(quad.z);
+	m_indices.push_back(i1);
+	m_indices.push_back(i2);
+	m_indices.push_back(i3);
 
-	m_indices.push_back(quad.y);
-	m_indices.push_back(quad.z);
-	m_indices.push_back(quad.w);
+	m_indices.push_back(i2);
+	m_indices.push_back(i3);
+	m_indices.push_back(i4);
 }
 
 
@@ -130,8 +135,8 @@ void Geometry::uploadToGPU()
 
 	std::vector<Vertex> gpuVertices;
 
-	if (m_normals.size() < getNumVertices())
-		computeNormals();
+	//if (m_normals.size() < getNumVertices())
+		//computeNormals();
 	//if (m_tangents.size() < getNumVertices())
 		computeTangents();
 	if(m_texCoords.size() < getNumVertices())

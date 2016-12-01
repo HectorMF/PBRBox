@@ -56,8 +56,8 @@ namespace Shapes
 				int c = (ix + 1) + gridX1 * (iy + 1);
 				int d = (ix + 1) + gridX1 * iy;
 
-				plane.addTriangle({ a, b, d });
-				plane.addTriangle({ b, c, d });
+				plane.addTriangle(a, b, d);
+				plane.addTriangle(b, c, d);
 			}
 		}
 
@@ -103,8 +103,8 @@ namespace Shapes
 				unsigned int firstIndex = verticesCount - 2 * (totalYRotationSteps + 1);
 				for (; (firstIndex + totalYRotationSteps + 2) < verticesCount; firstIndex++)
 				{
-					sphere.addTriangle({ firstIndex, firstIndex + 1, firstIndex + totalYRotationSteps + 1 });
-					sphere.addTriangle({ firstIndex + totalYRotationSteps + 1, firstIndex + 1, firstIndex + totalYRotationSteps + 2 });
+					sphere.addTriangle(firstIndex, firstIndex + 1, firstIndex + totalYRotationSteps + 1);
+					sphere.addTriangle(firstIndex + totalYRotationSteps + 1, firstIndex + 1, firstIndex + totalYRotationSteps + 2);
 				}
 			}
 		}
