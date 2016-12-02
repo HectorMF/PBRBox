@@ -76,13 +76,13 @@ void initializeScene()
 	shadowTarget = new RenderTarget();
 	GLuint brdfLUT = load_brdf("data\\out128.raw");
 	
-	/*GLuint radiance = create_texture("data\\neuroArm\\neuroArm_cube_radiance.dds");
+	GLuint radiance = create_texture("data\\neuroArm\\neuroArm_cube_radiance.dds");
 	GLuint irradiance = create_texture("data\\neuroArm\\neuroArm_cube_irradiance.dds");
-	GLuint specular = create_texture("data\\neuroArm\\neuroArm_cube_specular.dds");*/
+	GLuint specular = create_texture("data\\neuroArm\\neuroArm_cube_specular.dds");
 
-	GLuint radiance = create_texture("data\\pisa\\pisa_cube_radiance.dds");
+	/*GLuint radiance = create_texture("data\\pisa\\pisa_cube_radiance.dds");
 	GLuint irradiance = create_texture("data\\pisa\\pisa_cube_irradiance.dds");
-	GLuint specular = create_texture("data\\pisa\\pisa_cube_specular.dds");
+	GLuint specular = create_texture("data\\pisa\\pisa_cube_specular.dds");*/
 
 
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -103,7 +103,7 @@ void initializeScene()
 
 	envMat = new Material();
 	envMat->shader = Shader("shaders\\EnvMap.vert", "shaders\\EnvMap.frag");
-	envMat->environment = specular;
+	envMat->environment = irradiance;
 
 	PBRMaterial* gunMat = new PBRMaterial();
 	gunMat->setAlbedoMap(Texture("data\\cerberus\\Cerberus_A.png"));
@@ -118,6 +118,50 @@ void initializeScene()
 	depthMat = new Material();
 	depthMat->shader = Shader("shaders\\Diffuse.vert", "shaders\\Diffuse.frag");
 
+
+	Model* mandarineMesh = new Model("data\\mandarine\\Mandarine.obj");
+	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
+	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
+
+	Geometry orange = mandarineMesh->m_meshes[0];
+
+	PBRMaterial* mandMat = new PBRMaterial();
+
+	mandMat->m_radianceMap = radiance;
+	mandMat->m_irradianceMap = irradiance;
+	mandMat->m_specularMap = specular;
+	mandMat->m_BRDFLUT = brdfLUT;
+	mandMat->setAlbedoMap(Texture("data\\mandarine\\mandarine.jpg"));
+	mandMat->setMetalness(0);
+	mandMat->setRoughness(1);
+	Mesh* mandarine = new Mesh(orange, mandMat);
+	scene.add(mandarine);
+
+
+
+	Model* skullModel = new Model("data\\skull\\skull.obj");
+	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
+	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
+
+	Geometry skullGeo = skullModel->m_meshes[0];
+
+	PBRMaterial* skullmat = new PBRMaterial();
+
+	skullmat->m_radianceMap = radiance;
+	skullmat->m_irradianceMap = irradiance;
+	skullmat->m_specularMap = specular;
+	skullmat->m_BRDFLUT = brdfLUT;
+	//skullmat->setAlbedoMap(Texture("data\\skull\\albedo.jpg"));
+	skullmat->setNormalMap(Texture("data\\skull\\normal.jpg"));
+	skullmat->setMetalness(0);
+	skullmat->setRoughness(1);
+	Mesh* skull = new Mesh(skullGeo, skullmat);
+	skull->transform = glm::translate(skull->transform, glm::vec3(0, -1.3, 0));
+	scene.add(skull);
+
+
+
+
 	Model* model = new Model("data\\cerberus\\Cerberus.obj");
 	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
 	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
@@ -127,7 +171,7 @@ void initializeScene()
 	gun1 = new Mesh(gun, gunMat);
 
 	//gun1->transform = glm::scale(gun1->transform, glm::vec3(.5, .5, .5));
-	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, 1, 0));
+	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, 1.3, 0));
 	scene.add(gun1);
 
 	Mesh* skyBoxQuad = new Mesh(Shapes::cube(1), envMat);
@@ -147,9 +191,9 @@ void initializeScene()
 	diffuseMat->shadowTex = shadowTarget->depthTexture;
 	diffuseMat->m_BRDFLUT = brdfLUT;
 	Mesh* groundPlane = new Mesh(Shapes::plane(5,5), diffuseMat);
-	scene.add(groundPlane);
+	//scene.add(groundPlane);
 
-	std::vector<Geometry> fluentModel;// = loadModel("C:\\Users\\Hector\\Documents\\Gearbox\\apps\\NasalVisualization\\test01.dat");
+	std::vector<Geometry> fluentModel;// = loadModel("data\\test01.dat");
 
 	PBRMaterial* fluentMat = new PBRMaterial();
 
@@ -194,7 +238,7 @@ void initializeScene()
 			diffuseMat1->m_BRDFLUT = brdfLUT;
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
-			scene.add(sphere);
+			//scene.add(sphere);
 		}
 	}
 

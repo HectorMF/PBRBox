@@ -41,7 +41,7 @@ namespace Shapes
 
 				Vertex v;
 				v.position = glm::vec3(x, 0, -y);
-				v.normal = glm::vec3(0, 1, 0);
+				v.normal = glm::vec3(0, -1, 0);
 				v.texCoord = glm::vec2(ix / gridX, 1 - (iy / gridY));
 				plane.addVertex(v);
 			}

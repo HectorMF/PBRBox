@@ -136,8 +136,8 @@ void Geometry::uploadToGPU()
 	std::vector<Vertex> gpuVertices;
 
 	//if (m_normals.size() < getNumVertices())
-		//computeNormals();
-	//if (m_tangents.size() < getNumVertices())
+		computeNormals();
+	if (m_tangents.size() < getNumVertices())
 		computeTangents();
 	if(m_texCoords.size() < getNumVertices())
 		m_texCoords.resize(getNumVertices());
@@ -210,7 +210,69 @@ void Geometry::computeTangents()
 	m_tangents.resize(getNumVertices());
 	m_bitangents.resize(getNumVertices());
 
-	int triangleOffset = 0;
+
+	std::vector<glm::vec3> tan1;
+	std::vector<glm::vec3> tan2;
+	
+	tan1.resize(getNumVertices());
+	tan2.resize(getNumVertices());
+
+	for (long a = 0; a <  getNumTriangles(); a+=3)
+	{
+		unsigned int i1 = m_indices[a + 0];
+		unsigned int i2 = m_indices[a + 1];
+		unsigned int i3 = m_indices[a + 2];
+
+		// Shortcuts for vertices
+		glm::vec3 & v1 = m_positions[i1];
+		glm::vec3 & v2 = m_positions[i2];
+		glm::vec3 & v3 = m_positions[i3];
+
+		// Shortcuts for UVs
+		glm::vec2 & w1 = m_texCoords[i1];
+		glm::vec2 & w2 = m_texCoords[i2];
+		glm::vec2 & w3 = m_texCoords[i3];
+
+		float x1 = v2.x - v1.x;
+		float x2 = v3.x - v1.x;
+		float y1 = v2.y - v1.y;
+		float y2 = v3.y - v1.y;
+		float z1 = v2.z - v1.z;
+		float z2 = v3.z - v1.z;
+
+		float s1 = w2.x - w1.x;
+		float s2 = w3.x - w1.x;
+		float t1 = w2.y - w1.y;
+		float t2 = w3.y - w1.y;
+
+		float r = 1.0F / (s1 * t2 - s2 * t1);
+		glm::vec3 sdir((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r,
+			(t2 * z1 - t1 * z2) * r);
+		glm::vec3 tdir((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r,
+			(s1 * z2 - s2 * z1) * r);
+
+		tan1[i1] += sdir;
+		tan1[i2] += sdir;
+		tan1[i3] += sdir;
+
+		tan2[i1] += tdir;
+		tan2[i2] += tdir;
+		tan2[i3] += tdir;
+	}
+
+	for (long a = 0; a < getNumVertices(); a++)
+	{
+		glm::vec3 n = m_normals[a];
+		glm::vec3 t = tan1[a];
+
+		// Gram-Schmidt orthogonalize
+		m_tangents[a] = glm::vec4(glm::normalize(t - n * glm::dot(n, t)), 1);
+
+		// Calculate handedness
+		m_tangents[a].w = (glm::dot(glm::cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;
+	}
+
+	/*int triangleOffset = 0;
 	for (int i = 0; i < m_indices.size() / 3; i++)
 	{
 		unsigned int i1 = m_indices[triangleOffset + 0];
@@ -278,7 +340,7 @@ void Geometry::computeTangents()
 
 		m_tangents[v] = t;
 		m_bitangents[v] = b;
-	}
+	}*/
 }
 
 void Geometry::computeNormals()

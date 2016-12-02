@@ -276,7 +276,7 @@ vec3 approximateSpecularIBL( const in vec3 specularColor,
 
 
    // marmoset tricks
-    prefilteredColor *= occlusionHorizon( dominantR, VSNormal );
+    //prefilteredColor *= occlusionHorizon( dominantR, VSNormal );
 
 	//return uBrightness * prefilteredColor * integrateBRDFApprox( specularColor, roughnessLinear, NoV );
     vec2 envBRDF = integrateBRDF( roughnessLinear, NoV );
@@ -296,7 +296,7 @@ vec3 computeIBL_UE4( const in vec3 normal,
         color += uBrightness * albedo * texture(uIrradianceMap, normal).rgb;//* evaluateDiffuseSphericalHarmonics(normal,view );
     }
 
-    color += approximateSpecularIBL(specular, roughness, normal, view);
+    //color += approximateSpecularIBL(specular, roughness, normal, view);
 
     return color;
 }
@@ -322,7 +322,7 @@ void main()
 	vec3 ecEyeDir = normalize(-VSPosition);
     //direction towards the camera in the world space
     vec3 wcEyeDir = vec3(camera.mInvView * vec4(ecEyeDir, 0.0));
-	//if(dot(normal, wcEyeDir) < 0)
+	//if(!gl_FrontFacing)
 	//	normal*= -1;
 
 
@@ -369,5 +369,5 @@ void main()
 	//color *=  (1.0 - shadow);
 	//vec4 t = texture2D( uBRDFLUT, fs_in.uv);
 //vec4(integrateBRDF(fs_in.uv.x, fs_in.uv.y),0,1);//
-	fragColor = vec4(computeIBL_UE4(N, V, diffuseColor, roughness, specularColor), 1.0f);// vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb,1.0);
+	fragColor = vec4(fs_in.normal,1);//computeIBL_UE4(N, V, diffuseColor, roughness, specularColor), 1.0f);// vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb,1.0);
 }

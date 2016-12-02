@@ -17,7 +17,7 @@ bool ModelLoader::load(Model* model, const std::string &file)
 	std::string fullpath = file;
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(fullpath, aiProcess_FlipUVs|aiProcess_PreTransformVertices|aiProcessPreset_TargetRealtime_Quality);
+	const aiScene* scene = importer.ReadFile(fullpath, aiProcess_FlipUVs | aiProcess_PreTransformVertices | aiProcessPreset_TargetRealtime_Quality);
 
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 	{
