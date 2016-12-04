@@ -178,6 +178,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="ToneMapping.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="UnlitMaterial.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -220,8 +221,8 @@
       <DeploymentContent>false</DeploymentContent>
     </None>
     <None Include="..\x64\Release\shaders\ISPBR.vert" />
-    <None Include="..\x64\Release\shaders\Lambert.frag" />
-    <None Include="..\x64\Release\shaders\Lambert.vert" />
+    <None Include="..\x64\Release\shaders\Unlit.frag" />
+    <None Include="..\x64\Release\shaders\Unlit.vert" />
     <None Include="..\x64\Release\shaders\Mirror.frag" />
     <None Include="..\x64\Release\shaders\Mirror.vert" />
     <None Include="..\x64\Release\shaders\NormalShader.frag" />

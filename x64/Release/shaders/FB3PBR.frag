@@ -3,7 +3,7 @@ const float PI = 3.14159265;
 const float TwoPI = 6.28318530718;
 
 float uBrightness = 1;
-int maxLOD = 8; 
+int maxLOD = 9; 
 
 out vec4 fragColor;
 
@@ -104,11 +104,12 @@ uniform sampler2D uBRDFLUT;
 		//what does this do? handedness?
 		//normalMap.y *= -1.0;
 		
-		mat3 TBN = transpose(mat3(fs_in.tangent, fs_in.bitangent, fs_in.normal));
-		vec3 normal = (camera.mModel * vec4(normalMap * TBN,0)).rgb;
-		
+		mat3 TBN = mat3(fs_in.tangent, fs_in.bitangent, fs_in.normal);
+		vec3 normal = TBN * normalMap;
+	
 		return normalize(normal);
 	}
+
 #else
 	vec3 getNormal() {
 		return normalize(WSNormal);
@@ -214,7 +215,7 @@ float occlusionHorizon( const in vec3 R, const in vec3 normal)
 
 // http://marmosetco.tumblr.com/post/81245981087
 // TODO we set a min value (10%) to avoid pure blackness (in case of pure metal)
-    float factor = clamp( 1.0 + 0 * dot(R, normal), 0.1, 1.0 );
+    float factor = clamp( 1.0 + 1.3 * dot(R, normal), 0.1, 1.0 );
     return factor * factor;
 }
 
@@ -224,9 +225,20 @@ float linRoughnessToMipmap( float roughnessLinear )
     return sqrt(roughnessLinear);
 }
 
+
+const int nMipOffset = 3;
+const int nMips = 11;
+const float fUserScale = .3864;
+
+float roughnessToMip(float roughness) // log2 distribution
+{
+	float temp = (2.0/(roughness*roughness))-2.0;
+	return (nMips-1-nMipOffset) - log2(temp)*fUserScale;
+}
+
 vec3 prefilterEnvMap( float roughnessLinear, const in vec3 R )
 {
-    float lod = linRoughnessToMipmap(roughnessLinear) * maxLOD; //( uEnvironmentMaxLod - 1.0 );
+    float lod = roughnessToMip(roughnessLinear * roughnessLinear); //( uEnvironmentMaxLod - 1.0 );
     return textureLod(uSpecularMap, R, lod).rgb;//textureCubeLodEXTFixed( uRadianceMap, R, lod );
 }
 
@@ -269,17 +281,18 @@ vec3 approximateSpecularIBL( const in vec3 specularColor,
 
     // From Sebastien Lagarde Moving Frostbite to PBR page 69
     // so roughness = linRoughness * linRoughness
-    vec3 dominantR = getSpecularDominantDir( N, R, roughnessLinear*roughnessLinear );
+    vec3 dominantR = getSpecularDominantDir( N, R,  roughnessLinear*roughnessLinear);
 
     vec3 dir = ( vec4(dominantR, 0)).rgb;
     vec3 prefilteredColor = prefilterEnvMap( roughnessLinear, dir );
 
 
    // marmoset tricks
-    //prefilteredColor *= occlusionHorizon( dominantR, VSNormal );
+    //prefilteredColor *= occlusionHorizon( dominantR, (camera.mView * vec4(N,0)).rgb );
 
 	//return uBrightness * prefilteredColor * integrateBRDFApprox( specularColor, roughnessLinear, NoV );
     vec2 envBRDF = integrateBRDF( roughnessLinear, NoV );
+	//return vec3(roughnessToMip(roughnessLinear)/7);
 	return uBrightness * prefilteredColor * ( specularColor * envBRDF.x + envBRDF.y );
 }
 
@@ -293,23 +306,49 @@ vec3 computeIBL_UE4( const in vec3 normal,
 
     vec3 color = vec3(0.0);
     if ( albedo != color ) { // skip if no diffuse
-        color += uBrightness * albedo * texture(uIrradianceMap, normal).rgb;//* evaluateDiffuseSphericalHarmonics(normal,view );
+       color += uBrightness * albedo * texture(uIrradianceMap, normal).rgb * getAO();//* evaluateDiffuseSphericalHarmonics(normal,view );
     }
-
-    //color += approximateSpecularIBL(specular, roughness, normal, view);
-
+	//color = texture(uRadianceMap, normal).rgb;
+    color += approximateSpecularIBL(specular, roughness, normal, view);
+	//float mip = (roughness <.01) ? 1 : 0;
+	//color = vec3(mip);
     return color;
 }
-
+float adjustRoughness ( float inputRoughness , float avgNormalLength )
+{
+	// Based on The Order : 1886 SIGGRAPH course notes implementation
+	if ( avgNormalLength < 1.0f)
+	{
+	float avgNormLen2 = avgNormalLength * avgNormalLength ;
+	float kappa = (3 * avgNormalLength - avgNormalLength * avgNormLen2 ) /
+	(1 - avgNormLen2 ) ;
+	float variance = 1.0f / (2.0 * kappa ) ;
+	 return sqrt ( inputRoughness * inputRoughness + variance );
+	}
+	return ( inputRoughness );
+ }
+
+ float D_GGX(float ndoth, float m)
+{
+	float m2 = m* m;
+	float f = (ndoth * m2 - ndoth) * ndoth + 1;
+	return m2 / (f * f);
+}
 
 void main() 
 {
+	//TODO:: prefilter normal distribution
+	//http://www.frostbite.com/wp-content/uploads/2014/11/course_notes_moving_frostbite_to_pbr_v2.pdf
+	//pg 92
+
 	//float vertexColor = getVertexColor();
-	float roughness = getRoughness();
+	
+	
+	
 	float ao = getAO();
 	int nbSamples = 32;
-	float roughness2 = pow(roughness, 2);
-	float roughness4 = pow(roughness, 4);
+	//float roughness2 = pow(roughness, 2);
+	//float roughness4 = pow(roughness, 4);
 
 	float metalness = getMetalness();
 	
@@ -339,15 +378,15 @@ void main()
     float NdotV = abs(dot(N, V)) + 1e-5f;
 	float VdotH = saturate(dot(V, H));
 
+	float roughness = getRoughness() ;
+
+
 	vec3 diffuseColor =  albedo * (1 - metalness);
 	vec3 specularColor = mix(vec3(0.04), albedo, metalness);
 
 	//vec3 irradiance = texture(uIrradianceMap, N).rgb;
 	
-	int numMips			= 7;
-	float lod 			= (1.0 - roughness)*(numMips - 1.0);
-	float mip			= numMips - 1 + log2(roughness2);
-	vec3 lookup			= -reflect(V, N);
+	
 	//lookup			= fix_cube_lookup(lookup, 256, mip );
 	
 	//float3 vReflection = 2.0f * vNormal * dot(vViewDirection, vNormal) - vViewDirection;
@@ -368,6 +407,7 @@ void main()
 	shadow = min(shadow, 0.35);
 	//color *=  (1.0 - shadow);
 	//vec4 t = texture2D( uBRDFLUT, fs_in.uv);
+	
 //vec4(integrateBRDF(fs_in.uv.x, fs_in.uv.y),0,1);//
-	fragColor = vec4(fs_in.normal,1);//computeIBL_UE4(N, V, diffuseColor, roughness, specularColor), 1.0f);// vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb,1.0);
+	fragColor = vec4(computeIBL_UE4(N, V, diffuseColor, roughness, specularColor), 1.0f);// vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb,1.0);
 }

@@ -9,7 +9,7 @@
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #endif
 
 #include <sstream>
@@ -33,6 +33,7 @@
 #include "Renderer.h"
 
 #include "PBRMaterial.h"
+#include "UnlitMaterial.h"
 #include "SkyboxMaterial.h"
 #include "DDS.h"
 #include "FluentMesh.h"
@@ -53,7 +54,7 @@ Material* depthMat;
 Mesh* depthQuad;
 Mesh* gun1;
 Material* envMat;
-
+Mesh* hovercraft;
 /* Handler for window re-size event. Called back when the window first appears and
 whenever the window is re-sized with its new width and height */
 void reshape(GLsizei newwidth, GLsizei newheight)
@@ -79,12 +80,20 @@ void initializeScene()
 	GLuint radiance = create_texture("data\\neuroArm\\neuroArm_cube_radiance.dds");
 	GLuint irradiance = create_texture("data\\neuroArm\\neuroArm_cube_irradiance.dds");
 	GLuint specular = create_texture("data\\neuroArm\\neuroArm_cube_specular.dds");
-
-	/*GLuint radiance = create_texture("data\\pisa\\pisa_cube_radiance.dds");
+	/*
+	GLuint radiance = create_texture("data\\pisa\\pisa_cube_radiance.dds");
 	GLuint irradiance = create_texture("data\\pisa\\pisa_cube_irradiance.dds");
-	GLuint specular = create_texture("data\\pisa\\pisa_cube_specular.dds");*/
+	GLuint specular = create_texture("data\\pisa\\pisa_cube_specular.dds");
+
+	GLuint radiance = create_texture("data\\winterForest\\winterForest_cube_radiance.dds");
+	GLuint irradiance = create_texture("data\\winterForest\\winterForest_cube_irradiance.dds");
+	GLuint specular = create_texture("data\\winterForest\\winterForest_cube_specular.dds");
 
 
+
+	GLuint radiance = create_texture("data\\arches\\arches_cube_radiance.dds");
+	GLuint irradiance = create_texture("data\\arches\\arches_cube_irradiance.dds");
+	GLuint specular = create_texture("data\\arches\\arches_cube_specular.dds");*/
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	//Texture specular = Texture();
@@ -103,7 +112,7 @@ void initializeScene()
 
 	envMat = new Material();
 	envMat->shader = Shader("shaders\\EnvMap.vert", "shaders\\EnvMap.frag");
-	envMat->environment = irradiance;
+	envMat->environment = specular;
 
 	PBRMaterial* gunMat = new PBRMaterial();
 	gunMat->setAlbedoMap(Texture("data\\cerberus\\Cerberus_A.png"));
@@ -125,21 +134,42 @@ void initializeScene()
 
 	Geometry orange = mandarineMesh->m_meshes[0];
 
-	PBRMaterial* mandMat = new PBRMaterial();
+	UnlitMaterial* mandMat = new UnlitMaterial();
 
-	mandMat->m_radianceMap = radiance;
-	mandMat->m_irradianceMap = irradiance;
-	mandMat->m_specularMap = specular;
-	mandMat->m_BRDFLUT = brdfLUT;
-	mandMat->setAlbedoMap(Texture("data\\mandarine\\mandarine.jpg"));
-	mandMat->setMetalness(0);
-	mandMat->setRoughness(1);
+	mandMat->setDiffuseMap(Texture("data\\mandarine\\mandarine.jpg"));
 	Mesh* mandarine = new Mesh(orange, mandMat);
+	mandarine->transform = glm::translate(mandarine->transform, glm::vec3(0, -2, 0));
 	scene.add(mandarine);
 
 
 
-	Model* skullModel = new Model("data\\skull\\skull.obj");
+	Model* hovercraftModel = new Model("data\\hovercraft\\hovercraft.fbx");
+	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
+	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
+
+	Geometry hovercraftGeo = hovercraftModel->m_meshes[2];
+
+	PBRMaterial* hovercraftmat = new PBRMaterial();
+
+	hovercraftmat->m_radianceMap = radiance;
+	hovercraftmat->m_irradianceMap = irradiance;
+	hovercraftmat->m_specularMap = specular;
+	hovercraftmat->m_BRDFLUT = brdfLUT;
+	hovercraftmat->setAlbedoMap(Texture("data\\hovercraft\\Base_Color_0.png"));
+	hovercraftmat->setAmbientOcclusionMap(Texture("data\\hovercraft\\AO.png"));
+	hovercraftmat->setNormalMap(Texture("data\\hovercraft\\NornalGL_0.png", ColorSpace::Linear));
+	hovercraftmat->setMetalnessMap(Texture("data\\hovercraft\\Metalnes_0.png"));
+	hovercraftmat->setRoughnessMap(Texture("data\\hovercraft\\Roughtnes_0.png"));
+	hovercraft = new Mesh(hovercraftGeo, hovercraftmat);
+	hovercraft->transform = glm::scale(hovercraft->transform, glm::vec3(.01, .01, .01));
+	hovercraft->transform = glm::rotate(hovercraft->transform, glm::radians(90.0f),glm::vec3(1, 0, 0));
+	hovercraft->transform = glm::rotate(hovercraft->transform, glm::radians(180.0f), glm::vec3(0, 1, 0));
+	hovercraft->transform = glm::rotate(hovercraft->transform, glm::radians(90.0f), glm::vec3(0, 0, 1));
+	scene.add(hovercraft);
+
+
+
+	Model* skullModel = new Model("data\\skull\\skull.OBJ");
 	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
 	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
 
@@ -151,14 +181,14 @@ void initializeScene()
 	skullmat->m_irradianceMap = irradiance;
 	skullmat->m_specularMap = specular;
 	skullmat->m_BRDFLUT = brdfLUT;
+	skullmat->setAlbedo(glm::vec4(255, 219, 145, 255) / 255.0f);
 	//skullmat->setAlbedoMap(Texture("data\\skull\\albedo.jpg"));
-	skullmat->setNormalMap(Texture("data\\skull\\normal.jpg"));
-	skullmat->setMetalness(0);
-	skullmat->setRoughness(1);
+	skullmat->setNormalMap(Texture("data\\skull\\Normal.jpg", ColorSpace::Linear));
+	skullmat->setMetalness(1);
+	skullmat->setRoughness(.15);
 	Mesh* skull = new Mesh(skullGeo, skullmat);
-	skull->transform = glm::translate(skull->transform, glm::vec3(0, -1.3, 0));
+	skull->transform = glm::translate(skull->transform, glm::vec3(0, -5, 0));
 	scene.add(skull);
-
 
 
 
@@ -171,7 +201,7 @@ void initializeScene()
 	gun1 = new Mesh(gun, gunMat);
 
 	//gun1->transform = glm::scale(gun1->transform, glm::vec3(.5, .5, .5));
-	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, 1.3, 0));
+	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, 3, 0));
 	scene.add(gun1);
 
 	Mesh* skyBoxQuad = new Mesh(Shapes::cube(1), envMat);
@@ -237,8 +267,8 @@ void initializeScene()
 			diffuseMat1->shadowTex = shadowTarget->depthTexture;
 			diffuseMat1->m_BRDFLUT = brdfLUT;
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
-			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
-			//scene.add(sphere);
+			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, 6, z * .5));
+			scene.add(sphere);
 		}
 	}
 
@@ -266,6 +296,7 @@ void initializeScene()
 void disp(void)
 {
 	gun1->transform = glm::rotate(gun1->transform, .001f, glm::vec3(0,1,0));
+	hovercraft->transform = glm::rotate(hovercraft->transform, .003f, glm::vec3(0, 0, 1));
 	// if camera has moved, reset the accumulation buffer
 
 	// build a new camera for each frame on the CPU
@@ -311,7 +342,9 @@ int main(int argc, char** argv) {
 	//initHDR(); // initialise the HDR environment map
 			   // initialise GLUT
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB); // specify the display mode to be RGB and single buffering
+	glutSetOption(GLUT_MULTISAMPLE, 4);
+
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH |GLUT_MULTISAMPLE); // specify the display mode to be RGB and single buffering
 	glutInitWindowPosition(100, 100); // specify the initial window position
 	glutInitWindowSize(scrwidth, scrheight); // specify the initial window size
 	glutCreateWindow("PBRBox"); // create the window and set title
@@ -321,6 +354,19 @@ int main(int argc, char** argv) {
 	glMatrixMode(GL_PROJECTION);
 	gluOrtho2D(0.0, scrwidth, 0.0, scrheight);
 	fprintf(stderr, "OpenGL initialized \n");
+
+
+
+	glEnable(GL_MULTISAMPLE);
+	glHint(GL_MULTISAMPLE_FILTER_HINT_NV, GL_NICEST);
+
+	// detect current settings
+	GLint iMultiSample = 0;
+	GLint iNumSamples = 0;
+	glGetIntegerv(GL_SAMPLE_BUFFERS, &iMultiSample);
+	glGetIntegerv(GL_SAMPLES, &iNumSamples);
+	printf("MSAA on, GL_SAMPLE_BUFFERS = %d, GL_SAMPLES = %d\n", iMultiSample, iNumSamples);
+
 
 	// register callback function to display graphics
 	glutDisplayFunc(disp);

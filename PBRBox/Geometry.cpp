@@ -135,7 +135,7 @@ void Geometry::uploadToGPU()
 
 	std::vector<Vertex> gpuVertices;
 
-	//if (m_normals.size() < getNumVertices())
+	if (m_normals.size() < getNumVertices())
 		computeNormals();
 	if (m_tangents.size() < getNumVertices())
 		computeTangents();
@@ -217,11 +217,11 @@ void Geometry::computeTangents()
 	tan1.resize(getNumVertices());
 	tan2.resize(getNumVertices());
 
-	for (long a = 0; a <  getNumTriangles(); a+=3)
+	for (long a = 0; a <  getNumTriangles(); a++)
 	{
-		unsigned int i1 = m_indices[a + 0];
-		unsigned int i2 = m_indices[a + 1];
-		unsigned int i3 = m_indices[a + 2];
+		unsigned int i1 = m_indices[a * 3 + 0];
+		unsigned int i2 = m_indices[a * 3 + 1];
+		unsigned int i3 = m_indices[a * 3 + 2];
 
 		// Shortcuts for vertices
 		glm::vec3 & v1 = m_positions[i1];
@@ -266,10 +266,12 @@ void Geometry::computeTangents()
 		glm::vec3 t = tan1[a];
 
 		// Gram-Schmidt orthogonalize
-		m_tangents[a] = glm::vec4(glm::normalize(t - n * glm::dot(n, t)), 1);
+		m_tangents[a] = glm::normalize(t - n * glm::dot(n, t));
 
 		// Calculate handedness
-		m_tangents[a].w = (glm::dot(glm::cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;
+		float tangentW = (glm::dot(glm::cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;
+
+		m_bitangents[a] = glm::normalize(glm::cross(n, m_tangents[a]) * tangentW);
 	}
 
 	/*int triangleOffset = 0;

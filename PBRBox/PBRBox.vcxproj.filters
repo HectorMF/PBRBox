@@ -126,6 +126,9 @@
     <ClInclude Include="FluentMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UnlitMaterial.h">
+      <Filter>Header Files\Materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -175,12 +178,6 @@
     <None Include="..\x64\Release\shaders\ISPBR.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shaders\Lambert.frag">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shaders\Lambert.vert">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
     <None Include="..\x64\Release\shaders\Mirror.frag">
       <Filter>Resource Files\Shaders</Filter>
     </None>
@@ -215,6 +212,12 @@
       <Filter>Resource Files\Shaders</Filter>
     </None>
     <None Include="..\x64\Release\shaders\FB3PBR.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Unlit.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Unlit.frag">
       <Filter>Resource Files\Shaders</Filter>
     </None>
   </ItemGroup>

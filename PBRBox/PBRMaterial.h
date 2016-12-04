@@ -55,7 +55,7 @@ public:
 	PBRMaterial()
 	{
 		shader = Shader("shaders\\FB3PBR.vert", "shaders\\FB3PBR.frag", false);
-		shader.setVersion(330);
+		shader.setVersion(400);
 		shader.compile();
 		m_albedo = glm::vec4(1, 1, 1, 1);
 		m_roughness = .5f;

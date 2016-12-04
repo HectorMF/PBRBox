@@ -30,7 +30,7 @@ public:
 
 	void setVersion(int version)
 	{
-		m_version = "#version 330 core\n";
+		m_version = "#version 400 core\n";
 	}
 
 	void addFlag(std::string flag)

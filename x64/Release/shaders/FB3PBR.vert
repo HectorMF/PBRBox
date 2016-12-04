@@ -1,7 +1,7 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
-layout (location = 2) in vec4 tangent;
-//layout (location = 3) in vec3 bitangent;
+layout (location = 2) in vec3 tangent;
+layout (location = 3) in vec3 bitangent;
 layout (location = 4) in vec2 uv;
 layout (location = 5) in vec4 color;
 
@@ -72,11 +72,16 @@ void main()
 	EyePosition	= normalize(camera.position - vec3(wsPosition));
 
 	lightPos = uLightPos;
-	
+
+	mat3 normalMatrix = transpose(inverse(mat3(camera.mModel)));
+	vec3 T = normalize(normalMatrix * tangent);
+    vec3 B = normalize(normalMatrix * bitangent);
+    vec3 N = normalize(normalMatrix * normal);
+
 	vs_out.position = position;
-	vs_out.normal = normalize(normal);
-	vs_out.tangent = normalize(tangent);
-	vs_out.bitangent = normalize(bitangent);
+	vs_out.normal = N;
+	vs_out.tangent = T;
+	vs_out.bitangent = B;
 	vs_out.color = color;
 	vs_out.uv = uv;
 	
