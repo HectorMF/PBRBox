@@ -37,6 +37,9 @@
 #include "SkyboxMaterial.h"
 #include "DDS.h"
 #include "FluentMesh.h"
+#include "Environment.h"
+#include "Volume.h"
+#include "EnvironmentTools.h"
 // test scenes
 
 Camera* hostRendercam = NULL;
@@ -53,7 +56,6 @@ Material* shadowMat;
 Material* depthMat;
 Mesh* depthQuad;
 Mesh* gun1;
-Material* envMat;
 Mesh* hovercraft;
 /* Handler for window re-size event. Called back when the window first appears and
 whenever the window is re-sized with its new width and height */
@@ -70,16 +72,27 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 	glutPostRedisplay();
 }
 
+
 void initializeScene()
 {
-
-	glEnable(GL_FRAMEBUFFER_SRGB);
-	shadowTarget = new RenderTarget();
-	GLuint brdfLUT = load_brdf("data\\out128.raw");
 	
-	GLuint radiance = create_texture("data\\neuroArm\\neuroArm_cube_radiance.dds");
-	GLuint irradiance = create_texture("data\\neuroArm\\neuroArm_cube_irradiance.dds");
-	GLuint specular = create_texture("data\\neuroArm\\neuroArm_cube_specular.dds");
+	glEnable(GL_FRAMEBUFFER_SRGB);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	shadowTarget = new RenderTarget();
+
+	GLuint brdfLUT = computeBRDFLUT(256); // load_brdf("data\\out128.raw");
+
+	Environment* operatingRoom = new Environment();
+
+	operatingRoom->radiance.id = create_texture("data\\neuroArm\\neuroArm_cube_radiance.dds");
+	operatingRoom->irradiance.id = create_texture("data\\neuroArm\\neuroArm_cube_irradiance.dds");
+	operatingRoom->specular.id = create_texture("data\\neuroArm\\neuroArm_cube_specular.dds");
+
+	operatingRoom->radiance.textureType = GL_TEXTURE_CUBE_MAP;
+	operatingRoom->irradiance.textureType = GL_TEXTURE_CUBE_MAP;
+	operatingRoom->specular.textureType = GL_TEXTURE_CUBE_MAP;
+
 	/*
 	GLuint radiance = create_texture("data\\pisa\\pisa_cube_radiance.dds");
 	GLuint irradiance = create_texture("data\\pisa\\pisa_cube_irradiance.dds");
@@ -89,41 +102,55 @@ void initializeScene()
 	GLuint irradiance = create_texture("data\\winterForest\\winterForest_cube_irradiance.dds");
 	GLuint specular = create_texture("data\\winterForest\\winterForest_cube_specular.dds");
 
-
-
 	GLuint radiance = create_texture("data\\arches\\arches_cube_radiance.dds");
 	GLuint irradiance = create_texture("data\\arches\\arches_cube_irradiance.dds");
 	GLuint specular = create_texture("data\\arches\\arches_cube_specular.dds");*/
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-	//Texture specular = Texture();
+	Volume* vol = new Volume("data\\3L_768x768x768_type_uc_1channels.raw");
 
-	Texture diffuse = Texture("data\\BB8 New\\Body diff MAP.jpg");
-	Texture environment = Texture("data\\Mono_Lake_B\\Mono_Lake_B_Env.hdr");
-	Texture reflection = Texture("data\\Mono_Lake_B\\Mono_Lake_B_Ref.hdr");
+	Model* irrigationTool = new Model("data\\IrrigationTool.obj");
+	
+	PBRMaterial* irrigationMat = new PBRMaterial();
 
-	Material normalMat;
-	normalMat.shader = Shader("shaders\\NormalShader.vert", "shaders\\\NormalShader.frag");
-	normalMat.environment = environment;
+	irrigationMat->setEnvironement(operatingRoom);
+	irrigationMat->setAlbedo(glm::vec4(.96f, .96f, .9686f, 1));
+	irrigationMat->setMetalness(1);
+	irrigationMat->setRoughness(.05f);
+	irrigationMat->shadowTex = shadowTarget->depthTexture;
+	irrigationMat->m_BRDFLUT = brdfLUT;
 
-	Material* mirrorMat = new Material();
-	mirrorMat->shader = Shader("shaders\\Mirror.vert", "shaders\\Mirror.frag");
-	mirrorMat->environment = irradiance;
+	Mesh* irrigation = new Mesh(irrigationTool->m_meshes[0], irrigationMat);
+	irrigation->transform = glm::scale(irrigation->transform, glm::vec3(.05));
+	irrigation->transform = glm::rotate(irrigation->transform, glm::radians(90.0f), glm::vec3(1,0,0));
+	irrigation->transform = glm::rotate(irrigation->transform, glm::radians(90.0f), glm::vec3(0, 0, 1));
+	irrigation->transform = glm::translate(irrigation->transform, glm::vec3(0, 0, 1));
+	scene.add(irrigation);
 
-	envMat = new Material();
-	envMat->shader = Shader("shaders\\EnvMap.vert", "shaders\\EnvMap.frag");
-	envMat->environment = specular;
+	Mesh* skyBoxQuad = new Mesh(Shapes::cube(1), new SkyboxMaterial(operatingRoom));
+	scene.skybox = skyBoxQuad;
 
 	PBRMaterial* gunMat = new PBRMaterial();
+	gunMat->setEnvironement(operatingRoom);
 	gunMat->setAlbedoMap(Texture("data\\cerberus\\Cerberus_A.png"));
 	gunMat->setMetalnessMap(Texture("data\\cerberus\\Cerberus_M.jpg"));
 	gunMat->setRoughnessMap(Texture("data\\cerberus\\Cerberus_R.jpg"));
 	gunMat->setNormalMap(Texture("data\\cerberus\\Cerberus_N.jpg", ColorSpace::Linear));
-
-	gunMat->m_radianceMap = radiance;
-	gunMat->m_irradianceMap = irradiance;
-	gunMat->m_specularMap = specular;
 	gunMat->m_BRDFLUT = brdfLUT;
+
+
+	//Resource<Texture>::Load("data\\cerberus\\Cerberus_A.png");
+
+
+
+
+
+
+
+
+
+
+
+
 	depthMat = new Material();
 	depthMat->shader = Shader("shaders\\Diffuse.vert", "shaders\\Diffuse.frag");
 
@@ -151,16 +178,18 @@ void initializeScene()
 
 	PBRMaterial* hovercraftmat = new PBRMaterial();
 
-	hovercraftmat->m_radianceMap = radiance;
-	hovercraftmat->m_irradianceMap = irradiance;
-	hovercraftmat->m_specularMap = specular;
+	hovercraftmat->setEnvironement(operatingRoom);
 	hovercraftmat->m_BRDFLUT = brdfLUT;
+
+
 	hovercraftmat->setAlbedoMap(Texture("data\\hovercraft\\Base_Color_0.png"));
 	hovercraftmat->setAmbientOcclusionMap(Texture("data\\hovercraft\\AO.png"));
 	hovercraftmat->setNormalMap(Texture("data\\hovercraft\\NornalGL_0.png", ColorSpace::Linear));
 	hovercraftmat->setMetalnessMap(Texture("data\\hovercraft\\Metalnes_0.png"));
 	hovercraftmat->setRoughnessMap(Texture("data\\hovercraft\\Roughtnes_0.png"));
+
 	hovercraft = new Mesh(hovercraftGeo, hovercraftmat);
+
 	hovercraft->transform = glm::scale(hovercraft->transform, glm::vec3(.01, .01, .01));
 	hovercraft->transform = glm::rotate(hovercraft->transform, glm::radians(90.0f),glm::vec3(1, 0, 0));
 	hovercraft->transform = glm::rotate(hovercraft->transform, glm::radians(180.0f), glm::vec3(0, 1, 0));
@@ -177,9 +206,7 @@ void initializeScene()
 
 	PBRMaterial* skullmat = new PBRMaterial();
 
-	skullmat->m_radianceMap = radiance;
-	skullmat->m_irradianceMap = irradiance;
-	skullmat->m_specularMap = specular;
+	skullmat->setEnvironement(operatingRoom);
 	skullmat->m_BRDFLUT = brdfLUT;
 	skullmat->setAlbedo(glm::vec4(255, 219, 145, 255) / 255.0f);
 	//skullmat->setAlbedoMap(Texture("data\\skull\\albedo.jpg"));
@@ -204,14 +231,11 @@ void initializeScene()
 	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, 3, 0));
 	scene.add(gun1);
 
-	Mesh* skyBoxQuad = new Mesh(Shapes::cube(1), envMat);
-	scene.skybox = skyBoxQuad;
+
 
 	PBRMaterial* diffuseMat = new PBRMaterial();
 
-	diffuseMat->m_radianceMap = radiance;
-	diffuseMat->m_irradianceMap = irradiance;
-	diffuseMat->m_specularMap = specular;
+	diffuseMat->setEnvironement(operatingRoom);
 	diffuseMat->setAlbedoMap(Texture("data\\iron\\albedo.png"));
 	diffuseMat->setMetalnessMap(Texture("data\\iron\\metalness.png"));
 
@@ -228,19 +252,20 @@ void initializeScene()
 	PBRMaterial* fluentMat = new PBRMaterial();
 
 
-	fluentMat->m_radianceMap = radiance;
-	fluentMat->m_irradianceMap = irradiance;
-	fluentMat->m_specularMap = specular;
+	fluentMat->setEnvironement(operatingRoom);
 	fluentMat->m_BRDFLUT = brdfLUT;
 	fluentMat->setAlbedo(glm::vec4(1, 1, 1, 1));
 	fluentMat->setMetalness(0);
-	fluentMat->setRoughness(.75);
+	fluentMat->setRoughness(.4);
 	fluentMat->shadowTex = shadowTarget->depthTexture;
 	fluentMat->useVertexColors();
 	for (int i = 0; i < fluentModel.size(); i++)
 	{
+		fluentModel[i].computeNormals();
+		fluentModel[i].computeTangents();
 		Mesh* fluentMesh = new Mesh(fluentModel[i], fluentMat);
-		//sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, .2, z * .5));
+
+		fluentMesh->transform = glm::translate(fluentMesh->transform, glm::vec3(0,-7,0));
 		scene.add(fluentMesh);
 	}
 
@@ -258,9 +283,7 @@ void initializeScene()
 
 			PBRMaterial* diffuseMat1 = new PBRMaterial();
 
-			diffuseMat1->m_radianceMap = radiance;
-			diffuseMat1->m_irradianceMap = irradiance;
-			diffuseMat1->m_specularMap = specular;
+			diffuseMat1->setEnvironement(operatingRoom);
 			diffuseMat1->setAlbedo(glm::vec4(1, 1, 1, 1));
 			diffuseMat1->setMetalness((x + 4) / 8.0f);
 			diffuseMat1->setRoughness((z + 4) / 8.0f);
@@ -271,11 +294,6 @@ void initializeScene()
 			scene.add(sphere);
 		}
 	}
-
-	Geometry lightMesh = Shapes::sphere(.4);
-	Mesh* light = new Mesh(lightMesh, mirrorMat);
-	light->transform = glm::translate(light->transform, glm::vec3(0, 2, 0));
-	//scene.add(light); 
 	
 	renderer = new Renderer();
 	renderer->clearColor = glm::vec4(1, 0, 1, 1);
@@ -285,6 +303,7 @@ void initializeScene()
 
 	depthMat->shadowTex = shadowTarget->depthTexture;
 	gunMat->shadowTex = shadowTarget->depthTexture;
+
 	//Model* model = new Model("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\IrrigationTool.obj");
 	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
 	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));

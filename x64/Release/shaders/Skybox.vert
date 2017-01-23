@@ -1,9 +1,6 @@
 #version 330 core
 layout (location = 0) in vec3 position;
 
-out vec3 TexCoords;
-
-
 struct Camera
 {
 	vec3 vViewPos;
@@ -17,8 +14,9 @@ struct Camera
 
 uniform Camera camera;
 
-void main()
-{
-    gl_Position = camera.mProjection * camera.mView * vec4(position, 1.0);  
+out vec3 TexCoords;
+
+void main() {
+	gl_Position = camera.mProjection * camera.mView * vec4(position, 1.0);  
     TexCoords = position;
-} 
+}

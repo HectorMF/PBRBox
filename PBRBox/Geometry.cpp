@@ -1,11 +1,13 @@
 #include "Geometry.h"
 #include <random>
+
 float get_random()
 {
 	static std::default_random_engine e;
 	static std::uniform_real_distribution<> dis(0, 1); // rage 0 - 1
 	return dis(e);
 }
+
 Geometry::Geometry() {}
 
 Geometry::~Geometry()

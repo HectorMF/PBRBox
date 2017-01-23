@@ -2,9 +2,7 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "glm\glm.hpp"
-
-enum TextureType { Diffuse, Environment };
-
+#include "Environment.h"
 class Material
 {
 public:
@@ -13,12 +11,6 @@ public:
 		shader.bind();
 
 		glUniform3f(glGetUniformLocation(shader.getProgram(), "uLightPos"), 2.0, 2.0, 2.0);
-
-		GLint d = glGetUniformLocation(shader.getProgram(), "skybox");
-
-		glUniform1i(d, 0);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, environment);
 
 		glUniform1i(glGetUniformLocation(shader.getProgram(), "uShadowMap"), 1);
 		glActiveTexture(GL_TEXTURE1);
@@ -44,7 +36,13 @@ public:
 		shader.unbind();
 	}
 
-	GLuint environment;
+	void setEnvironement(Environment* env)
+	{
+		m_environment = env;
+	}
+
+	Environment* m_environment;
+
 	GLuint shadowTex;
 
 	Shader shader;

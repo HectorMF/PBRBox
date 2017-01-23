@@ -129,6 +129,21 @@
     <ClInclude Include="UnlitMaterial.h">
       <Filter>Header Files\Materials</Filter>
     </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Volume.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentTools.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image_write.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -160,18 +175,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\x64\Release\shaders\Diffuse.frag">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shaders\Diffuse.vert">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shaders\EnvMap.frag">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shaders\EnvMap.vert">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
     <None Include="..\x64\Release\shaders\ISPBR.frag">
       <Filter>Resource Files\Shaders</Filter>
     </None>
@@ -208,16 +211,19 @@
     <None Include="..\x64\Release\shaders\Standard.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="..\x64\Release\shaders\FB3PBR.frag">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
-    <None Include="..\x64\Release\shaders\FB3PBR.vert">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
     <None Include="..\x64\Release\shaders\Unlit.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
     <None Include="..\x64\Release\shaders\Unlit.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\PBR.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\PBR.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="Volume.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
   </ItemGroup>

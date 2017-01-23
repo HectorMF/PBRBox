@@ -7,7 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-
+#include <vector>
 #include <GL/glew.h>
 #include "Texture.h"
 
@@ -45,7 +45,7 @@ public:
 
 	unsigned int getProgram() const { return m_program; }
 
-	inline unsigned int getUniform(std::string val)
+	inline int getUniformLocation(std::string val)
 	{
 		return glGetUniformLocation(m_program, val.c_str());
 	}
@@ -63,65 +63,67 @@ public:
 
 	void setUniform(const std::string name, float x, float y, float z)
 	{
-		unsigned int location = getUniform(name);
+		int location = getUniformLocation(name);
 		glUniform3f(location, x, y, z);
 	}
 
 	void setUniform(const std::string name, float x, float y, float z, float w)
 	{
-		unsigned int location = getUniform(name);
+		int location = getUniformLocation(name);
 		glUniform4f(location, x, y, z, w);
 	}
 
 	void setUniform(const std::string name, const glm::vec3 & v)
 	{
-		unsigned int location = getUniform(name);
+		int location = getUniformLocation(name);
 		glUniform3fv(location, 1, glm::value_ptr(v));
 	}
 
 	void setUniform(const std::string name, const glm::vec4 & v)
 	{
-		unsigned int location = getUniform(name);
+		int location = getUniformLocation(name);
 		glUniform4fv(location, 1, glm::value_ptr(v));
 	}
 
 	void setUniform(const std::string name, const glm::mat4 &m)
 	{
-		unsigned int location = getUniform(name);
+		int location = getUniformLocation(name);
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m));
 	}
 
 	void setUniform(const std::string name, const glm::mat3 & m)
 	{
-		unsigned int location = getUniform(name);
+		int location = getUniformLocation(name);
 		glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(m));
 	}
 
 	void setUniform(const std::string name, float val)
 	{
-		unsigned int location = getUniform(name);
+		int location = getUniformLocation(name);
 		glUniform1f(location, val);
 	}
 
 	void setUniform(const std::string name, int val)
 	{
-		unsigned int location = getUniform(name);
+		int location = getUniformLocation(name);
 		glUniform1i(location, val);
 	}
 
 	void setUniform(const std::string name, bool val)
 	{
-		unsigned int location = getUniform(name);
+		int location = getUniformLocation(name);
 		glUniform1i(location, val);
 	}
 
 	void setUniform(const std::string name, Texture texture)
 	{
-		unsigned int location = getUniform(name);
-		glUniform1i(location, m_boundTextures);
-		glActiveTexture(GL_TEXTURE0 + m_boundTextures);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		m_boundTextures++;
+		int location = getUniformLocation(name);
+		if (location >= 0) {
+			glUniform1i(location, m_boundTextures);
+			glActiveTexture(GL_TEXTURE0 + m_boundTextures);
+			glBindTexture(texture.textureType, texture);
+			m_boundTextures++;
+		}
 	}
 
 	// Uses the current shader

@@ -1,13 +1,10 @@
 #version 330 core
-
 in vec3 TexCoords;
+out vec4 fragColor;
 
-out vec4 color;
-
-uniform samplerCube uSkybox;
+uniform samplerCube uSpecularMap;
 
 void main()
 {    
-    color = texture(uSkybox, TexCoords);
+    fragColor = vec4(textureLod(uSpecularMap, TexCoords, 2).rgb, 1);
 }
-  

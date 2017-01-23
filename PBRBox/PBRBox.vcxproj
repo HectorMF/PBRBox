@@ -151,6 +151,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DDS.h" />
     <ClInclude Include="DirectionalLight.h" />
+    <ClInclude Include="EnvironmentTools.h" />
     <ClInclude Include="FluentMesh.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="GeometryUtil.h" />
@@ -166,6 +167,8 @@
     <ClInclude Include="MouseKeyboardInput.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderTarget.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="Shader.h" />
@@ -173,12 +176,14 @@
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="PBRMaterial.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="stb_image_write.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="ToneMapping.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="UnlitMaterial.h" />
+    <ClInclude Include="Volume.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -211,12 +216,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\x64\Release\shaders\Diffuse.frag" />
-    <None Include="..\x64\Release\shaders\Diffuse.vert" />
-    <None Include="..\x64\Release\shaders\EnvMap.frag" />
-    <None Include="..\x64\Release\shaders\EnvMap.vert" />
-    <None Include="..\x64\Release\shaders\FB3PBR.frag" />
-    <None Include="..\x64\Release\shaders\FB3PBR.vert" />
+    <None Include="..\x64\Release\shaders\PBR.frag" />
+    <None Include="..\x64\Release\shaders\PBR.vert" />
     <None Include="..\x64\Release\shaders\ISPBR.frag">
       <DeploymentContent>false</DeploymentContent>
     </None>
@@ -233,6 +234,7 @@
     <None Include="..\x64\Release\shaders\Skybox.vert" />
     <None Include="..\x64\Release\shaders\Standard.frag" />
     <None Include="..\x64\Release\shaders\Standard.vert" />
+    <None Include="Volume.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

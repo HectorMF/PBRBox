@@ -314,7 +314,7 @@ std::vector<Geometry> loadModel(const std::string &file)
 
 			for (int i = 0; i < variableMap["X"].size(); i++)
 			{
-				glm::vec3 point = glm::vec3(variableMap["X"][i], variableMap["Y"][i], variableMap["Z"][i]) * 100.0f;
+				glm::vec3 point = glm::vec3(variableMap["X"][i], variableMap["Y"][i], variableMap["Z"][i]) * 10.0f;
 				//m//inPoint = Min(point, minPoint);
 				//maxPoint = Max(point, maxPoint);
 				Vertex v;

@@ -3,16 +3,19 @@
 #include <string>
 #include <GL/glew.h>
 
-enum class ColorSpace { Gamma, Linear };
+enum class ColorSpace { Gamma, Linear};
+
 class Texture
 {
 public:
 	unsigned int id;
 	operator unsigned int() const { return id; }
+	unsigned int textureType;
 
 	Texture(){}
 	Texture(std::string file, ColorSpace space = ColorSpace::Gamma)
 	{
+		textureType = GL_TEXTURE_2D;
 		int width, height, bpp;
 		unsigned char* image = stbi_load(file.c_str(), &width, &height, &bpp, 4);
 

@@ -44,9 +44,6 @@ private:
 	//environment information
 public:
 	GLuint m_sampler;
-	GLuint m_radianceMap;
-	GLuint m_irradianceMap;
-	GLuint m_specularMap;
 
 	GLuint m_BRDFLUT;
 
@@ -54,7 +51,7 @@ public:
 
 	PBRMaterial()
 	{
-		shader = Shader("shaders\\FB3PBR.vert", "shaders\\FB3PBR.frag", false);
+		shader = Shader("shaders\\PBR.vert", "shaders\\PBR.frag", false);
 		shader.setVersion(400);
 		shader.compile();
 		m_albedo = glm::vec4(1, 1, 1, 1);
@@ -87,31 +84,20 @@ public:
 		}
 
 		glUniform1i(glGetUniformLocation(shader.getProgram(), "uShadowMap"), 8);
-		glActiveTexture(GL_TEXTURE8);
+		glActiveTexture(GL_TEXTURE9);
 		glBindTexture(GL_TEXTURE_2D, shadowTex);
 
-
-		GLint d = glGetUniformLocation(shader.getProgram(), "uRadianceMap");
-		glUniform1i(d, 7);
-		glActiveTexture(GL_TEXTURE7);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_radianceMap);
-
-		GLint d1 = glGetUniformLocation(shader.getProgram(), "uIrradianceMap");
-		glUniform1i(d1, 9);
-		glActiveTexture(GL_TEXTURE9);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
-
-		GLint d2 = glGetUniformLocation(shader.getProgram(), "uSpecularMap");
-		glUniform1i(d2, 10);
-		glActiveTexture(GL_TEXTURE10);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_specularMap);
-		
 		GLint d4 = glGetUniformLocation(shader.getProgram(), "uBRDFLUT");
 		glUniform1i(d4, 11);
 		glActiveTexture(GL_TEXTURE11);
 		glBindTexture(GL_TEXTURE_2D, m_BRDFLUT);
 
-		
+		if (m_environment)
+		{
+			shader.setUniform("uRadianceMap", m_environment->radiance);
+			shader.setUniform("uIrradianceMap", m_environment->irradiance);
+			shader.setUniform("uSpecularMap", m_environment->specular);
+		}
 
 		shader.setUniform("uLightPos", 0.0, 10.0, 0.0);
 

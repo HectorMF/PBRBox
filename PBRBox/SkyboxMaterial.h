@@ -7,11 +7,10 @@
 class SkyboxMaterial : public Material
 {
 public:
-	GLuint m_cubeMap;
 
-
-	SkyboxMaterial()
+	SkyboxMaterial(Environment* environment)
 	{
+		m_environment = environment;
 		shader = Shader("shaders\\Skybox.vert", "shaders\\Skybox.frag");
 	}
 
@@ -19,9 +18,12 @@ public:
 	{
 		shader.bind();
 
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubeMap);
-		glUniform1i(glGetUniformLocation(shader.getProgram(), "uSkybox"), 3);
+		if (m_environment)
+		{
+			shader.setUniform("uRadianceMap", m_environment->radiance);
+			shader.setUniform("uIrradianceMap", m_environment->irradiance);
+			shader.setUniform("uSpecularMap", m_environment->specular);
+		}
 
 	}
 };
