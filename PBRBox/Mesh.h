@@ -7,9 +7,8 @@
 #include "glm\glm.hpp"
 #include "Geometry.h"
 #include "Material.h"
-#include "SceneObject.h"
 
-class Mesh : public SceneObject
+class Mesh
 {
 	friend class ModelLoader;
 public:

@@ -170,7 +170,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="SceneObject.h" />
+    <ClInclude Include="SceneNode.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SkyboxMaterial.h" />
     <ClInclude Include="SpotLight.h" />

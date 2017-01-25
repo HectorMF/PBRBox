@@ -13,7 +13,7 @@ glm::vec3 getHeatMapColor(const float & pressure)
 {
 	const int NUM_COLORS = 5;
 	float value = pressure;
-	float color[NUM_COLORS][3] = { { 0, 0, 1 },{ 0, 1, 1 },{ 0, 1, 0 },{ 1, 1, 0 },{ 1, 0, 0 } };
+	float color[NUM_COLORS][3] = {{ 0, 0, 1 }, { 0, 1, 1 }, { 0, 1, 0 }, { 1, 1, 0 }, { 1, 0, 0 }};
 	// A static array of 4 colors:  (blue,   green,  yellow,  red) using {r,g,b} for each.
 
 	int idx1;        // |-- Our desired color will be between these two indexes in "color".

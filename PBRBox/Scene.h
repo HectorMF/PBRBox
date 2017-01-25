@@ -1,24 +1,23 @@
 #pragma once
 #include "Camera.h"
-#include "SceneObject.h"
+#include "SceneNode.h"
 #include "Mesh.h"
 
 #include <vector>
 class Scene
 {
 public:
-	std::vector<Mesh*> sceneGraph;
+	SceneNode* root;
 	Mesh* skybox;
 
 	~Scene()
 	{
-		for (int i = 0; i < sceneGraph.size(); i++)
-			delete sceneGraph[i];
+		delete root;
 		delete skybox;
 	}
 
-	void add(Mesh* object)
-	{
-		sceneGraph.push_back(object);
-	}
+	//void add(Mesh* object)
+	//{
+	//	root->addChild(object);
+	//}
 };

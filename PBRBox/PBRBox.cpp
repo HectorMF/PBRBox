@@ -81,7 +81,7 @@ void initializeScene()
 
 	shadowTarget = new RenderTarget();
 
-	GLuint brdfLUT = computeBRDFLUT(256); // load_brdf("data\\out128.raw");
+	GLuint brdfLUT = computeBRDFLUT(64); // load_brdf("data\\out128.raw");
 
 	Environment* operatingRoom = new Environment();
 
@@ -106,7 +106,7 @@ void initializeScene()
 	GLuint irradiance = create_texture("data\\arches\\arches_cube_irradiance.dds");
 	GLuint specular = create_texture("data\\arches\\arches_cube_specular.dds");*/
 
-	Volume* vol = new Volume("data\\3L_768x768x768_type_uc_1channels.raw");
+	//Volume* vol = new Volume("data\\3L_768x768x768_type_uc_1channels.raw");
 
 	Model* irrigationTool = new Model("data\\IrrigationTool.obj");
 	

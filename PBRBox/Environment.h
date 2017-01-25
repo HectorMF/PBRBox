@@ -4,6 +4,7 @@
 class Environment
 {
 public:
+	
 	//Blur amount;
 	Texture radiance;
 	Texture irradiance;

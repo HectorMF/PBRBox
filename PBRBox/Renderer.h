@@ -63,7 +63,7 @@ public:
 		int t = glGetUniformLocation(overrideMaterial->shader.getProgram(), "lightSpaceMatrix");
 		glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
-		for (int i = 0; i < scene.sceneGraph.size(); i++)
+		for (int i = 0; i < scene.root->getChildCount(); i++)
 		{
 			t = glGetUniformLocation(overrideMaterial->shader.getProgram(), "model");
 			glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(scene.sceneGraph[i]->transform));
