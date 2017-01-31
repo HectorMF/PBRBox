@@ -80,8 +80,8 @@ void initializeScene()
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	shadowTarget = new RenderTarget();
-
-	GLuint brdfLUT = computeBRDFLUT(64); // load_brdf("data\\out128.raw");
+	stbi_set_flip_vertically_on_load(true);
+	GLuint brdfLUT = loadBRDF("BRDFLUT.png");
 
 	Environment* operatingRoom = new Environment();
 
@@ -111,7 +111,6 @@ void initializeScene()
 	Model* irrigationTool = new Model("data\\IrrigationTool.obj");
 	
 	PBRMaterial* irrigationMat = new PBRMaterial();
-
 	irrigationMat->setEnvironement(operatingRoom);
 	irrigationMat->setAlbedo(glm::vec4(.96f, .96f, .9686f, 1));
 	irrigationMat->setMetalness(1);
@@ -120,11 +119,15 @@ void initializeScene()
 	irrigationMat->m_BRDFLUT = brdfLUT;
 
 	Mesh* irrigation = new Mesh(irrigationTool->m_meshes[0], irrigationMat);
-	irrigation->transform = glm::scale(irrigation->transform, glm::vec3(.05));
-	irrigation->transform = glm::rotate(irrigation->transform, glm::radians(90.0f), glm::vec3(1,0,0));
-	irrigation->transform = glm::rotate(irrigation->transform, glm::radians(90.0f), glm::vec3(0, 0, 1));
-	irrigation->transform = glm::translate(irrigation->transform, glm::vec3(0, 0, 1));
-	scene.add(irrigation);
+	SceneNode* node = new SceneNode();
+	//node->position = glm::vec3(0, 0, 0);
+	//node->scale = glm::vec3(1, 1, 1);
+	node->rotation = glm::rotate(node->rotation, glm::radians(90.0f), glm::vec3(1, 0, 0));
+	//node->m_transform = glm::rotate(node->m_transform, glm::radians(90.0f), glm::vec3(1,0,0));
+	//node->m_transform = glm::rotate(node->m_transform, glm::radians(90.0f), glm::vec3(0, 0, 1));
+	//node->m_transform = glm::translate(node->m_transform, glm::vec3(0, 0, 1));
+	node->mesh = irrigation;
+	scene.root = node;
 
 	Mesh* skyBoxQuad = new Mesh(Shapes::cube(1), new SkyboxMaterial(operatingRoom));
 	scene.skybox = skyBoxQuad;
@@ -165,8 +168,8 @@ void initializeScene()
 
 	mandMat->setDiffuseMap(Texture("data\\mandarine\\mandarine.jpg"));
 	Mesh* mandarine = new Mesh(orange, mandMat);
-	mandarine->transform = glm::translate(mandarine->transform, glm::vec3(0, -2, 0));
-	scene.add(mandarine);
+	//mandarine->transform = glm::translate(mandarine->transform, glm::vec3(0, -2, 0));
+	//scene.add(mandarine);
 
 
 
@@ -190,11 +193,11 @@ void initializeScene()
 
 	hovercraft = new Mesh(hovercraftGeo, hovercraftmat);
 
-	hovercraft->transform = glm::scale(hovercraft->transform, glm::vec3(.01, .01, .01));
-	hovercraft->transform = glm::rotate(hovercraft->transform, glm::radians(90.0f),glm::vec3(1, 0, 0));
-	hovercraft->transform = glm::rotate(hovercraft->transform, glm::radians(180.0f), glm::vec3(0, 1, 0));
-	hovercraft->transform = glm::rotate(hovercraft->transform, glm::radians(90.0f), glm::vec3(0, 0, 1));
-	scene.add(hovercraft);
+	//hovercraft->transform = glm::scale(hovercraft->transform, glm::vec3(.01, .01, .01));
+	//hovercraft->transform = glm::rotate(hovercraft->transform, glm::radians(90.0f),glm::vec3(1, 0, 0));
+	//hovercraft->transform = glm::rotate(hovercraft->transform, glm::radians(180.0f), glm::vec3(0, 1, 0));
+	//hovercraft->transform = glm::rotate(hovercraft->transform, glm::radians(90.0f), glm::vec3(0, 0, 1));
+	//scene.add(hovercraft);
 
 
 
@@ -214,8 +217,8 @@ void initializeScene()
 	skullmat->setMetalness(1);
 	skullmat->setRoughness(.15);
 	Mesh* skull = new Mesh(skullGeo, skullmat);
-	skull->transform = glm::translate(skull->transform, glm::vec3(0, -5, 0));
-	scene.add(skull);
+	//skull->transform = glm::translate(skull->transform, glm::vec3(0, -5, 0));
+	//scene.add(skull);
 
 
 
@@ -228,8 +231,8 @@ void initializeScene()
 	gun1 = new Mesh(gun, gunMat);
 
 	//gun1->transform = glm::scale(gun1->transform, glm::vec3(.5, .5, .5));
-	gun1->transform = glm::translate(gun1->transform, glm::vec3(0, 3, 0));
-	scene.add(gun1);
+	//gun1->transform = glm::translate(gun1->transform, glm::vec3(0, 3, 0));
+	//scene.add(gun1);
 
 
 
@@ -265,12 +268,12 @@ void initializeScene()
 		fluentModel[i].computeTangents();
 		Mesh* fluentMesh = new Mesh(fluentModel[i], fluentMat);
 
-		fluentMesh->transform = glm::translate(fluentMesh->transform, glm::vec3(0,-7,0));
-		scene.add(fluentMesh);
+		//fluentMesh->transform = glm::translate(fluentMesh->transform, glm::vec3(0,-7,0));
+		//scene.add(fluentMesh);
 	}
 
 	depthQuad = new Mesh(Shapes::renderQuad(), depthMat);
-	depthQuad->transform = glm::scale(depthQuad->transform, glm::vec3(.25, .25, 0));
+	//depthQuad->transform = glm::scale(depthQuad->transform, glm::vec3(.25, .25, 0));
 
 	//scene.add(depthQuad);
 
@@ -290,8 +293,8 @@ void initializeScene()
 			diffuseMat1->shadowTex = shadowTarget->depthTexture;
 			diffuseMat1->m_BRDFLUT = brdfLUT;
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
-			sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, 6, z * .5));
-			scene.add(sphere);
+			//sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, 6, z * .5));
+			//scene.add(sphere);
 		}
 	}
 	
@@ -314,8 +317,8 @@ void initializeScene()
 // display function called by glutMainLoop(), gets executed every frame 
 void disp(void)
 {
-	gun1->transform = glm::rotate(gun1->transform, .001f, glm::vec3(0,1,0));
-	hovercraft->transform = glm::rotate(hovercraft->transform, .003f, glm::vec3(0, 0, 1));
+	//gun1->transform = glm::rotate(gun1->transform, .001f, glm::vec3(0,1,0));
+	//hovercraft->transform = glm::rotate(hovercraft->transform, .003f, glm::vec3(0, 0, 1));
 	// if camera has moved, reset the accumulation buffer
 
 	// build a new camera for each frame on the CPU

@@ -31,6 +31,12 @@
     <Filter Include="Resource Files\Shaders">
       <UniqueIdentifier>{d67971bf-7a3d-4083-88f7-1beb46117755}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Component">
+      <UniqueIdentifier>{15a6d52c-db74-4e73-bc3b-afc4b047cde6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CES">
+      <UniqueIdentifier>{b19a08d2-b9d7-46f1-8d27-1c71b7cafe14}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -102,9 +108,6 @@
     <ClInclude Include="Shader.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Transform.h">
-      <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="ToneMapping.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
@@ -144,6 +147,12 @@
     <ClInclude Include="SceneNode.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Entity.h">
+      <Filter>Header Files\CES</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Header Files\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -171,6 +180,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Geometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

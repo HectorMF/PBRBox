@@ -1,9 +1,12 @@
 #pragma once
 
 #include "glm\glm.hpp"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <string>
 #include <vector>
-
+#include "Mesh.h"
+class Scene;
 class SceneNode
 {
 
@@ -21,6 +24,10 @@ protected:
 	unsigned int uID;
 
 public:
+	glm::vec3 position;
+	glm::quat rotation;
+	glm::vec3 scale = glm::vec3(1,1,1);
+
 	Mesh* mesh;
 
 	SceneNode()
@@ -70,6 +77,7 @@ public:
 	Scene* getScene() { return m_scene; }
 
 	unsigned int getChildCount() { return m_children.size(); }
+
 	//right, up, forward matrices
 
 	//localPosition;
@@ -79,9 +87,15 @@ public:
 	//position;
 	//rotation;
 
-	glm::mat4 getTransformMatrix();
+	glm::mat4 getTransformMatrix()
+	{
+		m_transform = glm::mat4();
+		m_transform = glm::scale(m_transform, scale);
+		m_transform *= glm::toMat4(rotation);
+		m_transform = glm::translate(m_transform, position);
+		return m_transform;
+	}
 
-	//void setPosition(gb::Vec3f);
 	//gb::Vec3f getPosition();
 
 	//void setRotationEuler(gb::Vec3f);

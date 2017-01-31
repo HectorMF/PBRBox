@@ -63,12 +63,12 @@ public:
 		int t = glGetUniformLocation(overrideMaterial->shader.getProgram(), "lightSpaceMatrix");
 		glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
-		for (int i = 0; i < scene.root->getChildCount(); i++)
+		//for (int i = 0; i < scene.root->getChildCount(); i++)
 		{
 			t = glGetUniformLocation(overrideMaterial->shader.getProgram(), "model");
-			glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(scene.sceneGraph[i]->transform));
+			glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(scene.root->getTransformMatrix()));
 
-			scene.sceneGraph[i]->render();
+			(scene.root)->mesh->render();
 		}
 		
 		renderTarget->Unbind();
@@ -91,7 +91,7 @@ public:
 			Material* m = (!overrideMaterial) ? (scene.skybox->m_material) : overrideMaterial;
 			m->bind();
 
-			glm::mat4 model = scene.skybox->transform;
+			glm::mat4 model;
 			glm::mat4 view = glm::lookAt(camera.position, camera.position + camera.view, camera.up);
 			glm::mat4 projection = glm::perspective(45.0f, (float)camera.resolution.x / (float)camera.resolution.y, 0.1f, 1000.0f);
 
@@ -119,9 +119,9 @@ public:
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
-		for (int i = 0; i < scene.sceneGraph.size(); i++)
+		//for (int i = 0; i < scene.sceneGraph.size(); i++)
 		{
-			Material* m = (!overrideMaterial)? (scene.sceneGraph[i]->m_material): overrideMaterial;
+			Material* m = (!overrideMaterial)? (scene.root->mesh->m_material): overrideMaterial;
 
 			m->bind();
 
@@ -147,7 +147,7 @@ public:
 			int t = glGetUniformLocation(m->shader.getProgram(), "lightSpaceMatrix");
 			glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
-			glm::mat4 model = scene.sceneGraph[i]->transform;
+			glm::mat4 model = scene.root->getTransformMatrix();
 			glm::mat4 view = glm::lookAt(camera.position, camera.position + camera.view, camera.up);
 			glm::mat4 projection = glm::perspective(45.0f, (float)camera.resolution.x / (float)camera.resolution.y, 0.1f, 1000.0f);
 
@@ -175,7 +175,7 @@ public:
 			glUniform3fv(vd, 1, glm::value_ptr(camera.view));
 			glUniform3fv(vp, 1, glm::value_ptr(camera.position));
 
-			scene.sceneGraph[i]->render();
+			scene.root->mesh->render();
 
 			m->unbind();
 		}

@@ -81,26 +81,29 @@
 			}
 		}
 		return glm::vec2(A / (float)NumSamples, B / (float)NumSamples);
-	}
+	}
+
 	GLuint computeBRDFLUT(int size)
 	{
-		float* imageData = new float[size * size * 2];
+		unsigned char* imageData = new unsigned char[size * size * 4];
 		float step = 1.0f / (float)size;
 		int offset = 0;
-		for (int y = 0; y < size; y++)
+		for (int y = size - 1; y  >= 0; y--)
 		{
 			for (int x = 0; x < size; x++)
 			{
 				glm::vec2 d = IntegrateBRDF(step * (y + .5) , step * (x +.5));
-				imageData[offset + 0] = d.x;
-				imageData[offset + 1] = d.y;
-				offset += 2;
+				imageData[offset + 0] = d.x * 255;
+				imageData[offset + 1] = d.y * 255;
+				imageData[offset + 2] = 0;
+				imageData[offset + 3] = 255;
+				offset += 4;
 			}
 		}
 
-		//stbi_write_png("TestBRDFOut.png", size, size, 4, imageData, 0);
+		stbi_write_png("BGRDFLUT.png", size, size, 4, imageData, 0);
 		
-		GLuint TextureName = 0;
+		/*GLuint TextureName = 0;
 		glGenTextures(1, &TextureName);
 		glBindTexture(GL_TEXTURE_2D, TextureName);
 
@@ -112,7 +115,41 @@
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		delete imageData;
-		return TextureName;
+		return TextureName;*/
+		return 0;
+	}
+
+	GLuint loadBRDF(std::string filename)
+	{
+		GLuint texture;
+		int w;
+		int h;
+		int comp;
+		unsigned char* image = stbi_load(filename.c_str(), &w, &h, &comp, STBI_rgb_alpha);
+
+		if (image == nullptr)
+			throw(std::string("Failed to load texture"));
+
+		glGenTextures(1, &texture);
+
+		glBindTexture(GL_TEXTURE_2D, texture);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		if (comp == 3)
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		else if (comp == 4)
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		stbi_image_free(image);
+
+		return texture;
 	}
 
 

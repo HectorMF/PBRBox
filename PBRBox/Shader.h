@@ -11,7 +11,6 @@
 #include <GL/glew.h>
 #include "Texture.h"
 
-
 #include <glm/gtc/type_ptr.hpp>
 class Shader
 {
