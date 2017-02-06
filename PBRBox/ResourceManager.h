@@ -25,7 +25,8 @@ public:
 			printf("Loader not found\n");
 		else
 			printf("Loader found!\n");
-		return loader->load(filename);
+		ResourceDescriptor<T>* descriptor = loader->loadDescriptor(filename);
+		return loader->load(this, filename, descriptor);
 	}
 
 	template<typename T>

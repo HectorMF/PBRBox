@@ -4,50 +4,60 @@
 
 class TextureDescriptor : public ResourceDescriptor<Texture>
 {
-	void save(std::string filename, Texture* texture)
+protected:
+	unsigned int target;
+	unsigned int colorSpace;
+	unsigned int minFilter;
+	unsigned int magFilter;
+	unsigned int uWrap;
+	unsigned int vWrap;
+	bool generateMM;
+
+public:
+	TextureDescriptor(){}
+
+	TextureDescriptor(std::string filename)
+	{
+		save(filename);
+	}
+
+	void save(std::string filename)
 	{
 		tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
-		tinyxml2::XMLNode* element = doc->InsertEndChild(doc->NewElement("element"));
+		tinyxml2::XMLNode* element = doc->InsertEndChild(doc->NewElement("Parameters"));
+		
+		tinyxml2::XMLElement* tar = doc->NewElement("Target");
+		tar->SetText(target);
 
-		tinyxml2::XMLElement* sub[3] = { doc->NewElement("sub"), doc->NewElement("sub"), doc->NewElement("sub") };
-		for (int i = 0; i<3; ++i) {
-			sub[i]->SetAttribute("attrib", i);
-		}
-		element->InsertEndChild(sub[2]);
-		tinyxml2::XMLNode* comment = element->InsertFirstChild(doc->NewComment("comment"));
-		comment->SetUserData((void*)2);
-		element->InsertAfterChild(comment, sub[0]);
-		element->InsertAfterChild(sub[0], sub[1]);
-		sub[2]->InsertFirstChild(doc->NewText("& Text!"));
+		tinyxml2::XMLElement* space = doc->NewElement("ColorSpace");
+		space->SetText(colorSpace);
+
+		tinyxml2::XMLElement* minF = doc->NewElement("MinFilter");
+		minF->SetText(minFilter);
+
+		tinyxml2::XMLElement* magF = doc->NewElement("MagFilter");
+		magF->SetText(magFilter);
+
+		tinyxml2::XMLElement* uW = doc->NewElement("UWrap");
+		uW->SetText(uWrap);
+
+		tinyxml2::XMLElement* vW = doc->NewElement("VWrap");
+		vW->SetText(vWrap);
+
+		tinyxml2::XMLElement* mip = doc->NewElement("GenerateMipMaps");
+		mip->SetText(generateMM);
+
+		element->InsertEndChild(tar);
+		element->InsertEndChild(space);
+		element->InsertEndChild(minF);
+		element->InsertEndChild(magF);
+		element->InsertEndChild(uW);
+		element->InsertEndChild(vW);
+		element->InsertEndChild(mip);
+
 		doc->Print();
 
-		// And now deletion:
-		element->DeleteChild(sub[2]);
-		doc->DeleteNode(comment);
-
-		element->FirstChildElement()->SetAttribute("attrib", true);
-		element->LastChildElement()->DeleteAttribute("attrib");
-
-		XMLTest("Programmatic DOM", true, doc->FirstChildElement()->FirstChildElement()->BoolAttribute("attrib"));
-		int value = 10;
-		int result = doc->FirstChildElement()->LastChildElement()->QueryIntAttribute("attrib", &value);
-		XMLTest("Programmatic DOM", result, (int)XML_NO_ATTRIBUTE);
-		XMLTest("Programmatic DOM", value, 10);
-
-		doc->Print();
-
-		{
-			XMLPrinter streamer;
-			doc->Print(&streamer);
-			printf("%s", streamer.CStr());
-		}
-		{
-			XMLPrinter streamer(0, true);
-			doc->Print(&streamer);
-			XMLTest("Compact mode", "<element><sub attrib=\"1\"/><sub/></element>", streamer.CStr(), false);
-		}
-		doc->SaveFile("./resources/out/pretty.xml");
-		doc->SaveFile("./resources/out/compact.xml", true);
+		doc->SaveFile((filename + ".gbr").c_str());
 		delete doc;
 	}
 
@@ -56,21 +66,27 @@ class TextureDescriptor : public ResourceDescriptor<Texture>
 		tinyxml2::XMLDocument doc;
 		doc.LoadFile((filename + ".gbr").c_str());
 
-		// Structure of the XML file:
-		// - Element "PLAY"      the root Element, which is the 
-		//                       FirstChildElement of the Document
-		// - - Element "TITLE"   child of the root PLAY Element
-		// - - - Text            child of the TITLE Element
+		tinyxml2::XMLNode* element = doc.FirstChildElement("Parameters");
+		
+		tinyxml2::XMLElement* tar = element->FirstChildElement("Target");
+		target = std::stoi(tar->GetText());
 
-		// Navigate to the title, using the convenience function,
-		// with a dangerous lack of error checking.
-		const char* title = doc.FirstChildElement("PLAY")->FirstChildElement("TITLE")->GetText();
-		printf("Name of play (1): %s\n", title);
+		tinyxml2::XMLElement* space = element->FirstChildElement("ColorSpace");
+		colorSpace = std::stoi(space->GetText());
 
-		// Text is just another Node to TinyXML-2. The more
-		// general way to get to the XMLText:
-		tinyxml2::XMLText* textNode = doc.FirstChildElement("PLAY")->FirstChildElement("TITLE")->FirstChild()->ToText();
-		title = textNode->Value();
-		printf("Name of play (2): %s\n", title);
+		tinyxml2::XMLElement* minF = element->FirstChildElement("MinFilter");
+		minFilter = std::stoi(minF->GetText());
+
+		tinyxml2::XMLElement* magF = element->FirstChildElement("MagFilter");
+		magFilter = std::stoi(magF->GetText());
+
+		tinyxml2::XMLElement* uW = element->FirstChildElement("UWrap");
+		uWrap = std::stoi(uW->GetText());
+
+		tinyxml2::XMLElement* vW = element->FirstChildElement("VWrap");
+		vWrap = std::stoi(vW->GetText());
+
+		tinyxml2::XMLElement* mip = element->FirstChildElement("GenerateMipMaps");
+		generateMM = mip->GetText();
 	}
 };

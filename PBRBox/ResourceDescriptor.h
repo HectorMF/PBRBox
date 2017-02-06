@@ -7,8 +7,14 @@ class ResourceDescriptor
 {
 public:
 	std::string fileName;
+	std::vector<std::string> dependencies;
 
-	
+	bool hasDependencies()
+	{
+		return dependencies.size() > 0;
+	}
+
+
 	//public final Class<T> type;
 	/*public final AssetLoaderParameters params;
 

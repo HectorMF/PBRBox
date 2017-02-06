@@ -25,16 +25,18 @@ class Texture
 public:
 	unsigned int id;
 	operator unsigned int() const { return id; }
-	unsigned int target;
 
+	unsigned int target;
 	ColorSpace colorSpace = ColorSpace::Gamma;
 	Filter minFilter = Filter::MipMapLinearLinear;
 	Filter magFilter = Filter::Linear;
 	Wrap uWrap = Wrap::Repeat;
 	Wrap vWrap = Wrap::Repeat;
+	bool generateMipMaps = true;
+
 	unsigned int width, height;
 	unsigned char* data;
-	bool generateMipMaps = true;
+
 	Texture()
 	{
 		glGenTextures(1, &id);

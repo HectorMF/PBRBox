@@ -11,6 +11,7 @@ public:
 		extensions.push_back(".gbmat");
 	}
 
+
 	Material* load(std::string filename) override
 	{
 

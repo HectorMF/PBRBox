@@ -2,6 +2,7 @@
 #include "Loader.h"
 #include "Texture.h"
 #include "stb_image.h"
+#include "TextureDescriptor.h"
 
 class JPGLoader : public Loader<Texture>
 {
@@ -13,7 +14,12 @@ public:
 		extensions.push_back(".jpeg");
 	}
 
-	Texture* load(std::string filename) override
+	ResourceDescriptor<Texture>* loadDescriptor(std::string filename) override
+	{
+		return new TextureDescriptor(filename);
+	}
+
+	Texture* load(ResourceManager* resourceManager, std::string filename, ResourceDescriptor<Texture>* descriptor) override
 	{
 		int width, height, bpp;
 		unsigned char* image = stbi_load(filename.c_str(), &width, &height, &bpp, 4);
