@@ -45,7 +45,7 @@ private:
 public:
 	GLuint m_sampler;
 
-	GLuint m_BRDFLUT;
+	Texture* m_BRDFLUT;
 
 	Texture m_hammersleyPointMap;
 
@@ -90,13 +90,13 @@ public:
 		GLint d4 = glGetUniformLocation(shader.getProgram(), "uBRDFLUT");
 		glUniform1i(d4, 11);
 		glActiveTexture(GL_TEXTURE11);
-		glBindTexture(GL_TEXTURE_2D, m_BRDFLUT);
+		glBindTexture(GL_TEXTURE_2D, m_BRDFLUT->id);
 
 		if (m_environment)
 		{
-			shader.setUniform("uRadianceMap", m_environment->radiance);
-			shader.setUniform("uIrradianceMap", m_environment->irradiance);
-			shader.setUniform("uSpecularMap", m_environment->specular);
+			shader.setUniform("uRadianceMap", *(m_environment->radiance));
+			shader.setUniform("uIrradianceMap", *(m_environment->irradiance));
+			shader.setUniform("uSpecularMap", *(m_environment->specular));
 		}
 
 		shader.setUniform("uLightPos", 0.0, 10.0, 0.0);

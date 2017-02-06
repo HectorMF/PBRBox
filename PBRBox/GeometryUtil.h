@@ -91,8 +91,8 @@ namespace Shapes
 				temp *= -radius;
 
 				Vertex v;
-				v.position = temp;
-				v.normal= glm::normalize(temp);
+				v.position = glm::vec3(temp.x, temp.y, temp.z);
+				v.normal = glm::normalize(v.position);
 				v.texCoord = glm::vec2(normalizedY, 1 - normalizedZ);
 				sphere.addVertex(v);
 			}

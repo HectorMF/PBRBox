@@ -114,13 +114,12 @@ public:
 		glUniform1i(location, val);
 	}
 
-	void setUniform(const std::string name, Texture texture)
+	void setUniform(const std::string name, Texture& texture)
 	{
 		int location = getUniformLocation(name);
 		if (location >= 0) {
 			glUniform1i(location, m_boundTextures);
-			glActiveTexture(GL_TEXTURE0 + m_boundTextures);
-			glBindTexture(texture.textureType, texture);
+			texture.bind(m_boundTextures);
 			m_boundTextures++;
 		}
 	}

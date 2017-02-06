@@ -1,8 +1,6 @@
 #pragma once
-#pragma once
 
 #include "Material.h"
-#include "MathUtil.h"
 
 class SkyboxMaterial : public Material
 {
@@ -20,9 +18,9 @@ public:
 
 		if (m_environment)
 		{
-			shader.setUniform("uRadianceMap", m_environment->radiance);
-			shader.setUniform("uIrradianceMap", m_environment->irradiance);
-			shader.setUniform("uSpecularMap", m_environment->specular);
+			shader.setUniform("uRadianceMap", *(m_environment->radiance));
+			shader.setUniform("uIrradianceMap", *(m_environment->irradiance));
+			shader.setUniform("uSpecularMap", *(m_environment->specular));
 		}
 
 	}

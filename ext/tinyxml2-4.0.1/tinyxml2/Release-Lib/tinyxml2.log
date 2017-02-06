@@ -1,0 +1,13 @@
+﻿Build started 2/5/2017 11:15:57 PM.
+     1>Project "C:\Users\Javi\Downloads\tinyxml2-4.0.1\tinyxml2-4.0.1\tinyxml2\tinyxml2.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /nologo /W4 /WX- /O2 /Ob2 /Oi /Ot /Oy /GT /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /GF /Gm- /EHsc /MD /GS- /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Release-Lib\\" /Fd"Release-Lib\tinyxml2.pdb" /Gd /TP /analyze- /errorReport:prompt ..\tinyxml2.cpp
+         tinyxml2.cpp
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\Lib.exe /OUT:"C:\Users\Javi\Downloads\tinyxml2-4.0.1\tinyxml2-4.0.1\tinyxml2\Release-Lib\tinyxml2.lib" /NOLOGO /LTCG "Release-Lib\tinyxml2.obj"
+         tinyxml2.vcxproj -> C:\Users\Javi\Downloads\tinyxml2-4.0.1\tinyxml2-4.0.1\tinyxml2\Release-Lib\tinyxml2.lib
+     1>Done Building Project "C:\Users\Javi\Downloads\tinyxml2-4.0.1\tinyxml2-4.0.1\tinyxml2\tinyxml2.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.69

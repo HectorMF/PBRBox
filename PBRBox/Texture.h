@@ -1,67 +1,93 @@
 #pragma once
-#include "stb_image.h"
 #include <string>
 #include <GL/glew.h>
 
-enum class ColorSpace { Gamma, Linear};
+enum class ColorSpace { Gamma = GL_SRGB, Linear = GL_RGBA };
+
+enum class Filter {
+	Nearest = GL_NEAREST, Linear = GL_LINEAR, MipMapNearestNearest = GL_NEAREST_MIPMAP_NEAREST,
+	MipMapNearestLinear = GL_NEAREST_MIPMAP_LINEAR, MipMapLinearNearest = GL_LINEAR_MIPMAP_NEAREST,
+	MipMapLinearLinear = GL_LINEAR_MIPMAP_LINEAR
+};
+
+enum class Wrap
+{
+	Clamp = GL_CLAMP_TO_EDGE, ClampBorder = GL_CLAMP_TO_BORDER, Repeat = GL_REPEAT, MirroredRepeat = GL_MIRRORED_REPEAT
+};
+
+enum class TextureType
+{
+	//2D = GL_TEXTURE_2D
+};
 
 class Texture
 {
 public:
 	unsigned int id;
 	operator unsigned int() const { return id; }
-	unsigned int textureType;
+	unsigned int target;
 
-	Texture(){}
-	Texture(std::string file, ColorSpace space = ColorSpace::Gamma)
+	ColorSpace colorSpace = ColorSpace::Gamma;
+	Filter minFilter = Filter::MipMapLinearLinear;
+	Filter magFilter = Filter::Linear;
+	Wrap uWrap = Wrap::Repeat;
+	Wrap vWrap = Wrap::Repeat;
+	unsigned int width, height;
+	unsigned char* data;
+	bool generateMipMaps = true;
+	Texture()
 	{
-		textureType = GL_TEXTURE_2D;
-		int width, height, bpp;
-		unsigned char* image = stbi_load(file.c_str(), &width, &height, &bpp, 4);
+		glGenTextures(1, &id);
+		target = GL_TEXTURE_2D;
+	}
 
-		glGenTextures(1, &id); /* Texture name generation */
-		glBindTexture(GL_TEXTURE_2D, id); /* Binding of texture name */
-		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear interpolation for magnification filter */
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); /* We will use linear interpolation for minifying filter */
-		if (space == ColorSpace::Gamma)
-		{
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	~Texture()
+	{
+		glDeleteTextures(1, &id);
+		delete data;
+	}
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear interpolation for magnification filter */
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); /* We will use linear interpolation for minifying filter */
-	
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-			glGenerateMipmap(GL_TEXTURE_2D);
-		}/* Texture specification */
-		if (space == ColorSpace::Linear)
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image); /* Texture specification */
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear interpolation for magnification filter */
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); /* We will use linear interpolation for minifying filter */
+	void upload() {
 
-			glGenerateMipmap(GL_TEXTURE_2D);
-		}
+		glBindTexture(target, id); /* Binding of texture name */
+		unsigned int test = static_cast<unsigned int>(colorSpace);
 
-		float aniso;
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glTexImage2D(target, 0, static_cast<unsigned>(colorSpace), width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
+		if(generateMipMaps)
+			glGenerateMipmap(target);
 
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, static_cast<unsigned int>(minFilter));
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, static_cast<unsigned int>(magFilter));
 
-		//printf("Anisotropy %f\n", aniso);
-		//aniso = 1.0f;
-		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
-		//float aniso = 4.0f;
-		//glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
-		//glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
-		//printf("Anisotropy %f\n", aniso);
-		//BGFX_TEXTURE_MIN_ANISOTROPIC | BGFX_TEXTURE_MAG_ANISOTROPIC | BGFX_TEXTURE_U_CLAMP | BGFX_TEXTURE_V_CLAMP,
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, static_cast<unsigned int>(uWrap));
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, static_cast<unsigned int>(vWrap));
+
+		//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+
+		glBindTexture(target, 0);
+	}
+
+	void bind()
+	{
+		glBindTexture(target, id);
+	}
 
 
-		stbi_image_free(image);
+	void bind(unsigned int unit)
+	{
+		glActiveTexture(GL_TEXTURE0 + unit);
+		glBindTexture(target, id);
+	}
+
+	/*void unbind()
+	{
+		glBindTexture()
+	}*/
+
+	void setBorderColor()
+	{
+		//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 	}
 }; 
 

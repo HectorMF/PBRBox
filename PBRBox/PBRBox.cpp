@@ -2,15 +2,18 @@
 //
 
 #include "stdafx.h"
-
-
-#include "stdafx.h"
 #include <GL/glew.h>
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/freeglut.h>
 #endif
+
+#include "ResourceManager.h"
+#include "JPGLoader.h"
+#include "PNGLoader.h"
+
+#include "DDSLoader.h"
 
 #include <sstream>
 #include <iostream>
@@ -39,7 +42,9 @@
 #include "FluentMesh.h"
 #include "Environment.h"
 #include "Volume.h"
-#include "EnvironmentTools.h"
+//#include "EnvironmentTools.h"
+
+
 // test scenes
 
 Camera* hostRendercam = NULL;
@@ -57,6 +62,7 @@ Material* depthMat;
 Mesh* depthQuad;
 Mesh* gun1;
 Mesh* hovercraft;
+ResourceManager* rm;
 /* Handler for window re-size event. Called back when the window first appears and
 whenever the window is re-sized with its new width and height */
 void reshape(GLsizei newwidth, GLsizei newheight)
@@ -75,24 +81,37 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 
 void initializeScene()
 {
-	
+	rm = new ResourceManager();
+
+	rm->addLoader(new JPGLoader());
+	rm->addLoader(new PNGLoader());
+	rm->addLoader(new DDSLoader());
+
+	//assetManager->load<Texture>("BRDFLUT.png");
+
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	shadowTarget = new RenderTarget();
-	stbi_set_flip_vertically_on_load(true);
-	GLuint brdfLUT = loadBRDF("BRDFLUT.png");
+	//stbi_set_flip_vertically_on_load(true);
+
 
 	Environment* operatingRoom = new Environment();
 
-	operatingRoom->radiance.id = create_texture("data\\neuroArm\\neuroArm_cube_radiance.dds");
-	operatingRoom->irradiance.id = create_texture("data\\neuroArm\\neuroArm_cube_irradiance.dds");
-	operatingRoom->specular.id = create_texture("data\\neuroArm\\neuroArm_cube_specular.dds");
+	operatingRoom->radiance = rm->load<Texture>("data\\neuroArm\\neuroArm_cube_radiance.dds");
+	operatingRoom->irradiance = rm->load<Texture>("data\\neuroArm\\neuroArm_cube_irradiance.dds");
+	operatingRoom->specular = rm->load<Texture>("data\\neuroArm\\neuroArm_cube_specular.dds");
 
-	operatingRoom->radiance.textureType = GL_TEXTURE_CUBE_MAP;
-	operatingRoom->irradiance.textureType = GL_TEXTURE_CUBE_MAP;
-	operatingRoom->specular.textureType = GL_TEXTURE_CUBE_MAP;
-
+	stbi_set_flip_vertically_on_load(true);
+	Texture* brdfLUT = rm->load<Texture>("BRDFLUT.png");
+	brdfLUT->generateMipMaps = false;
+	brdfLUT->minFilter = Filter::Nearest;
+	brdfLUT->magFilter = Filter::Nearest;
+	brdfLUT->colorSpace = ColorSpace::Linear;
+	brdfLUT->uWrap = Wrap::Clamp;
+	brdfLUT->vWrap = Wrap::Clamp;
+	brdfLUT->upload();
+	stbi_set_flip_vertically_on_load(false);
 	/*
 	GLuint radiance = create_texture("data\\pisa\\pisa_cube_radiance.dds");
 	GLuint irradiance = create_texture("data\\pisa\\pisa_cube_irradiance.dds");
@@ -132,13 +151,96 @@ void initializeScene()
 	Mesh* skyBoxQuad = new Mesh(Shapes::cube(1), new SkyboxMaterial(operatingRoom));
 	scene.skybox = skyBoxQuad;
 
+	depthMat = new Material();
+	depthMat->shader = Shader("shaders\\Diffuse.vert", "shaders\\Diffuse.frag");
+
+	Model* model = new Model("data\\cerberus\\Cerberus.obj");
+	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
+	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
+
+	Geometry gun = model->m_meshes[0];
+
+
+	GLenum err = glGetError();
+	if (err != GL_NO_ERROR)
+	{
+		printf("OpenGL error %08x\n", err);
+		abort();
+	}
+
+	Texture* norma = rm->load<Texture>("data\\cerberus\\Cerberus_N.jpg");
+	norma->colorSpace = ColorSpace::Linear;
+
+	norma->upload();
+
+
+
+
+
+	Texture* gunA = rm->load<Texture>("data\\cerberus\\Cerberus_A.png");
+	gunA->upload();
+	Texture* gunM = rm->load<Texture>("data\\cerberus\\Cerberus_M.jpg");
+	gunM->upload();
+	Texture* gunR = rm->load<Texture>("data\\cerberus\\Cerberus_R.jpg");
+	gunR->upload();
+
+
 	PBRMaterial* gunMat = new PBRMaterial();
 	gunMat->setEnvironement(operatingRoom);
-	gunMat->setAlbedoMap(Texture("data\\cerberus\\Cerberus_A.png"));
-	gunMat->setMetalnessMap(Texture("data\\cerberus\\Cerberus_M.jpg"));
-	gunMat->setRoughnessMap(Texture("data\\cerberus\\Cerberus_R.jpg"));
-	gunMat->setNormalMap(Texture("data\\cerberus\\Cerberus_N.jpg", ColorSpace::Linear));
+	gunMat->setAlbedoMap(*gunA);
+	gunMat->setMetalnessMap(*gunM);
+	gunMat->setRoughnessMap(*gunR);
+	gunMat->setNormalMap(*norma);
 	gunMat->m_BRDFLUT = brdfLUT;
+
+	Mesh* gun1 = new Mesh(gun, gunMat);
+
+	SceneNode* node2 = new SceneNode();
+	node2->mesh = gun1;
+
+	scene.root = node2;
+
+
+
+	Geometry sphereMesh = Shapes::sphere(.2);
+
+	PBRMaterial* diffuseMat1 = new PBRMaterial();
+
+	diffuseMat1->setEnvironement(operatingRoom);
+	diffuseMat1->setAlbedo(glm::vec4(1, 1, 1, 1));
+	diffuseMat1->setMetalness(1);
+	diffuseMat1->setRoughness(0);
+	diffuseMat1->shadowTex = shadowTarget->depthTexture;
+	diffuseMat1->m_BRDFLUT = brdfLUT;
+	Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
+	//sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, 6, z * .5));
+	SceneNode* node3 = new SceneNode();
+	node3->mesh = sphere;
+	//scene.root = node3;
+
+
+	/*for (int x = -4; x <= 4; x++)
+	{
+		for (int z = -4; z <= 4; z++)
+		{
+
+			PBRMaterial* diffuseMat1 = new PBRMaterial();
+
+			diffuseMat1->setEnvironement(operatingRoom);
+			diffuseMat1->setAlbedo(glm::vec4(1, 1, 1, 1));
+			diffuseMat1->setMetalness((x + 4) / 8.0f);
+			diffuseMat1->setRoughness((z + 4) / 8.0f);
+			diffuseMat1->shadowTex = shadowTarget->depthTexture;
+			diffuseMat1->m_BRDFLUT = brdfLUT;
+			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
+			//sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, 6, z * .5));
+			SceneNode* node2 = new SceneNode();
+			node2->mesh = sphere;
+			scene.root = node2;
+			//scene.add(sphere);
+		}
+	}*/
+	/*
 
 
 	//Resource<Texture>::Load("data\\cerberus\\Cerberus_A.png");
@@ -154,8 +256,7 @@ void initializeScene()
 
 
 
-	depthMat = new Material();
-	depthMat->shader = Shader("shaders\\Diffuse.vert", "shaders\\Diffuse.frag");
+	
 
 
 	Model* mandarineMesh = new Model("data\\mandarine\\Mandarine.obj");
@@ -297,7 +398,7 @@ void initializeScene()
 			//scene.add(sphere);
 		}
 	}
-	
+	*/
 	renderer = new Renderer();
 	renderer->clearColor = glm::vec4(1, 0, 1, 1);
 
@@ -305,7 +406,7 @@ void initializeScene()
 	shadowMat->shader = Shader("shaders\\Shadow.vert", "shaders\\Shadow.frag");
 
 	depthMat->shadowTex = shadowTarget->depthTexture;
-	gunMat->shadowTex = shadowTarget->depthTexture;
+	//gunMat->shadowTex = shadowTarget->depthTexture;
 
 	//Model* model = new Model("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\IrrigationTool.obj");
 	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
@@ -339,16 +440,16 @@ void disp(void)
 
 	renderer->render(scene, *hostRendercam);
 	glDisable(GL_DEPTH_TEST);
-	depthQuad->m_material->bind();
-	depthQuad->render();
-	depthQuad->m_material->unbind();
+//	depthQuad->m_material->bind();
+//	depthQuad->render();
+//	depthQuad->m_material->unbind();
 
 	glEnable(GL_DEPTH_TEST);
 	glutSwapBuffers();
 }
 
 void deleteCudaAndCpuMemory() {
-
+	delete rm;
 	delete hostRendercam;
 	delete interactiveCamera;
 }

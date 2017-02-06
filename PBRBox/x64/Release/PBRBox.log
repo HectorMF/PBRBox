@@ -1,4 +1,4 @@
-﻿Build started 1/29/2017 12:50:39 AM.
+﻿Build started 2/5/2017 8:01:46 PM.
      1>Project "C:\Users\Javi\Documents\GitHub\PBRBox\PBRBox\PBRBox.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\CL.exe /c /I"..\ext\glew-2.0.0\include" /I..\ext\freeglut\include /I"..\ext\glm-0.9.8.1\glm" /I..\ext\assimp\include /I"..\ext\gli-0.8.1.1\gli" /Zi /nologo /W3 /WX- /sdl /Od /Oi /GL /D NDEBUG /D _CONSOLE /D _CRT_SECURE_NO_WARNINGS /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yu"stdafx.h" /Fp"x64\Release\PBRBox.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc140.pdb" /Gd /TP /errorReport:prompt PBRBox.cpp
@@ -14,7 +14,7 @@
      1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
      1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(54): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
      1>c:\users\javi\documents\github\pbrbox\pbrbox\Geometry.h(106): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Shader.h(137): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\Shader.h(136): warning C4018: '<': signed/unsigned mismatch
      1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(79): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
      1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(84): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
      1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(104): warning C4018: '<': signed/unsigned mismatch
@@ -22,7 +22,7 @@
      1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(127): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
      1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(128): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
      1>c:\users\javi\documents\github\pbrbox\pbrbox\SceneNode.h(79): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Renderer.h(80): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\Renderer.h(81): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
      1>c:\users\javi\documents\github\pbrbox\pbrbox\MathUtil.h(8): warning C4305: 'argument': truncation from 'double' to 'float'
      1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(28): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
      1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(48): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
@@ -34,15 +34,20 @@
      1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(338): warning C4018: '<': signed/unsigned mismatch
      1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(348): warning C4018: '<': signed/unsigned mismatch
      1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(357): warning C4018: '<': signed/unsigned mismatch
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\EnvironmentTools.h(30): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\EnvironmentTools.h(95): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\EnvironmentTools.h(96): warning C4244: '=': conversion from 'float' to 'unsigned char', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\EnvironmentTools.h(97): warning C4244: '=': conversion from 'float' to 'unsigned char', possible loss of data
-     1>PBRBox.cpp(65): warning C4244: 'argument': conversion from 'GLsizei' to 'float', possible loss of data
-     1>PBRBox.cpp(218): warning C4305: 'argument': truncation from 'double' to 'const float'
-     1>PBRBox.cpp(262): warning C4305: 'argument': truncation from 'double' to 'const float'
-     1>PBRBox.cpp(280): warning C4305: 'argument': truncation from 'double' to 'float'
-     1>PBRBox.cpp(375): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+     1>PBRBox.cpp(71): warning C4244: 'argument': conversion from 'GLsizei' to 'float', possible loss of data
+     1>PBRBox.cpp(205): warning C4305: 'argument': truncation from 'double' to 'float'
+     1>PBRBox.cpp(476): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+     1>c:\users\javi\documents\github\pbrbox\pbrbox\ResourceManager.h(43): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+         c:\users\javi\documents\github\pbrbox\pbrbox\ResourceManager.h(18): note: see reference to function template instantiation 'Loader<Texture> *ResourceManager::getLoader<T>(std::type_index,std::string)' being compiled
+                 with
+                 [
+                     T=Texture
+                 ]
+         PBRBox.cpp(101): note: see reference to function template instantiation 'T *ResourceManager::load<Texture>(std::string)' being compiled
+                 with
+                 [
+                     T=Texture
+                 ]
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Javi\Documents\GitHub\PBRBox\x64\Release\PBRBox.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"..\ext\glew-2.0.0\lib\Release\x64" /LIBPATH:..\ext\freeglut\lib\x64 /LIBPATH:..\ext\assimp\lib\Release opengl32.lib glew32.lib freeglut.lib assimp.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Javi\Documents\GitHub\PBRBox\x64\Release\PBRBox.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG:incremental /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Javi\Documents\GitHub\PBRBox\x64\Release\PBRBox.lib" /MACHINE:X64 x64\Release\Camera.obj
          x64\Release\Geometry.obj
@@ -55,13 +60,13 @@
          x64\Release\SceneNode.obj
          x64\Release\stdafx.obj
          Generating code
-         10 of 2115 functions ( 0.5%) were compiled, the rest were copied from previous compilation.
-           9 functions were new in current compilation
-           7 functions had inline decision re-evaluated but remain unchanged
+         1 of 2501 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+           0 functions were new in current compilation
+           1 functions had inline decision re-evaluated but remain unchanged
          Finished generating code
          PBRBox.vcxproj -> C:\Users\Javi\Documents\GitHub\PBRBox\x64\Release\PBRBox.exe
      1>Done Building Project "C:\Users\Javi\Documents\GitHub\PBRBox\PBRBox\PBRBox.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:03.00
+Time Elapsed 00:00:02.35

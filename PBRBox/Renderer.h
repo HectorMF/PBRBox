@@ -64,6 +64,7 @@ public:
 		glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
 		//for (int i = 0; i < scene.root->getChildCount(); i++)
+		if(scene.root)
 		{
 			t = glGetUniformLocation(overrideMaterial->shader.getProgram(), "model");
 			glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(scene.root->getTransformMatrix()));
@@ -119,7 +120,8 @@ public:
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
-		//for (int i = 0; i < scene.sceneGraph.size(); i++)
+		//for (int i = 0; i < scene.sce.size(); i++)
+		if(scene.root)
 		{
 			Material* m = (!overrideMaterial)? (scene.root->mesh->m_material): overrideMaterial;
 

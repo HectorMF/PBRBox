@@ -6,7 +6,7 @@ class Environment
 public:
 	
 	//Blur amount;
-	Texture radiance;
-	Texture irradiance;
-	Texture specular;
+	Texture* radiance;
+	Texture* irradiance;
+	Texture* specular;
 };
