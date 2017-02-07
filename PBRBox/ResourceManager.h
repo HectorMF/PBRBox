@@ -12,6 +12,7 @@ class ResourceManager
 	std::map<std::string, std::string> aliasMap;
 	std::map<std::string, Resource*> resources;
 
+
 public:
 	ResourceManager(){}
 	~ResourceManager(){}
@@ -25,7 +26,12 @@ public:
 			printf("Loader not found\n");
 		else
 			printf("Loader found!\n");
+
 		ResourceDescriptor<T>* descriptor = loader->loadDescriptor(filename);
+
+		for (int i = 0; i < descriptor->dependencies.size(); i++)
+			load(descriptor->dependencies[i]);
+
 		return loader->load(this, filename, descriptor);
 	}
 

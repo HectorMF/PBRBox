@@ -14,9 +14,8 @@ protected:
 	bool generateMM;
 
 public:
-	TextureDescriptor(){}
 
-	TextureDescriptor(std::string filename)
+	TextureDescriptor(std::string filename): ResourceDescriptor(filename)
 	{
 		save(filename);
 	}

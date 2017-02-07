@@ -6,8 +6,11 @@ template<typename T>
 class ResourceDescriptor
 {
 public:
+
 	std::string fileName;
 	std::vector<std::string> dependencies;
+
+	ResourceDescriptor(std::string filename) : fileName(filename) {}
 
 	bool hasDependencies()
 	{
