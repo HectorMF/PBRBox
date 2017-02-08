@@ -3,8 +3,6 @@
 #include <typeindex>
 #include <typeinfo>
 #include <vector>
-#include "ResourceDescriptor.h"
-#include "tinyxml2.h"
 
 class ResourceManager;
 
@@ -27,9 +25,7 @@ public:
 	{
 	}
 
-	virtual ResourceDescriptor<T>* loadDescriptor(std::string filename) = 0;
-
-	virtual T* load(ResourceManager* resourceManager, std::string filename, ResourceDescriptor<T>* descriptor) = 0;
+	virtual T* load(ResourceManager* resourceManager, std::string filename, T* obj) = 0;
 
 	std::type_index getResourceType()
 	{

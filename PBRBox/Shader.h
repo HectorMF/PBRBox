@@ -10,12 +10,14 @@
 #include <vector>
 #include <GL/glew.h>
 #include "Texture.h"
-
+#include "ResourceManager.h"
 #include <glm/gtc/type_ptr.hpp>
-class Shader
+class Shader : public ResourceBase
 {
 	std::string m_version;
 public:
+	void foo() {}
+
 	GLuint m_program;
 
 	std::string vertexCode;
@@ -108,18 +110,24 @@ public:
 		glUniform1i(location, val);
 	}
 
+	void setUniform(const std::string name, unsigned int val)
+	{
+		int location = getUniformLocation(name);
+		glUniform1ui(location, val);
+	}
+
 	void setUniform(const std::string name, bool val)
 	{
 		int location = getUniformLocation(name);
 		glUniform1i(location, val);
 	}
 
-	void setUniform(const std::string name, Texture& texture)
+	void setUniform(const std::string name, ResourceHandle<Texture> texture)
 	{
 		int location = getUniformLocation(name);
 		if (location >= 0) {
 			glUniform1i(location, m_boundTextures);
-			texture.bind(m_boundTextures);
+			texture->bind(m_boundTextures);
 			m_boundTextures++;
 		}
 	}

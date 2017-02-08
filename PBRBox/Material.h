@@ -36,12 +36,12 @@ public:
 		shader.unbind();
 	}
 
-	void setEnvironement(Environment* env)
+	void setEnvironment(ResourceHandle<Environment> env)
 	{
 		m_environment = env;
 	}
 
-	Environment* m_environment;
+	ResourceHandle<Environment> m_environment;
 
 	GLuint shadowTex;
 

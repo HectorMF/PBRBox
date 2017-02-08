@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cereal>
+	<value0>
+		<value0>data\Environments\neuroArm\neuroArm_cube_radiance.dds</value0>
+		<value1>data\Environments\neuroArm\neuroArm_cube_irradiance.dds</value1>
+		<value2>data\Environments\neuroArm\neuroArm_cube_specular.dds</value2>
+		<value3>data\Environments\BRDFLUT.png</value3>
+	</value0>
+</cereal>
+

@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <GL/glew.h>
+#include "ResourceBase.h"
 
 enum class ColorSpace { Gamma = GL_SRGB, Linear = GL_RGBA };
 
@@ -20,13 +21,15 @@ enum class TextureType
 	//2D = GL_TEXTURE_2D
 };
 
-class Texture
+class Texture : public ResourceBase
 {
 public:
+	void foo() {}
+
 	unsigned int id;
 	operator unsigned int() const { return id; }
 
-	unsigned int target;
+	unsigned int target = GL_TEXTURE_2D;
 	ColorSpace colorSpace = ColorSpace::Gamma;
 	Filter minFilter = Filter::MipMapLinearLinear;
 	Filter magFilter = Filter::Linear;
@@ -37,19 +40,21 @@ public:
 	unsigned int width, height;
 	unsigned char* data;
 
+	bool hasBeenUploaded = false;
 	Texture()
-	{
+	{	
 		glGenTextures(1, &id);
-		target = GL_TEXTURE_2D;
 	}
 
 	~Texture()
 	{
-		glDeleteTextures(1, &id);
+		if(hasBeenUploaded)
+			glDeleteTextures(1, &id);
 		delete data;
 	}
 
 	void upload() {
+		hasBeenUploaded = true;
 
 		glBindTexture(target, id); /* Binding of texture name */
 		unsigned int test = static_cast<unsigned int>(colorSpace);

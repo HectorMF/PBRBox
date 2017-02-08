@@ -3,6 +3,7 @@
 #include <bitset>
 #include "Material.h"
 #include "MathUtil.h"
+#include "ResourceHandle.h"
 
 class PBRMaterial : public Material 
 {
@@ -24,11 +25,11 @@ private:
 	float m_metalness;
 	float m_roughness;
 
-	Texture m_albedoMap;
-	Texture m_normalMap;
-	Texture m_roughnessMap;
-	Texture m_metalnessMap;
-	Texture m_ambientOcclusion;
+	ResourceHandle<Texture> m_albedoMap;
+	ResourceHandle<Texture> m_normalMap;
+	ResourceHandle<Texture> m_roughnessMap;
+	ResourceHandle<Texture> m_metalnessMap;
+	ResourceHandle<Texture> m_ambientOcclusion;
 
 	enum TextureMap
 	{
@@ -43,11 +44,6 @@ private:
 
 	//environment information
 public:
-	GLuint m_sampler;
-
-	Texture* m_BRDFLUT;
-
-	Texture m_hammersleyPointMap;
 
 	PBRMaterial()
 	{
@@ -87,16 +83,16 @@ public:
 		glActiveTexture(GL_TEXTURE9);
 		glBindTexture(GL_TEXTURE_2D, shadowTex);
 
-		GLint d4 = glGetUniformLocation(shader.getProgram(), "uBRDFLUT");
-		glUniform1i(d4, 11);
-		glActiveTexture(GL_TEXTURE11);
-		glBindTexture(GL_TEXTURE_2D, m_BRDFLUT->id);
-
-		if (m_environment)
+		//GLint d4 = glGetUniformLocation(shader.getProgram(), "uBRDFLUT");
+		//glUniform1i(d4, 11);
+		//glActiveTexture(GL_TEXTURE11);
+		//glBindTexture(GL_TEXTURE_2D, m_environment->brdf->id);
+		if (m_environment.uid > 0)
 		{
-			shader.setUniform("uRadianceMap", *(m_environment->radiance));
-			shader.setUniform("uIrradianceMap", *(m_environment->irradiance));
-			shader.setUniform("uSpecularMap", *(m_environment->specular));
+			shader.setUniform("uRadianceMap", m_environment->radiance);
+			shader.setUniform("uIrradianceMap", m_environment->irradiance);
+			shader.setUniform("uSpecularMap", m_environment->specular);
+			shader.setUniform("uBRDFLUT", m_environment->brdf);
 		}
 
 		shader.setUniform("uLightPos", 0.0, 10.0, 0.0);
@@ -120,10 +116,10 @@ public:
 			shader.setUniform("uNormal", m_normalMap);
 
 		if (m_permutation[TextureMap::AmbientOcclusion])
-			shader.setUniform("uAmbientOcclusion", m_ambientOcclusion);
+			shader.setUniform("uAmbientOcclusion", m_ambientOcclusion->id);
 	}
 
-	void setAmbientOcclusionMap(const Texture& ao)
+	void setAmbientOcclusionMap(ResourceHandle<Texture> ao)
 	{
 		m_ambientOcclusion = ao;
 		checkBit(TextureMap::AmbientOcclusion, true);
@@ -134,13 +130,13 @@ public:
 		m_albedo = albedo;
 	}
 
-	void setAlbedoMap(const Texture& albedo)
+	void setAlbedoMap(ResourceHandle<Texture> albedo)
 	{
 		m_albedoMap = albedo;
 		checkBit(TextureMap::Albedo, true);
 	}
 
-	void setNormalMap(const Texture& normals)
+	void setNormalMap(ResourceHandle<Texture> normals)
 	{
 		m_normalMap = normals;
 		checkBit(TextureMap::Normals, true);
@@ -152,7 +148,7 @@ public:
 		checkBit(TextureMap::Metalness, false);
 	}
 
-	void setMetalnessMap(const Texture& metalness)
+	void setMetalnessMap(ResourceHandle<Texture> metalness)
 	{
 		m_metalnessMap = metalness;
 		checkBit(TextureMap::Metalness, true);
@@ -164,7 +160,7 @@ public:
 		checkBit(TextureMap::Roughness, false);
 	}
 
-	void setRoughnessMap(const Texture& roughness)
+	void setRoughnessMap(ResourceHandle<Texture> roughness)
 	{
 		m_roughnessMap = roughness;
 		checkBit(TextureMap::Roughness, true);

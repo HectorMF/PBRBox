@@ -41,6 +41,7 @@
 #include "DDS.h"
 #include "FluentMesh.h"
 #include "Environment.h"
+#include "EnvironmentLoader.h"
 #include "Volume.h"
 //#include "EnvironmentTools.h"
 
@@ -81,37 +82,33 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 
 void initializeScene()
 {
+	glEnable(GL_FRAMEBUFFER_SRGB);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
 	rm = new ResourceManager();
 
 	rm->addLoader(new JPGLoader());
 	rm->addLoader(new PNGLoader());
 	rm->addLoader(new DDSLoader());
-
-	//assetManager->load<Texture>("BRDFLUT.png");
-
-	glEnable(GL_FRAMEBUFFER_SRGB);
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	rm->addLoader(new EnvironmentLoader());
 
 	shadowTarget = new RenderTarget();
-	//stbi_set_flip_vertically_on_load(true);
+
+	ResourceHandle<Environment> operatingRoom = rm->load<Environment>("data\\Environments\\Winter.gbenv");
 
 
-	Environment* operatingRoom = new Environment();
 
-	operatingRoom->radiance = rm->load<Texture>("data\\neuroArm\\neuroArm_cube_radiance.dds");
-	operatingRoom->irradiance = rm->load<Texture>("data\\neuroArm\\neuroArm_cube_irradiance.dds");
-	operatingRoom->specular = rm->load<Texture>("data\\neuroArm\\neuroArm_cube_specular.dds");
 
-	stbi_set_flip_vertically_on_load(true);
-	Texture* brdfLUT = rm->load<Texture>("BRDFLUT.png");
-	brdfLUT->generateMipMaps = false;
-	brdfLUT->minFilter = Filter::Nearest;
-	brdfLUT->magFilter = Filter::Nearest;
-	brdfLUT->colorSpace = ColorSpace::Linear;
-	brdfLUT->uWrap = Wrap::Clamp;
-	brdfLUT->vWrap = Wrap::Clamp;
-	brdfLUT->upload();
-	stbi_set_flip_vertically_on_load(false);
+
+
+	// new Environment();
+	
+	//operatingRoom->radiance = rm->load<Texture>("data\\neuroArm\\neuroArm_cube_radiance.dds");
+	//operatingRoom->irradiance = rm->load<Texture>("data\\neuroArm\\neuroArm_cube_irradiance.dds");
+	//operatingRoom->specular = rm->load<Texture>("data\\neuroArm\\neuroArm_cube_specular.dds");
+
+	
+	//operatingRoom->brdf = brdfLUT;
 	/*
 	GLuint radiance = create_texture("data\\pisa\\pisa_cube_radiance.dds");
 	GLuint irradiance = create_texture("data\\pisa\\pisa_cube_irradiance.dds");
@@ -130,12 +127,11 @@ void initializeScene()
 	Model* irrigationTool = new Model("data\\IrrigationTool.obj");
 	
 	PBRMaterial* irrigationMat = new PBRMaterial();
-	irrigationMat->setEnvironement(operatingRoom);
+	irrigationMat->setEnvironment(operatingRoom);
 	irrigationMat->setAlbedo(glm::vec4(.96f, .96f, .9686f, 1));
 	irrigationMat->setMetalness(1);
 	irrigationMat->setRoughness(.05f);
 	irrigationMat->shadowTex = shadowTarget->depthTexture;
-	irrigationMat->m_BRDFLUT = brdfLUT;
 
 	Mesh* irrigation = new Mesh(irrigationTool->m_meshes[0], irrigationMat);
 	SceneNode* node = new SceneNode();
@@ -159,39 +155,22 @@ void initializeScene()
 	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
 
 	Geometry gun = model->m_meshes[0];
-
-
-	GLenum err = glGetError();
-	if (err != GL_NO_ERROR)
-	{
-		printf("OpenGL error %08x\n", err);
-		abort();
-	}
-
-	Texture* norma = rm->load<Texture>("data\\cerberus\\Cerberus_N.jpg");
-	norma->colorSpace = ColorSpace::Linear;
-
-	norma->upload();
-
-
-
-
-
-	Texture* gunA = rm->load<Texture>("data\\cerberus\\Cerberus_A.png");
-	gunA->upload();
-	Texture* gunM = rm->load<Texture>("data\\cerberus\\Cerberus_M.jpg");
-	gunM->upload();
-	Texture* gunR = rm->load<Texture>("data\\cerberus\\Cerberus_R.jpg");
-	gunR->upload();
-
+	
+	ResourceHandle<Texture> gunA = rm->load<Texture>("data\\cerberus\\Cerberus_A.png");
+	ResourceHandle<Texture> gunM = rm->load<Texture>("data\\cerberus\\Cerberus_M.jpg");
+	ResourceHandle<Texture> gunR = rm->load<Texture>("data\\cerberus\\Cerberus_R.jpg");
+	ResourceHandle<Texture> gunN = rm->load<Texture>("data\\cerberus\\Cerberus_N.jpg");
 
 	PBRMaterial* gunMat = new PBRMaterial();
-	gunMat->setEnvironement(operatingRoom);
-	gunMat->setAlbedoMap(*gunA);
-	gunMat->setMetalnessMap(*gunM);
-	gunMat->setRoughnessMap(*gunR);
-	gunMat->setNormalMap(*norma);
-	gunMat->m_BRDFLUT = brdfLUT;
+	gunMat->setEnvironment(operatingRoom);
+	gunMat->setAlbedoMap(gunA);
+	gunMat->setMetalnessMap(gunM);
+	gunMat->setRoughnessMap(gunR);
+	gunMat->setNormalMap(gunN);
+	gunMat->shadowTex = shadowTarget->depthTexture;
+
+
+
 
 	Mesh* gun1 = new Mesh(gun, gunMat);
 
@@ -206,12 +185,12 @@ void initializeScene()
 
 	PBRMaterial* diffuseMat1 = new PBRMaterial();
 
-	diffuseMat1->setEnvironement(operatingRoom);
+	diffuseMat1->setEnvironment(operatingRoom);
 	diffuseMat1->setAlbedo(glm::vec4(1, 1, 1, 1));
 	diffuseMat1->setMetalness(1);
 	diffuseMat1->setRoughness(0);
 	diffuseMat1->shadowTex = shadowTarget->depthTexture;
-	diffuseMat1->m_BRDFLUT = brdfLUT;
+
 	Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 	//sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, 6, z * .5));
 	SceneNode* node3 = new SceneNode();

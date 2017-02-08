@@ -11,14 +11,8 @@ public:
 		extensions.push_back(".dds");
 	}
 
-	ResourceDescriptor<Texture>* loadDescriptor(std::string filename) override
+	Texture* load(ResourceManager* resourceManager, std::string filename, Texture* tex) override
 	{
-		return new TextureDescriptor(filename);
-	}
-
-	Texture* load(ResourceManager* resourceManager, std::string filename, ResourceDescriptor<Texture>* descriptor) override
-	{
-		Texture* tex = new Texture();
 		gli::texture Texture = gli::load(filename);
 		if (Texture.empty())
 			return nullptr;

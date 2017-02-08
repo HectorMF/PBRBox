@@ -3,23 +3,59 @@
 #include <typeindex>
 #include <typeinfo>
 #include "Loader.h"
-#include "Resource.h"
+
+#include <cereal/archives/xml.hpp>
+#include <fstream>
+
+#include "ResourceSerialization.h"
+#include "ResourceBase.h"
+#include "ResourceHandle.h"
 
 class ResourceManager
 {
+	static unsigned int UUIDGEN;
 	std::map<std::type_index, std::map<std::string, void*>> loaders;
 
-	std::map<std::string, std::string> aliasMap;
-	std::map<std::string, Resource*> resources;
+	std::map<std::string, unsigned int> fileNameMap;
 
+	std::map<std::string, unsigned int> aliasMap;
+	std::map<unsigned int, std::shared_ptr<ResourceBase>> resources;
 
 public:
-	ResourceManager(){}
-	~ResourceManager(){}
+	ResourceManager()
+	{
+
+	}
+	~ResourceManager()
+	{
+		//cleanup loaders
+		for (auto const& entry1 : loaders)
+		{
+			for (auto const& entry2 : entry1.second)
+			{
+				delete entry2.second;
+			}
+		}
+	}
 
 	template<typename T>
-	T* load(std::string filename)
+	T* get(unsigned int id)
 	{
+		return static_cast<T*>(resources[id].get());
+	}
+
+	template<typename T>
+	ResourceHandle<T> load(std::string filename)
+	{
+		if (fileNameMap.find(filename) != fileNameMap.end())
+		{
+			ResourceHandle<T> handle;
+			handle.filePath = filename;
+			handle.uid = fileNameMap[filename];
+			handle.manager = this;
+			return handle;
+		}
+
 		std::type_index type = std::type_index(typeid(T));
 		Loader<T>* loader = getLoader<T>(type, filename);
 		if (loader == nullptr)
@@ -27,12 +63,39 @@ public:
 		else
 			printf("Loader found!\n");
 
-		ResourceDescriptor<T>* descriptor = loader->loadDescriptor(filename);
+		std::shared_ptr<T> resource;
 
-		for (int i = 0; i < descriptor->dependencies.size(); i++)
-			load(descriptor->dependencies[i]);
+		std::ifstream file(filename + ".xml");
+		if (file)
+		{
+			cereal::XMLInputArchive archive(file);	
+			archive(resource);
+		}
+		else
+		{
+			resource = std::make_shared<T>();
+		}
 
-		return loader->load(this, filename, descriptor);
+		loader->load(this, filename, resource.get());
+
+		//resource->filePath = filename;
+		//resource->uniqueID = UUIDGEN;
+	
+		//resource->manager = this;
+
+		resources[UUIDGEN] = resource;
+		fileNameMap[filename] = UUIDGEN;
+
+		ResourceHandle<T> handle;
+		handle.filePath = filename;
+		handle.uid = UUIDGEN;
+		handle.manager = this;
+
+		UUIDGEN++;
+		//for (int i = 0; i < descriptor->dependencies.size(); i++)
+			//load(descriptor->dependencies[i]);
+
+		return handle;// loader->load(this, filename, descriptor);
 	}
 
 	template<typename T>

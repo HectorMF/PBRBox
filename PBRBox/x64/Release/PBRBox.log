@@ -1,127 +1,49 @@
-﻿Build started 2/6/2017 8:22:26 PM.
-     1>Project "C:\Users\Javi\Documents\GitHub\PBRBox\PBRBox\PBRBox.vcxproj" on node 2 (Build target(s)).
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\CL.exe /c /I"..\ext\glew-2.0.0\include" /I..\ext\freeglut\include /I"..\ext\glm-0.9.8.1\glm" /I..\ext\assimp\include /I"..\ext\gli-0.8.1.1\gli" /I"..\ext\tinyxml2-4.0.1" /Zi /nologo /W3 /WX- /sdl /Od /Oi /GL /D NDEBUG /D _CONSOLE /D _CRT_SECURE_NO_WARNINGS /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yc"stdafx.h" /Fp"x64\Release\PBRBox.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc140.pdb" /Gd /TP /errorReport:prompt stdafx.cpp
-         stdafx.cpp
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\CL.exe /c /I"..\ext\glew-2.0.0\include" /I..\ext\freeglut\include /I"..\ext\glm-0.9.8.1\glm" /I..\ext\assimp\include /I"..\ext\gli-0.8.1.1\gli" /I"..\ext\tinyxml2-4.0.1" /Zi /nologo /W3 /WX- /sdl /Od /Oi /GL /D NDEBUG /D _CONSOLE /D _CRT_SECURE_NO_WARNINGS /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"x64\Release\\" /Fd"x64\Release\vc140.pdb" /Gd /TP /errorReport:prompt Camera.cpp Geometry.cpp Mesh.cpp Model.cpp ModelInstance.cpp ModelLoader.cpp ModelNode.cpp SceneNode.cpp
-         Camera.cpp
-     1>Camera.cpp(9): warning C4305: '=': truncation from 'double' to 'float'
-     1>Camera.cpp(11): warning C4305: '=': truncation from 'double' to 'float'
-     1>Camera.cpp(61): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-     1>Camera.cpp(78): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-     1>Camera.cpp(83): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-     1>Camera.cpp(89): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-     1>Camera.cpp(117): warning C4305: 'argument': truncation from 'double' to 'float'
-     1>Camera.cpp(127): warning C4305: 'initializing': truncation from 'double' to 'float'
-     1>Camera.cpp(128): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-     1>Camera.cpp(132): warning C4305: 'initializing': truncation from 'double' to 'float'
-     1>Camera.cpp(144): warning C4305: 'initializing': truncation from 'double' to 'float'
-         Geometry.cpp
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Geometry.h(106): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-     1>Geometry.cpp(8): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
-     1>Geometry.cpp(22): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-     1>Geometry.cpp(27): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-     1>Geometry.cpp(32): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-     1>Geometry.cpp(149): warning C4018: '<': signed/unsigned mismatch
-     1>Geometry.cpp(154): warning C4018: '<': signed/unsigned mismatch
-     1>Geometry.cpp(222): warning C4018: '<': signed/unsigned mismatch
-     1>Geometry.cpp(265): warning C4018: '<': signed/unsigned mismatch
-         Mesh.cpp
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Geometry.h(106): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Shader.h(136): warning C4018: '<': signed/unsigned mismatch
-         Model.cpp
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(54): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Geometry.h(106): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Shader.h(136): warning C4018: '<': signed/unsigned mismatch
-         ModelInstance.cpp
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(54): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Geometry.h(106): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Shader.h(136): warning C4018: '<': signed/unsigned mismatch
-         ModelLoader.cpp
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(54): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Geometry.h(106): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Shader.h(136): warning C4018: '<': signed/unsigned mismatch
-     1>ModelLoader.cpp(30): warning C4018: '<': signed/unsigned mismatch
-     1>ModelLoader.cpp(51): warning C4018: '<': signed/unsigned mismatch
-     1>ModelLoader.cpp(68): warning C4018: '<': signed/unsigned mismatch
-     1>ModelLoader.cpp(110): warning C4018: '<': signed/unsigned mismatch
-     1>ModelLoader.cpp(130): warning C4018: '<': signed/unsigned mismatch
-         ModelNode.cpp
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(54): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-         SceneNode.cpp
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Geometry.h(106): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Shader.h(136): warning C4018: '<': signed/unsigned mismatch
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\SceneNode.h(79): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\CL.exe /c /I"..\ext\glew-2.0.0\include" /I..\ext\freeglut\include /I"..\ext\glm-0.9.8.1\glm" /I..\ext\assimp\include /I"..\ext\gli-0.8.1.1\gli" /I"..\ext\tinyxml2-4.0.1" /Zi /nologo /W3 /WX- /sdl /Od /Oi /GL /D NDEBUG /D _CONSOLE /D _CRT_SECURE_NO_WARNINGS /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yu"stdafx.h" /Fp"x64\Release\PBRBox.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc140.pdb" /Gd /TP /errorReport:prompt PBRBox.cpp
-         PBRBox.cpp
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\TextureDescriptor.h(90): warning C4800: 'const char *': forcing value to bool 'true' or 'false' (performance warning)
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(38): warning C4305: 'argument': truncation from 'double' to 'float'
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(39): warning C4305: 'argument': truncation from 'double' to 'float'
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(40): warning C4305: 'argument': truncation from 'double' to 'float'
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(41): warning C4305: 'argument': truncation from 'double' to 'float'
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(67): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(68): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(72): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(77): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\ModelNode.h(54): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Geometry.h(106): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Shader.h(136): warning C4018: '<': signed/unsigned mismatch
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(79): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(84): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(104): warning C4018: '<': signed/unsigned mismatch
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(126): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(127): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(128): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\SceneNode.h(79): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\Renderer.h(81): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\MathUtil.h(8): warning C4305: 'argument': truncation from 'double' to 'float'
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(28): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(48): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(64): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(65): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(82): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(189): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(332): warning C4018: '<': signed/unsigned mismatch
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(338): warning C4018: '<': signed/unsigned mismatch
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(348): warning C4018: '<': signed/unsigned mismatch
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(357): warning C4018: '<': signed/unsigned mismatch
-     1>PBRBox.cpp(71): warning C4244: 'argument': conversion from 'GLsizei' to 'float', possible loss of data
-     1>PBRBox.cpp(205): warning C4305: 'argument': truncation from 'double' to 'float'
-     1>PBRBox.cpp(476): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\ResourceManager.h(49): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-         c:\users\javi\documents\github\pbrbox\pbrbox\ResourceManager.h(23): note: see reference to function template instantiation 'Loader<Texture> *ResourceManager::getLoader<T>(std::type_index,std::string)' being compiled
-                 with
-                 [
-                     T=Texture
-                 ]
-         PBRBox.cpp(101): note: see reference to function template instantiation 'T *ResourceManager::load<Texture>(std::string)' being compiled
-                 with
-                 [
-                     T=Texture
-                 ]
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Javi\Documents\GitHub\PBRBox\x64\Release\PBRBox.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"..\ext\glew-2.0.0\lib\Release\x64" /LIBPATH:..\ext\freeglut\lib\x64 /LIBPATH:..\ext\assimp\lib\Release /LIBPATH:"..\ext\tinyxml2-4.0.1\tinyxml2\bin\x64-Release-Dll" opengl32.lib glew32.lib freeglut.lib assimp.lib tinyxml2.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Javi\Documents\GitHub\PBRBox\x64\Release\PBRBox.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG:incremental /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Javi\Documents\GitHub\PBRBox\x64\Release\PBRBox.lib" /MACHINE:X64 x64\Release\Camera.obj
-         x64\Release\Geometry.obj
-         x64\Release\Mesh.obj
-         x64\Release\Model.obj
-         x64\Release\ModelInstance.obj
-         x64\Release\ModelLoader.obj
-         x64\Release\ModelNode.obj
-         x64\Release\PBRBox.obj
-         x64\Release\SceneNode.obj
-         x64\Release\stdafx.obj
-         Generating code
-     1>c:\users\javi\documents\github\pbrbox\pbrbox\modelloader.cpp(37): warning C4715: 'ModelLoader::load': not all control paths return a value
-         All 2684 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
-         Finished generating code
-         PBRBox.vcxproj -> C:\Users\Javi\Documents\GitHub\PBRBox\x64\Release\PBRBox.exe
-     1>Done Building Project "C:\Users\Javi\Documents\GitHub\PBRBox\PBRBox\PBRBox.vcxproj" (Build target(s)).
-
-Build succeeded.
-
-Time Elapsed 00:00:08.43
+﻿  PBRBox.cpp
+c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(38): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(39): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(40): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(41): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(67): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(68): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(72): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(77): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\ModelNode.h(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\ModelNode.h(54): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\Geometry.h(106): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\Shader.h(144): warning C4018: '<': signed/unsigned mismatch
+c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(79): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(84): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(104): warning C4018: '<': signed/unsigned mismatch
+c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(126): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(127): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\GeometryUtil.h(128): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\SceneNode.h(79): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\Renderer.h(81): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\MathUtil.h(8): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\hector\documents\github\pbrbox\pbrbox\FluentMesh.h(28): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\FluentMesh.h(48): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\FluentMesh.h(64): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\FluentMesh.h(65): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\FluentMesh.h(82): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\FluentMesh.h(189): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\hector\documents\github\pbrbox\pbrbox\FluentMesh.h(332): warning C4018: '<': signed/unsigned mismatch
+c:\users\hector\documents\github\pbrbox\pbrbox\FluentMesh.h(338): warning C4018: '<': signed/unsigned mismatch
+c:\users\hector\documents\github\pbrbox\pbrbox\FluentMesh.h(348): warning C4018: '<': signed/unsigned mismatch
+c:\users\hector\documents\github\pbrbox\pbrbox\FluentMesh.h(357): warning C4018: '<': signed/unsigned mismatch
+PBRBox.cpp(72): warning C4244: 'argument': conversion from 'GLsizei' to 'float', possible loss of data
+PBRBox.cpp(184): warning C4305: 'argument': truncation from 'double' to 'float'
+PBRBox.cpp(455): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+c:\users\hector\documents\github\pbrbox\pbrbox\ResourceManager.h(118): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  c:\users\hector\documents\github\pbrbox\pbrbox\ResourceManager.h(60): note: see reference to function template instantiation 'Loader<Texture> *ResourceManager::getLoader<T>(std::type_index,std::string)' being compiled
+          with
+          [
+              T=Texture
+          ]
+  c:\users\hector\documents\github\pbrbox\pbrbox\EnvironmentLoader.h(26): note: see reference to function template instantiation 'ResourceHandle<Texture> ResourceManager::load<Texture>(std::string)' being compiled
+     Creating library C:\Users\Hector\Documents\GitHub\PBRBox\x64\Release\PBRBox.lib and object C:\Users\Hector\Documents\GitHub\PBRBox\x64\Release\PBRBox.exp
+  Generating code
+  32 of 9384 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    35 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  PBRBox.vcxproj -> C:\Users\Hector\Documents\GitHub\PBRBox\x64\Release\PBRBox.exe
