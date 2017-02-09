@@ -2,6 +2,7 @@
 #include <string>
 #include <GL/glew.h>
 #include "ResourceBase.h"
+#include "TextureData.h"
 
 enum class ColorSpace { Gamma = GL_SRGB, Linear = GL_RGBA };
 
@@ -37,8 +38,10 @@ public:
 	Wrap vWrap = Wrap::Repeat;
 	bool generateMipMaps = true;
 
-	unsigned int width, height;
-	unsigned char* data;
+	TextureData* data;
+
+	//unsigned int width, height;
+	//unsigned char* data;
 
 	bool hasBeenUploaded = false;
 	Texture()
@@ -59,7 +62,8 @@ public:
 		glBindTexture(target, id); /* Binding of texture name */
 		unsigned int test = static_cast<unsigned int>(colorSpace);
 
-		glTexImage2D(target, 0, static_cast<unsigned>(colorSpace), width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		unsigned int t = GL_UNSIGNED_BYTE;
+		glTexImage2D(target, 0, static_cast<unsigned>(colorSpace), data->getWidth(), data->getHeight(), 0, data->getFormat(), data->getDataType(), data->getData());
 
 		if(generateMipMaps)
 			glGenerateMipmap(target);

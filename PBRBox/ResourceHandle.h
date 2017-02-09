@@ -11,6 +11,7 @@ public:
 	std::string filePath;
 	ResourceManager* manager;
 
+	operator T*() const { return manager->get<T>(uid); }
 
 	T* operator -> ()
 	{
