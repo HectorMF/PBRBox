@@ -33,6 +33,4 @@ public:
 	
 		return env;
 	}
-
-
 };

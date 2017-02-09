@@ -55,6 +55,14 @@ public:
 			handle.manager = this;
 			return handle;
 		}
+		if (filename == "")
+		{
+			ResourceHandle<T> handle;
+			handle.filePath = filename;
+			handle.uid = fileNameMap[filename];
+			handle.manager = this;
+			return handle;
+		}
 
 		std::type_index type = std::type_index(typeid(T));
 		Loader<T>* loader = getLoader<T>(type, filename);
@@ -82,7 +90,6 @@ public:
 		//resource->uniqueID = UUIDGEN;
 	
 		//resource->manager = this;
-
 		resources[UUIDGEN] = resource;
 		fileNameMap[filename] = UUIDGEN;
 

@@ -12,7 +12,7 @@
 #include "ResourceManager.h"
 #include "JPGLoader.h"
 #include "PNGLoader.h"
-
+#include "MaterialLoader.h"
 #include "DDSLoader.h"
 
 #include <sstream>
@@ -91,15 +91,11 @@ void initializeScene()
 	rm->addLoader(new PNGLoader());
 	rm->addLoader(new DDSLoader());
 	rm->addLoader(new EnvironmentLoader());
+	rm->addLoader(new MaterialLoader());
 
 	shadowTarget = new RenderTarget();
 
-	ResourceHandle<Environment> operatingRoom = rm->load<Environment>("data\\Environments\\Winter.gbenv");
-
-
-
-
-
+	ResourceHandle<Environment> operatingRoom = rm->load<Environment>("data\\Environments\\OR.gbenv");
 
 	// new Environment();
 	
@@ -150,12 +146,22 @@ void initializeScene()
 	depthMat = new Material();
 	depthMat->shader = Shader("shaders\\Diffuse.vert", "shaders\\Diffuse.frag");
 
-	Model* model = new Model("data\\cerberus\\Cerberus.obj");
+
+
+
+	Model* model = new Model("data\\head\\Infinite-Level_02.OBJ");
+
+
 	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
 	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
 
 	Geometry gun = model->m_meshes[0];
 	
+	/*
+	Model* model = new Model("data\\cerberus\\Cerberus.obj");
+
+	Geometry gun = model->m_meshes[0];
+
 	ResourceHandle<Texture> gunA = rm->load<Texture>("data\\cerberus\\Cerberus_A.png");
 	ResourceHandle<Texture> gunM = rm->load<Texture>("data\\cerberus\\Cerberus_M.jpg");
 	ResourceHandle<Texture> gunR = rm->load<Texture>("data\\cerberus\\Cerberus_R.jpg");
@@ -168,15 +174,36 @@ void initializeScene()
 	gunMat->setRoughnessMap(gunR);
 	gunMat->setNormalMap(gunN);
 	gunMat->shadowTex = shadowTarget->depthTexture;
+	
+	std::ofstream file("GunMat.gbmat");
+	if (file)
+	{
+		cereal::XMLOutputArchive archive(file);
+		archive(*gunMat);
+	}
+	*/
 
+	//ResourceHandle<PBRMaterial> gunMat = rm->load<PBRMaterial>("GunMat.gbmat");
 
+	ResourceHandle<Texture> gunA = rm->load<Texture>("data\\head\\Map-COL.jpg");
+	//ResourceHandle<Texture> gunR = rm->load<Texture>("data\\head\\NormalMap.dds");
+//	ResourceHandle<Texture> gunN = rm->load<Texture>("data\\head\\Infinite-Level_02_Tangent_SmoothUV.jpg");
+	//ResourceHandle<Texture> gunAO = rm->load<Texture>("data\\head\\SpecularAOMap.dds");
+
+	PBRMaterial* gunMat = new PBRMaterial();
+	gunMat->setEnvironment(operatingRoom);
+	gunMat->setAlbedoMap(gunA); //setAlbedo(glm::vec4(255, 219, 145, 255) / 255.0f); //
+	gunMat->setMetalness(0);
+	gunMat->setRoughness(0);
+//	gunMat->setNormalMap(gunN);
+	gunMat->shadowTex = shadowTarget->depthTexture;
 
 
 	Mesh* gun1 = new Mesh(gun, gunMat);
 
 	SceneNode* node2 = new SceneNode();
 	node2->mesh = gun1;
-
+	node2->scale = glm::vec3(6, 6, 6);
 	scene.root = node2;
 
 

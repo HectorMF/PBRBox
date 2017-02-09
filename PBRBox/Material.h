@@ -3,9 +3,13 @@
 #include "Texture.h"
 #include "glm\glm.hpp"
 #include "Environment.h"
-class Material
+#include "ResourceBase.h"
+
+class Material : public ResourceBase
 {
 public:
+	void foo(){}
+
 	virtual void bind()
 	{
 		shader.bind();

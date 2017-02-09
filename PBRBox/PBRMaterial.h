@@ -7,7 +7,7 @@
 
 class PBRMaterial : public Material 
 {
-private:
+public:
 
 	void checkBit(int pos, bool val)
 	{
@@ -53,7 +53,7 @@ public:
 		m_albedo = glm::vec4(1, 1, 1, 1);
 		m_roughness = .5f;
 		m_metalness = 0.0;
-		m_dirty = false;
+		m_dirty = true;
 		m_bUseVertexColors = false;
 	}
 
@@ -89,31 +89,31 @@ public:
 		//glBindTexture(GL_TEXTURE_2D, m_environment->brdf->id);
 		if (m_environment.uid > 0)
 		{
-			shader.setUniform("uRadianceMap", m_environment->radiance);
-			shader.setUniform("uIrradianceMap", m_environment->irradiance);
-			shader.setUniform("uSpecularMap", m_environment->specular);
-			shader.setUniform("uBRDFLUT", m_environment->brdf);
+			shader.setUniform("uRadianceMap", *m_environment->radiance.operator->());
+			shader.setUniform("uIrradianceMap", *m_environment->irradiance.operator->());
+			shader.setUniform("uSpecularMap", *m_environment->specular.operator->());
+			shader.setUniform("uBRDFLUT", *m_environment->brdf.operator->());
 		}
 
 		shader.setUniform("uLightPos", 0.0, 10.0, 0.0);
 
 		if (m_permutation[TextureMap::Albedo])
-			shader.setUniform("uAlbedo", m_albedoMap);
+			shader.setUniform("uAlbedo",* m_albedoMap.operator->());
 		else
 			shader.setUniform("uAlbedo", sRGBToLinear(m_albedo));
 
 		if (m_permutation[TextureMap::Roughness])
-			shader.setUniform("uRoughness", m_roughnessMap);
+			shader.setUniform("uRoughness", *m_roughnessMap.operator->());
 		else
 			shader.setUniform("uRoughness", m_roughness);
 
 		if (m_permutation[TextureMap::Metalness])
-			shader.setUniform("uMetalness", m_metalnessMap);
+			shader.setUniform("uMetalness", * m_metalnessMap.operator->());
 		else
 			shader.setUniform("uMetalness", m_metalness);
 
 		if (m_permutation[TextureMap::Normals])
-			shader.setUniform("uNormal", m_normalMap);
+			shader.setUniform("uNormal", *m_normalMap.operator->());
 
 		if (m_permutation[TextureMap::AmbientOcclusion])
 			shader.setUniform("uAmbientOcclusion", m_ambientOcclusion->id);

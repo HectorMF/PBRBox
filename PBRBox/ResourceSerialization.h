@@ -8,3 +8,5 @@
 
 #include "TextureSerializer.h"
 #include "EnvironmentSerializer.h"
+#include "ShaderSerializer.h"
+#include "PBRMaterialSerializer.h"

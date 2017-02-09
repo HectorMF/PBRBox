@@ -18,9 +18,9 @@ public:
 
 		if (m_environment.uid > 0)
 		{
-			shader.setUniform("uRadianceMap", m_environment->radiance);
-			shader.setUniform("uIrradianceMap", m_environment->irradiance);
-			shader.setUniform("uSpecularMap", m_environment->specular);
+			shader.setUniform("uRadianceMap", *m_environment->radiance.operator->());
+			shader.setUniform("uIrradianceMap", *m_environment->irradiance.operator->());
+			shader.setUniform("uSpecularMap", *m_environment->specular.operator->());
 		}
 
 	}

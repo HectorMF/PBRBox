@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cereal>
+	<value0>
+		<value0>data\Environments\Winter.gbenv</value0>
+		<value1>data\cerberus\Cerberus_A.png</value1>
+		<value2></value2>
+		<value3>data\cerberus\Cerberus_M.jpg</value3>
+		<value4>data\cerberus\Cerberus_R.jpg</value4>
+		<value5>data\cerberus\Cerberus_N.jpg</value5>
+		<value6>1</value6>
+		<value7>1</value7>
+		<value8>1</value8>
+		<value9>1</value9>
+		<value10>0</value10>
+		<value11>0.5</value11>
+		<value12>false</value12>
+		<value13>
+			<type>0</type>
+			<data>15</data>
+		</value13>
+	</value0>
+</cereal>
+

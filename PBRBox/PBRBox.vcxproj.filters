@@ -46,6 +46,9 @@
     <Filter Include="Header Files\Resources\Serializers">
       <UniqueIdentifier>{d7f23526-21dd-4dbd-8a71-fe32518ed358}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Resources\Serializers\Materials">
+      <UniqueIdentifier>{8fed88cb-7f41-464b-8465-84a9e5b7ac82}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -191,6 +194,15 @@
     </ClInclude>
     <ClInclude Include="ResourceHandle.h">
       <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderSerializer.h">
+      <Filter>Header Files\Resources\Serializers</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderLoader.h">
+      <Filter>Header Files\Resources\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="PBRMaterialSerializer.h">
+      <Filter>Header Files\Resources\Serializers\Materials</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

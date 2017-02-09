@@ -171,6 +171,7 @@
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="ModelNode.h" />
     <ClInclude Include="MouseKeyboardInput.h" />
+    <ClInclude Include="PBRMaterialSerializer.h" />
     <ClInclude Include="PNGLoader.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderTarget.h" />
@@ -181,6 +182,8 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneNode.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShaderLoader.h" />
+    <ClInclude Include="ShaderSerializer.h" />
     <ClInclude Include="SkyboxMaterial.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="PBRMaterial.h" />

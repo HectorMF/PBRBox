@@ -10,15 +10,19 @@
 #include <vector>
 #include <GL/glew.h>
 #include "Texture.h"
-#include "ResourceManager.h"
 #include <glm/gtc/type_ptr.hpp>
 class Shader : public ResourceBase
 {
-	std::string m_version;
+
 public:
+	std::string m_version;
 	void foo() {}
 
 	GLuint m_program;
+
+	std::string vertexPath;
+	std::string fragmentPath;
+	bool autoCompile;
 
 	std::string vertexCode;
 	std::string fragmentCode;
@@ -122,12 +126,12 @@ public:
 		glUniform1i(location, val);
 	}
 
-	void setUniform(const std::string name, ResourceHandle<Texture> texture)
+	void setUniform(const std::string name, Texture& texture)
 	{
 		int location = getUniformLocation(name);
 		if (location >= 0) {
 			glUniform1i(location, m_boundTextures);
-			texture->bind(m_boundTextures);
+			texture.bind(m_boundTextures);
 			m_boundTextures++;
 		}
 	}
@@ -209,6 +213,10 @@ public:
 	// Constructor generates the shader on the fly
 	Shader(const GLchar* vertexPath, const GLchar* fragmentPath, bool autoCompile = true)
 	{
+		this->vertexPath = vertexPath;
+		this->fragmentPath = fragmentPath;
+		this->autoCompile = autoCompile;
+
 		m_boundTextures = 0;
 		// 1. Retrieve the vertex/fragment source code from filePath
 		std::ifstream vShaderFile;
