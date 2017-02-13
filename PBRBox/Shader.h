@@ -192,7 +192,7 @@ public:
 		{
 			glGetShaderInfoLog(fragment, 2048, NULL, infoLog);
 			std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-		}
+		} 
 		// Shader Program
 		m_program = glCreateProgram();
 		glAttachShader(m_program, vertex);

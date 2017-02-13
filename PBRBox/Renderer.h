@@ -14,6 +14,8 @@ public:
 	float clearDepth;
 	glm::vec2 windowSize;
 
+	RenderTarget* shadowTarget;
+
 	Renderer()
 	{
 		renderTarget = nullptr;
@@ -42,21 +44,65 @@ public:
 		renderTarget = nullptr;
 	}
 
+	void renderNodeShadow(SceneNode* node)
+	{
+		if (node->mesh != nullptr)
+		{
+			Material* m = (!overrideMaterial) ? (node->mesh->m_material) : overrideMaterial;
+
+			m->bind();
+
+			glm::mat4 biasMatrix(
+				0.5, 0.0, 0.0, 0.0,
+				0.0, 0.5, 0.0, 0.0,
+				0.0, 0.0, 0.5, 0.0,
+				0.5, 0.5, 0.5, 1.0
+				);
+
+			//glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
+			//int t = glGetUniformLocation(m->shader, "uDepthBiasMatrix");
+			//glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(depthBiasMVP));
+
+			GLfloat near_plane = 1.0f, far_plane = 60.0f;
+			glm::mat4 lightProjection = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, near_plane, far_plane);
+			glm::mat4 lightView = glm::lookAt(glm::vec3(0.0f, 20.0f, 0.0f),
+				glm::vec3(0.0f, 0.0f, 0.0f),
+				glm::vec3(1.0f, 0.0f, 0.0f));
+
+			glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+			int t = glGetUniformLocation(m->shader.getProgram(), "lightSpaceMatrix");
+			glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+			glm::mat4 model = node->getWorldMatrix();
+	
+			t = glGetUniformLocation(overrideMaterial->shader.getProgram(), "model");
+			glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(model));
+
+			node->mesh->render();
+
+			m->unbind();
+		}
+
+		for (int i = 0; i < node->getChildCount(); i++)
+			renderNodeShadow(node->getChild(i));
+	}
+
 	void renderShadow(Scene& scene)
 	{
 		overrideMaterial->bind();
 		renderTarget->Bind();
 
-		glViewport(0, 0, 2048, 2048);
+		glViewport(0, 0, 4096, 4096);
 		glClearDepth(1.0);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		//glEnable(GL_DEPTH_TEST);
 		
-		GLfloat near_plane = 1.0f, far_plane = 7.5f;
-		glm::mat4 lightProjection = glm::ortho(-3.0f, 3.0f, -3.0f, 3.0f, near_plane, far_plane);
-		glm::mat4 lightView = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
+		GLfloat near_plane = 1.0f, far_plane = 60.0f;
+		glm::mat4 lightProjection = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, near_plane, far_plane);
+		glm::mat4 lightView = glm::lookAt(glm::vec3(0.0f, 20.0f, 0.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::vec3(1.0f, 0.0f, 0.0f));
 
 		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
@@ -65,13 +111,8 @@ public:
 
 		//renderNode(SceneNode* node, Camera& camera);
 		//for (int i = 0; i < scene.root->getChildCount(); i++)
-		/*if(scene.root)
-		{
-			t = glGetUniformLocation(overrideMaterial->shader.getProgram(), "model");
-			glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(scene.root->getWorldMatrix()));
 
-			(scene.root)->mesh->render();
-		}*/
+		renderNodeShadow(scene.root);
 		
 		renderTarget->Unbind();
 		overrideMaterial->unbind();
@@ -103,7 +144,6 @@ public:
 			glm::vec4 viewDir = view * model * glm::vec4(1, 0, 0, 0);
 
 			view = glm::mat4(glm::mat3(view));
-
 
 			m->shader.setUniform("camera.position", camera.position);
 			m->shader.setUniform("camera.viewDirection", camera.view);
@@ -146,11 +186,11 @@ public:
 			//int t = glGetUniformLocation(m->shader, "uDepthBiasMatrix");
 			//glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(depthBiasMVP));
 
-			GLfloat near_plane = 1.0f, far_plane = 7.5f;
-			glm::mat4 lightProjection = glm::ortho(-3.0f, 3.0f, -3.0f, 3.0f, near_plane, far_plane);
-			glm::mat4 lightView = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
+			GLfloat near_plane = 1.0f, far_plane = 60.0f;
+			glm::mat4 lightProjection = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, near_plane, far_plane);
+			glm::mat4 lightView = glm::lookAt(glm::vec3(0.0f, 20.0f, 0.0f),
 				glm::vec3(0.0f, 0.0f, 0.0f),
-				glm::vec3(0.0f, 1.0f, 0.0f));
+				glm::vec3(1.0f, 0.0f, 0.0f));
 
 			glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
@@ -166,6 +206,9 @@ public:
 			glm::mat4 transView = glm::transpose(view);
 			glm::vec4 viewDir = view * model * glm::vec4(1, 0, 0, 0);
 
+			m->shader.setUniform("uShadowMap", 13);
+			glActiveTexture(GL_TEXTURE0 + 13);
+			glBindTexture(GL_TEXTURE_2D, shadowTarget->depthTexture);
 
 			GLint vp = glGetUniformLocation(m->shader.getProgram(), "camera.position");
 			GLint vd = glGetUniformLocation(m->shader.getProgram(), "camera.viewDirection");

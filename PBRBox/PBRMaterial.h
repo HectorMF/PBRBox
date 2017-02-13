@@ -78,13 +78,10 @@ public:
 			m_dirty = false;
 		}
 
-		if (m_environment.uid > 0)
-		{
-			shader.setUniform("uRadianceMap", *m_environment->radiance.operator->());
-			shader.setUniform("uIrradianceMap", *m_environment->irradiance.operator->());
-			shader.setUniform("uSpecularMap", *m_environment->specular.operator->());
-			shader.setUniform("uBRDFLUT", *m_environment->brdf.operator->());
-		}
+		shader.setUniform("uRadianceMap", *m_environment->radiance.operator->());
+		shader.setUniform("uIrradianceMap", *m_environment->irradiance.operator->());
+		shader.setUniform("uSpecularMap", *m_environment->specular.operator->());
+		shader.setUniform("uBRDFLUT", *m_environment->brdf.operator->());
 
 		if (m_permutation[TextureMap::Albedo])
 			shader.setUniform("uAlbedo",* m_albedoMap.operator->());

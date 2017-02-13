@@ -2,4 +2,5 @@
 # ToolType: PolyMesh3D
 # www.zbrush.com
 newmtl defaultMat
-map_Kd Infinite-Level_02.bmp
+map_Kd textures_head\Map-COL.jpg
+map_Kn textures_head\Infinite-Level_02_Tangent_SmoothUV.jpg

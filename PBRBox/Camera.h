@@ -9,6 +9,17 @@
 #define scrwidth 1280
 #define scrheight 720
 
+
+
+
+
+
+
+
+
+
+
+
 // Camera struct, used to store interactive camera data, copied to the GPU and used by CUDA for each frame
 struct Camera {
 	glm::vec2 resolution;

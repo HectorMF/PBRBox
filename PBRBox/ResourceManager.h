@@ -19,6 +19,7 @@ class ResourceManager
 	std::map<std::string, unsigned int> fileNameMap;
 
 	std::map<std::string, unsigned int> aliasMap;
+	std::map<std::type_index, unsigned int> defaultMap;
 	std::map<unsigned int, std::shared_ptr<ResourceBase>> resources;
 
 public:
@@ -39,9 +40,20 @@ public:
 	}
 
 	template<typename T>
+	void setDefault(std::string filename)
+	{
+		int id = fileNameMap[filename];
+		defaultMap[std::type_index(typeid(T))] = id;
+	}
+
+
+	template<typename T>
 	T* get(unsigned int id)
 	{
-		return static_cast<T*>(resources[id].get());
+		if(id > 0)
+			return static_cast<T*>(resources[id].get());
+		else
+			return static_cast<T*>(resources[defaultMap[std::type_index(typeid(T))]].get());
 	}
 
 	template<typename T>
@@ -55,19 +67,30 @@ public:
 			handle.manager = this;
 			return handle;
 		}
+
+		std::type_index type = std::type_index(typeid(T));
+
 		if (filename == "")
 		{
 			ResourceHandle<T> handle;
-			handle.filePath = filename;
-			handle.uid = fileNameMap[filename];
+			handle.filePath = "";
+			handle.uid = defaultMap[type];
 			handle.manager = this;
 			return handle;
 		}
 
-		std::type_index type = std::type_index(typeid(T));
+		
 		Loader<T>* loader = getLoader<T>(type, filename);
 		if (loader == nullptr)
+		{
 			printf("Loader not found\n");
+			ResourceHandle<T> handle;
+			handle.filePath = "";
+			handle.uid = defaultMap[type];
+			handle.manager = this;
+			return handle;
+	
+		}
 		else
 			printf("Loader found!\n");
 

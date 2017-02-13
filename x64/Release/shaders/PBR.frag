@@ -507,7 +507,7 @@ void main()
 	//color = pow(color, vec3(1/2.2));
 
 	float shadow = ShadowCalculation(fragPosLightSpace, WSPosition, N);   
-	shadow = min(shadow, 0.35);
+	shadow = min(shadow, 0.6);
 	//color *=  (1.0 - shadow);
 	//vec4 t = texture2D( uBRDFLUT, fs_in.uv);
 	
@@ -581,5 +581,5 @@ void main()
 
 	//
 
-	fragColor = vec4(Lo + computeIBL_UE4(N, V, diffuseColor, roughness, specularColor), 1.0f);//  vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb, 1.0);
+	fragColor = vec4((Lo + computeIBL_UE4(N, V, diffuseColor, roughness, specularColor)) *  (1.0 - shadow), 1.0f);//  vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb, 1.0);
 }

@@ -47,7 +47,7 @@
 #include "Volume.h"
 //#include "EnvironmentTools.h"
 
-
+#include "Animation\Animation.h"
 // test scenes
 
 Camera* hostRendercam = NULL;
@@ -68,6 +68,8 @@ Mesh* hovercraft;
 ResourceManager* rm;
 SceneNode* node2;
 SceneNode* node3;
+
+TweenManager* tm;
 /* Handler for window re-size event. Called back when the window first appears and
 whenever the window is re-sized with its new width and height */
 void reshape(GLsizei newwidth, GLsizei newheight)
@@ -89,6 +91,8 @@ void initializeScene()
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
+	tm = new TweenManager();
+
 	rm = new ResourceManager();
 
 	rm->addLoader(new JPGLoader());
@@ -99,7 +103,11 @@ void initializeScene()
 	rm->addLoader(new MaterialLoader());
 	rm->addLoader(new ModelLoader());
 
-	ResourceHandle<Environment> operatingRoom = rm->load<Environment>("data\\Environments\\Pisa.gbenv");
+	rm->load<Texture>("Error.png");
+	ResourceHandle<Environment> operatingRoom = rm->load<Environment>("data\\Environments\\Arches.gbenv");
+
+	rm->setDefault<Texture>("Error.png");
+	rm->setDefault<Environment>("data\\Environments\\Arches.gbenv");
 
 	scene.environment = operatingRoom;
 
@@ -129,22 +137,27 @@ void initializeScene()
 	//Volume* vol = new Volume("data\\3L_768x768x768_type_uc_1channels.raw");
 
 	ResourceHandle<Model> irrigationTool = rm->load<Model>("data\\IrrigationTool.obj");
-	
+
 	PBRMaterial* irrigationMat = new PBRMaterial();
 	irrigationMat->setEnvironment(operatingRoom);
 	irrigationMat->setAlbedo(glm::vec4(.96f, .96f, .9686f, 1));
 	irrigationMat->setMetalness(1);
 	irrigationMat->setRoughness(.05f);
 
-	Mesh* irrigation = new Mesh(irrigationTool->m_meshes[0]->m_geometry, irrigationMat);
-	SceneNode* node = new SceneNode();
+	irrigationTool->m_meshes[0]->m_material = irrigationMat;
+	irrigationTool->m_hierarchy->scale = { .1,.1,.1 };
+	irrigationTool->m_hierarchy->position = { -3, 0, 0 };
+	scene.add(irrigationTool->m_hierarchy);
+
+	//Mesh* irrigation = new Mesh(irrigationTool->m_meshes[0]->m_geometry, irrigationMat);
+	//SceneNode* node = new SceneNode();
 	//node->position = glm::vec3(0, 0, 0);
 	//node->scale = glm::vec3(1, 1, 1);
-	node->rotation = glm::rotate(node->rotation, glm::radians(90.0f), glm::vec3(1, 0, 0));
+	//node->rotation = glm::rotate(node->rotation, glm::radians(90.0f), glm::vec3(1, 0, 0));
 	//node->m_transform = glm::rotate(node->m_transform, glm::radians(90.0f), glm::vec3(1,0,0));
 	//node->m_transform = glm::rotate(node->m_transform, glm::radians(90.0f), glm::vec3(0, 0, 1));
 	//node->m_transform = glm::translate(node->m_transform, glm::vec3(0, 0, 1));
-	node->mesh = irrigation;
+	//node->mesh = irrigation;
 	//scene.root = node;
 
 	Mesh* skyBoxQuad = new Mesh(Shapes::cube(1), new SkyboxMaterial(operatingRoom));
@@ -188,16 +201,37 @@ void initializeScene()
 	}
 	*/
 
+	Model* headModel = rm->load<Model>("data\\head\\Infinite-Level_02.obj");
+	headModel->m_hierarchy->position = glm::vec3(3, 1, 0);
+	headModel->m_hierarchy->rotation = glm::quat();
+	Tween<glm::vec3> t;
+	t.start({ 3, 1, 0 }).end({ 0, 1, 0 }).loop(10, LoopType::YoYo).duration(5).ease(Easing::BounceInOut).target(headModel->m_hierarchy->position);
+	
+	Tween<glm::vec3> t2;
+	t2.start({ 0, 1, 0 }).end({ 0, 1, 3 }).loop(10, LoopType::YoYo).duration(5).ease(Easing::BounceInOut).target(headModel->m_hierarchy->position);
+
+	TweenSequence ts;
+	ts.add(t);
+	ts.begin(SequenceType::Parallel);
+	ts.add(t2);
+	ts.end();
+	ts.loop(4, LoopType::YoYo);
+	tm->start(t);
+
+	scene.add(headModel->m_hierarchy);
+
 	ResourceHandle<Model> model4 = rm->load<Model>("data\\cerberus\\Cerberus.obj");
 	Geometry gun4 = model4->m_meshes[0]->m_geometry;
 	ResourceHandle<PBRMaterial> gunMat = rm->load<PBRMaterial>("GunMat.gbmat");
 
 	ResourceHandle<Texture> gunA = rm->load<Texture>("data\\head\\Map-COL.jpg");
+
 	//ResourceHandle<Texture> gunR = rm->load<Texture>("data\\head\\NormalMap.dds");
-//	ResourceHandle<Texture> gunN = rm->load<Texture>("data\\head\\Infinite-Level_02_Tangent_SmoothUV.jpg");
+	ResourceHandle<Texture> gunN = rm->load<Texture>("data\\head\\Infinite-Level_02_Tangent_SmoothUV.jpg");
 	//ResourceHandle<Texture> gunAO = rm->load<Texture>("data\\head\\SpecularAOMap.dds");
 
 	PBRMaterial* gunMat2 = new PBRMaterial();
+
 	gunMat2->setEnvironment(operatingRoom);
 	gunMat2->setAlbedoMap(gunA); //setAlbedo(glm::vec4(255, 219, 145, 255) / 255.0f); //
 	gunMat2->setMetalness(0);
@@ -206,18 +240,17 @@ void initializeScene()
 
 
 	/*Mesh* gun1 = new Mesh(gun->m_geometry, gunMat2);
-
 	node2 = new SceneNode();
 	node2->mesh = gun1;
 	node2->scale = glm::vec3(6, 6, 6);
-	node2->position = glm::vec3(-4, 0, 0);
+	node2->position = glm::vec3(0, 0, 4);
 	scene.add(node2);*/
 
 	node3 = new SceneNode();
 	node3->mesh = new Mesh(gun4, gunMat);
-	node3->scale = glm::vec3(2, 2, 2);
-	node3->position = glm::vec3(4, 0, 0);
-	//scene.add(node3);
+	node3->scale = glm::vec3(1, 1, 1);
+	node3->position = glm::vec3(0, 1, 0);
+	scene.add(node3);
 
 
 	Geometry sphereMesh = Shapes::sphere(.2);
@@ -448,6 +481,7 @@ void initializeScene()
 	*/
 	renderer = new Renderer();
 	renderer->clearColor = glm::vec4(1, 0, 1, 1);
+	renderer->shadowTarget = shadowTarget;
 
 	shadowMat = new Material();
 	shadowMat->shader = Shader("shaders\\Shadow.vert", "shaders\\Shadow.frag");
@@ -464,8 +498,10 @@ void initializeScene()
 // display function called by glutMainLoop(), gets executed every frame 
 void disp(void)
 {
-	//node2->rotation = glm::rotate(node2->rotation, .01f, glm::vec3(0, 1, 0));
-	node3->rotation = glm::rotate(node3->rotation, .03f, glm::vec3(1, -1, 0));
+	tm->update(.01);
+
+	//scene.root->getChild(2)->rotation = glm::rotate(scene.root->getChild(2)->rotation, .01f, glm::vec3(0, 1, 0));
+	node3->rotation = glm::rotate(node3->rotation, .01f, glm::vec3(1, -1, 0));
 	scene.root->updateWorldMatrix();
 	//gun1->transform = glm::rotate(gun1->transform, .001f, glm::vec3(0,1,0));
 	//hovercraft->transform = glm::rotate(hovercraft->transform, .003f, glm::vec3(0, 0, 1));

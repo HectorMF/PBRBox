@@ -45,7 +45,7 @@ public:
 
 			val = (Texture.target() == gli::TARGET_2D) ? Extent.y : FaceTotal;
 			glTexStorage2D(
-				Target, static_cast<GLint>(Texture.levels()), GL_SRGB8,
+				Target, static_cast<GLint>(Texture.levels()), Format.Internal,
 				Extent.x, Extent.y);
 			break;
 		case gli::TARGET_2D_ARRAY:

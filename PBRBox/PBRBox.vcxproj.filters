@@ -31,12 +31,6 @@
     <Filter Include="Resource Files\Shaders">
       <UniqueIdentifier>{d67971bf-7a3d-4083-88f7-1beb46117755}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Component">
-      <UniqueIdentifier>{15a6d52c-db74-4e73-bc3b-afc4b047cde6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\CES">
-      <UniqueIdentifier>{b19a08d2-b9d7-46f1-8d27-1c71b7cafe14}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Resources">
       <UniqueIdentifier>{7db0fd38-71ac-4b52-9c4b-65bbf7ca5fe5}</UniqueIdentifier>
     </Filter>
@@ -48,6 +42,24 @@
     </Filter>
     <Filter Include="Header Files\Resources\Serializers\Materials">
       <UniqueIdentifier>{8fed88cb-7f41-464b-8465-84a9e5b7ac82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utility">
+      <UniqueIdentifier>{77bd9ef3-2b00-474f-9467-4b9040f80b83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics\PostProcess">
+      <UniqueIdentifier>{41252853-6854-49d4-9101-8809992f6aec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Images">
+      <UniqueIdentifier>{3574d74d-1922-4eae-baa2-0f49102fcb73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics\Cameras">
+      <UniqueIdentifier>{0961ca9a-fac0-40cf-9f5b-ea037b8e10fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Animation">
+      <UniqueIdentifier>{63b7d544-f556-40b8-8d1f-6f55c78b8e4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Animation\Splines">
+      <UniqueIdentifier>{9bf9e9ba-11f2-423d-afef-4d17417793b2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -90,9 +102,6 @@
     <ClInclude Include="Model.h">
       <Filter>Header Files\Geometry</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="MouseKeyboardInput.h">
       <Filter>Header Files\Input</Filter>
     </ClInclude>
@@ -111,41 +120,20 @@
     <ClInclude Include="Shader.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="ToneMapping.h">
-      <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Environment.h">
       <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="MathUtil.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SkyboxMaterial.h">
       <Filter>Header Files\Materials</Filter>
     </ClInclude>
-    <ClInclude Include="FluentMesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="UnlitMaterial.h">
       <Filter>Header Files\Materials</Filter>
-    </ClInclude>
-    <ClInclude Include="Volume.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EnvironmentTools.h">
-      <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="stb_image_write.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SceneNode.h">
       <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Entity.h">
-      <Filter>Header Files\CES</Filter>
-    </ClInclude>
-    <ClInclude Include="Transform.h">
-      <Filter>Header Files\Component</Filter>
     </ClInclude>
     <ClInclude Include="ResourceManager.h">
       <Filter>Header Files\Resources</Filter>
@@ -203,6 +191,75 @@
     </ClInclude>
     <ClInclude Include="TGALoader.h">
       <Filter>Header Files\Resources\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Volume.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentTools.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ToneMapping.h">
+      <Filter>Header Files\Graphics\PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="AntiAliasing.h">
+      <Filter>Header Files\Graphics\PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="PerspectiveCamera.h">
+      <Filter>Header Files\Graphics\Cameras</Filter>
+    </ClInclude>
+    <ClInclude Include="OrthographicCamera.h">
+      <Filter>Header Files\Graphics\Cameras</Filter>
+    </ClInclude>
+    <ClInclude Include="StereoCamera.h">
+      <Filter>Header Files\Graphics\Cameras</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files\Graphics\Cameras</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureData.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MathUtil.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="FluentMesh.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Animation.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\EasingFunctions.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\ITween.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Spline.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Tween.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\TweenManager.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\TweenDelay.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\TweenSequence.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Splines\BezierSpline.h">
+      <Filter>Header Files\Animation\Splines</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Splines\BSpline.h">
+      <Filter>Header Files\Animation\Splines</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Splines\CatmullRomSpline.h">
+      <Filter>Header Files\Animation\Splines</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Splines\LinearSpline.h">
+      <Filter>Header Files\Animation\Splines</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -283,5 +340,10 @@
     <None Include="Volume.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\x64\Release\Error.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
   </ItemGroup>
 </Project>

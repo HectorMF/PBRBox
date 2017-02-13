@@ -148,10 +148,22 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation\Animation.h" />
+    <ClInclude Include="Animation\EasingFunctions.h" />
+    <ClInclude Include="Animation\ITween.h" />
+    <ClInclude Include="Animation\Spline.h" />
+    <ClInclude Include="Animation\Splines\BezierSpline.h" />
+    <ClInclude Include="Animation\Splines\BSpline.h" />
+    <ClInclude Include="Animation\Splines\CatmullRomSpline.h" />
+    <ClInclude Include="Animation\Splines\LinearSpline.h" />
+    <ClInclude Include="Animation\Tween.h" />
+    <ClInclude Include="Animation\TweenDelay.h" />
+    <ClInclude Include="Animation\TweenManager.h" />
+    <ClInclude Include="Animation\TweenSequence.h" />
+    <ClInclude Include="AntiAliasing.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DDSLoader.h" />
     <ClInclude Include="DirectionalLight.h" />
-    <ClInclude Include="Entity.h" />
     <ClInclude Include="EnvironmentLoader.h" />
     <ClInclude Include="EnvironmentSerializer.h" />
     <ClInclude Include="EnvironmentTools.h" />
@@ -169,7 +181,9 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelSerializer.h" />
     <ClInclude Include="MouseKeyboardInput.h" />
+    <ClInclude Include="OrthographicCamera.h" />
     <ClInclude Include="PBRMaterialSerializer.h" />
+    <ClInclude Include="PerspectiveCamera.h" />
     <ClInclude Include="PNGLoader.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Renderer.h" />
@@ -189,13 +203,14 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stb_image_write.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StereoCamera.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="JPGLoader.h" />
+    <ClInclude Include="TextureData.h" />
     <ClInclude Include="TextureSerializer.h" />
     <ClInclude Include="TGALoader.h" />
     <ClInclude Include="ToneMapping.h" />
-    <ClInclude Include="Transform.h" />
     <ClInclude Include="UnlitMaterial.h" />
     <ClInclude Include="Volume.h" />
   </ItemGroup>
@@ -246,6 +261,9 @@
     <None Include="..\x64\Release\shaders\Standard.frag" />
     <None Include="..\x64\Release\shaders\Standard.vert" />
     <None Include="Volume.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\x64\Release\Error.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

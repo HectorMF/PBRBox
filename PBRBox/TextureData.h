@@ -7,6 +7,7 @@ class TextureData
 	unsigned int format;
 public:
 	void* getData() { return data; }
+
 	void setData(unsigned int width, unsigned int height, void* data)
 	{
 		this->data = data;

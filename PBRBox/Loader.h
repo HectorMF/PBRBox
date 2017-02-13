@@ -13,7 +13,7 @@ class Loader
 protected:
 	std::type_index type;
 	std::vector<std::string> extensions;
-
+	
 public:
 	inline bool ends_with(std::string const & value, std::string const & ending)
 	{
@@ -26,6 +26,9 @@ public:
 	}
 
 	virtual T* load(ResourceManager* resourceManager, std::string filename, T* obj) = 0;
+
+	//virtual void save(T* obj, std::string filename);
+	//virtual void unload();
 
 	std::type_index getResourceType()
 	{

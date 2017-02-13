@@ -22,16 +22,15 @@ public:
 	float intensity;
 
 	float spotAngle;
-
+	
 	float range;
 
-	float intensity;
+//	float intensity;
 
 	void GetShadowCamera() {}
 
 	void renderGizmo()
 	{
-		
 		//c_world = inverse(projection * view) * vec4(c_ncd, 1);
 		//c_world = c_world*1.0 / c_world.w;
 	}

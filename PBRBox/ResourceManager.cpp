@@ -1,3 +1,3 @@
 #include "ResourceManager.h"
 
-unsigned int ResourceManager::UUIDGEN = 0;
+unsigned int ResourceManager::UUIDGEN = 1;

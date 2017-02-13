@@ -9,10 +9,18 @@ class Scene
 {
 public:
 	SceneNode* root;
+
 	ResourceHandle<Environment> environment;
+
 	Mesh* skybox;
 
 	std::vector<Light*> lights;
+
+	//void init()
+	//void start()
+	//void update()
+	//void end();
+	//void quit();
 
 	Scene()
 	{

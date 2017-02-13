@@ -119,12 +119,13 @@ public:
 		{
 			aiFace face = mesh->mFaces[i];
 			// Retrieve all indices of the face and store them in the indices vector
-			//for (int j = 0; j < face.mNumIndices; j++)
+			// for (int j = 0; j < face.mNumIndices; j++)
 			geometry.addTriangle(face.mIndices[0], face.mIndices[1], face.mIndices[2]);
 		}
 
 		PBRMaterial* pbr = new PBRMaterial();
-		pbr->setEnvironment(resourceManager->load<Environment>("data\\Environments\\Pisa.gbenv"));
+		pbr->m_environment.manager = resourceManager;
+
 		aiString name;
 		// Process materials
 		if (mesh->mMaterialIndex >= 0)
@@ -135,7 +136,7 @@ public:
 
 			aiString str;
 			material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-
+			
 			if (str.length != 0)
 				pbr->setAlbedoMap(resourceManager->load<Texture>(str.C_Str()));
 		
