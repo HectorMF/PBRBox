@@ -5,35 +5,28 @@
 #include <map>
 #include <string>
 
-#include "ModelNode.h"
+#include "SceneNode.h"
 #include "Mesh.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-class Model
+class Model : public ResourceBase
 {
 	friend class ModelLoader;
 public:
 	Model();
-	Model(const std::string &filename);
 
+	void foo() {}
 	virtual ~Model();
 
-	//load and save the resource object
-	virtual void load(const std::string &file);
-	virtual void save(const std::string &file);
+	const std::vector<Mesh*>& getMeshes() const { return m_meshes; }
 
-	void render();
-	void renderNode(const ModelNode* node, glm::mat4 transform);
-	const std::vector<Geometry>& getMeshes() const { return m_meshes; }
-
-	const ModelNode* getHierarchy() const { return m_hierarchy; }
-	ModelNode* copyHierarchy() const { return m_hierarchy->copyNode(nullptr); }
+	const SceneNode* getHierarchy() const { return m_hierarchy; }
 
 	//gb::AABox3f getAABB() const { return m_AABB; }
 //protected:
 	//gb::AABox3f m_AABB;
 	std::string m_fileName;
-	std::vector<Geometry> m_meshes;
-	ModelNode* m_hierarchy;
+	std::vector<Mesh*> m_meshes;
+	SceneNode* m_hierarchy;
 };

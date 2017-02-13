@@ -1,16 +1,30 @@
 #pragma once
-#include "SceneObject.h"
+#include "glm\vec3.hpp"
+#include "glm\vec2.hpp"
 
-class Light : public SceneObject
+enum class LightType { Directional, Point, Spot };
+
+class Light 
 {
 public:
 	bool castShadows;
 
 	glm::vec2 shadowMapSize;
-	float bias = 0;
+	float shadowBias = 0;
+	float shadowStrength;
+	float shadowNormalBias;
+	float shadowRadius;
+	float shadowAngle;
+
 	float radius = 1;
 	//Camera camera;
 	glm::vec3 color;
+	float intensity;
+
+	float spotAngle;
+
+	float range;
+
 	float intensity;
 
 	void GetShadowCamera() {}

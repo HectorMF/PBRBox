@@ -48,6 +48,5 @@ public:
 	}
 
 
-
 	//virtual T Load(std::string filename) = 0;
 };

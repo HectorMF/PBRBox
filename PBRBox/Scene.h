@@ -2,13 +2,32 @@
 #include "Camera.h"
 #include "SceneNode.h"
 #include "Mesh.h"
+#include "Light.h"
 
 #include <vector>
 class Scene
 {
 public:
 	SceneNode* root;
+	ResourceHandle<Environment> environment;
 	Mesh* skybox;
+
+	std::vector<Light*> lights;
+
+	Scene()
+	{
+		root = new SceneNode();
+	}
+
+	void add(SceneNode* m)
+	{
+		root->add(m);
+	}
+
+	void add(Model* model)
+	{
+		
+	}
 
 	~Scene()
 	{

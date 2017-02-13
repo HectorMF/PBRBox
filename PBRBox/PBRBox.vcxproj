@@ -149,7 +149,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="DDS.h" />
     <ClInclude Include="DDSLoader.h" />
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="Entity.h" />
@@ -166,13 +165,13 @@
     <ClInclude Include="MaterialLoader.h" />
     <ClInclude Include="MathUtil.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="ModelInstance.h" />
     <ClInclude Include="ModelLoader.h" />
-    <ClInclude Include="ModelNode.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelSerializer.h" />
     <ClInclude Include="MouseKeyboardInput.h" />
     <ClInclude Include="PBRMaterialSerializer.h" />
     <ClInclude Include="PNGLoader.h" />
+    <ClInclude Include="PointLight.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="ResourceBase.h" />
@@ -194,6 +193,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="JPGLoader.h" />
     <ClInclude Include="TextureSerializer.h" />
+    <ClInclude Include="TGALoader.h" />
     <ClInclude Include="ToneMapping.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="UnlitMaterial.h" />
@@ -210,15 +210,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Model.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ModelInstance.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ModelLoader.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ModelNode.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="PBRBox.cpp" />

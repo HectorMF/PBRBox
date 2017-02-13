@@ -12,15 +12,16 @@
 #include "ResourceManager.h"
 #include "JPGLoader.h"
 #include "PNGLoader.h"
+#include "TGALoader.h"
 #include "MaterialLoader.h"
 #include "DDSLoader.h"
+#include "ModelLoader.h"
 
 #include <sstream>
 #include <iostream>
 #include "Camera.h"
 #include "MouseKeyboardInput.h"
 #include "Model.h"
-#include "ModelInstance.h"
 #include "Shader.h"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -38,7 +39,8 @@
 #include "PBRMaterial.h"
 #include "UnlitMaterial.h"
 #include "SkyboxMaterial.h"
-#include "DDS.h"
+
+
 #include "FluentMesh.h"
 #include "Environment.h"
 #include "EnvironmentLoader.h"
@@ -64,6 +66,8 @@ Mesh* depthQuad;
 Mesh* gun1;
 Mesh* hovercraft;
 ResourceManager* rm;
+SceneNode* node2;
+SceneNode* node3;
 /* Handler for window re-size event. Called back when the window first appears and
 whenever the window is re-sized with its new width and height */
 void reshape(GLsizei newwidth, GLsizei newheight)
@@ -90,12 +94,16 @@ void initializeScene()
 	rm->addLoader(new JPGLoader());
 	rm->addLoader(new PNGLoader());
 	rm->addLoader(new DDSLoader());
+	rm->addLoader(new TGALoader());
 	rm->addLoader(new EnvironmentLoader());
 	rm->addLoader(new MaterialLoader());
+	rm->addLoader(new ModelLoader());
+
+	ResourceHandle<Environment> operatingRoom = rm->load<Environment>("data\\Environments\\Pisa.gbenv");
+
+	scene.environment = operatingRoom;
 
 	shadowTarget = new RenderTarget();
-
-	ResourceHandle<Environment> operatingRoom = rm->load<Environment>("data\\Environments\\OR.gbenv");
 
 	// new Environment();
 	
@@ -120,16 +128,15 @@ void initializeScene()
 
 	//Volume* vol = new Volume("data\\3L_768x768x768_type_uc_1channels.raw");
 
-	Model* irrigationTool = new Model("data\\IrrigationTool.obj");
+	ResourceHandle<Model> irrigationTool = rm->load<Model>("data\\IrrigationTool.obj");
 	
 	PBRMaterial* irrigationMat = new PBRMaterial();
 	irrigationMat->setEnvironment(operatingRoom);
 	irrigationMat->setAlbedo(glm::vec4(.96f, .96f, .9686f, 1));
 	irrigationMat->setMetalness(1);
 	irrigationMat->setRoughness(.05f);
-	irrigationMat->shadowTex = shadowTarget->depthTexture;
 
-	Mesh* irrigation = new Mesh(irrigationTool->m_meshes[0], irrigationMat);
+	Mesh* irrigation = new Mesh(irrigationTool->m_meshes[0]->m_geometry, irrigationMat);
 	SceneNode* node = new SceneNode();
 	//node->position = glm::vec3(0, 0, 0);
 	//node->scale = glm::vec3(1, 1, 1);
@@ -138,7 +145,7 @@ void initializeScene()
 	//node->m_transform = glm::rotate(node->m_transform, glm::radians(90.0f), glm::vec3(0, 0, 1));
 	//node->m_transform = glm::translate(node->m_transform, glm::vec3(0, 0, 1));
 	node->mesh = irrigation;
-	scene.root = node;
+	//scene.root = node;
 
 	Mesh* skyBoxQuad = new Mesh(Shapes::cube(1), new SkyboxMaterial(operatingRoom));
 	scene.skybox = skyBoxQuad;
@@ -146,16 +153,14 @@ void initializeScene()
 	depthMat = new Material();
 	depthMat->shader = Shader("shaders\\Diffuse.vert", "shaders\\Diffuse.frag");
 
+//	Model* model = new Model("data\\head\\Infinite-Level_02.OBJ");
+	ResourceHandle<Model> model = rm->load<Model>("data\\sponza\\SponzaNoFlag.obj");
 
-
-
-	Model* model = new Model("data\\head\\Infinite-Level_02.OBJ");
-
+	model->m_hierarchy->scale = glm::vec3(.01, .01, .01);
 
 	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
 	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
-
-	Geometry gun = model->m_meshes[0];
+	scene.add(model->m_hierarchy);
 	
 	/*
 	Model* model = new Model("data\\cerberus\\Cerberus.obj");
@@ -183,29 +188,36 @@ void initializeScene()
 	}
 	*/
 
-	//ResourceHandle<PBRMaterial> gunMat = rm->load<PBRMaterial>("GunMat.gbmat");
+	ResourceHandle<Model> model4 = rm->load<Model>("data\\cerberus\\Cerberus.obj");
+	Geometry gun4 = model4->m_meshes[0]->m_geometry;
+	ResourceHandle<PBRMaterial> gunMat = rm->load<PBRMaterial>("GunMat.gbmat");
 
 	ResourceHandle<Texture> gunA = rm->load<Texture>("data\\head\\Map-COL.jpg");
 	//ResourceHandle<Texture> gunR = rm->load<Texture>("data\\head\\NormalMap.dds");
 //	ResourceHandle<Texture> gunN = rm->load<Texture>("data\\head\\Infinite-Level_02_Tangent_SmoothUV.jpg");
 	//ResourceHandle<Texture> gunAO = rm->load<Texture>("data\\head\\SpecularAOMap.dds");
 
-	PBRMaterial* gunMat = new PBRMaterial();
-	gunMat->setEnvironment(operatingRoom);
-	gunMat->setAlbedoMap(gunA); //setAlbedo(glm::vec4(255, 219, 145, 255) / 255.0f); //
-	gunMat->setMetalness(0);
-	gunMat->setRoughness(0);
+	PBRMaterial* gunMat2 = new PBRMaterial();
+	gunMat2->setEnvironment(operatingRoom);
+	gunMat2->setAlbedoMap(gunA); //setAlbedo(glm::vec4(255, 219, 145, 255) / 255.0f); //
+	gunMat2->setMetalness(0);
+	gunMat2->setRoughness(.5f);
 //	gunMat->setNormalMap(gunN);
-	gunMat->shadowTex = shadowTarget->depthTexture;
 
 
-	Mesh* gun1 = new Mesh(gun, gunMat);
+	/*Mesh* gun1 = new Mesh(gun->m_geometry, gunMat2);
 
-	SceneNode* node2 = new SceneNode();
+	node2 = new SceneNode();
 	node2->mesh = gun1;
 	node2->scale = glm::vec3(6, 6, 6);
-	scene.root = node2;
+	node2->position = glm::vec3(-4, 0, 0);
+	scene.add(node2);*/
 
+	node3 = new SceneNode();
+	node3->mesh = new Mesh(gun4, gunMat);
+	node3->scale = glm::vec3(2, 2, 2);
+	node3->position = glm::vec3(4, 0, 0);
+	//scene.add(node3);
 
 
 	Geometry sphereMesh = Shapes::sphere(.2);
@@ -216,37 +228,66 @@ void initializeScene()
 	diffuseMat1->setAlbedo(glm::vec4(1, 1, 1, 1));
 	diffuseMat1->setMetalness(1);
 	diffuseMat1->setRoughness(0);
-	diffuseMat1->shadowTex = shadowTarget->depthTexture;
 
 	Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 	//sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, 6, z * .5));
-	SceneNode* node3 = new SceneNode();
-	node3->mesh = sphere;
+	//SceneNode* node3 = new SceneNode();
+	//node3->mesh = sphere;
 	//scene.root = node3;
 
 
-	/*for (int x = -4; x <= 4; x++)
+	for (int x = -4; x <= 4; x++)
 	{
 		for (int z = -4; z <= 4; z++)
 		{
 
 			PBRMaterial* diffuseMat1 = new PBRMaterial();
 
-			diffuseMat1->setEnvironement(operatingRoom);
+			diffuseMat1->setEnvironment(operatingRoom);
 			diffuseMat1->setAlbedo(glm::vec4(1, 1, 1, 1));
 			diffuseMat1->setMetalness((x + 4) / 8.0f);
 			diffuseMat1->setRoughness((z + 4) / 8.0f);
-			diffuseMat1->shadowTex = shadowTarget->depthTexture;
-			diffuseMat1->m_BRDFLUT = brdfLUT;
+
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 			//sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, 6, z * .5));
-			SceneNode* node2 = new SceneNode();
-			node2->mesh = sphere;
-			scene.root = node2;
-			//scene.add(sphere);
+			SceneNode* node4 = new SceneNode();
+			node4->mesh = sphere;
+			node4->position = glm::vec3(x*.5, z* .5, 0);
+			//scene.add(node4);
 		}
-	}*/
+	}
+
+	PBRMaterial* lightMat = new PBRMaterial();
+
+	diffuseMat1->setEnvironment(operatingRoom);
+	diffuseMat1->setAlbedo(glm::vec4(1, 1, 1, 1));
+	diffuseMat1->setMetalness(0);
+	diffuseMat1->setRoughness(0);
+
+	//sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, 6, z * .5));
+	SceneNode* node5 = new SceneNode();
+	node5->mesh = sphere;
+	node5->position = glm::vec3(-6.0f, 6.0f, 6.0f);
+	//scene.add(node5);
+
+	SceneNode* node6 = new SceneNode();
+	node6->mesh = sphere;
+	node6->position = glm::vec3(6.0f, 6.0f, 6.0f);
+	//scene.add(node6);
+
+	SceneNode* node7 = new SceneNode();
+	node7->mesh = sphere;
+	node7->position = glm::vec3(-6.0f, -6.0f, 6.0f);
+	//scene.add(node7);
+
+	SceneNode* node8 = new SceneNode();
+	node8->mesh = sphere;
+	node8->position = glm::vec3(6.0f, -6.0f, 6.0f);
+	//scene.add(node8);
+
+
 	/*
+
 
 
 	//Resource<Texture>::Load("data\\cerberus\\Cerberus_A.png");
@@ -411,7 +452,6 @@ void initializeScene()
 	shadowMat = new Material();
 	shadowMat->shader = Shader("shaders\\Shadow.vert", "shaders\\Shadow.frag");
 
-	depthMat->shadowTex = shadowTarget->depthTexture;
 	//gunMat->shadowTex = shadowTarget->depthTexture;
 
 	//Model* model = new Model("C:\\Users\\Javi\\Documents\\GitHub\\PBRBox\\PBRBox\\IrrigationTool.obj");
@@ -424,6 +464,9 @@ void initializeScene()
 // display function called by glutMainLoop(), gets executed every frame 
 void disp(void)
 {
+	//node2->rotation = glm::rotate(node2->rotation, .01f, glm::vec3(0, 1, 0));
+	node3->rotation = glm::rotate(node3->rotation, .03f, glm::vec3(1, -1, 0));
+	scene.root->updateWorldMatrix();
 	//gun1->transform = glm::rotate(gun1->transform, .001f, glm::vec3(0,1,0));
 	//hovercraft->transform = glm::rotate(hovercraft->transform, .003f, glm::vec3(0, 0, 1));
 	// if camera has moved, reset the accumulation buffer
@@ -440,7 +483,7 @@ void disp(void)
 	renderer->clearRenderTarget();
 
 	renderer->clearOverideMaterial();
-
+	
 	//diffuseMat->shadowTex = shadowTarget->depthTexture;
 	//glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(shadowTarget->depthTexture));
 

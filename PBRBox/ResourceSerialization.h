@@ -10,3 +10,4 @@
 #include "EnvironmentSerializer.h"
 #include "ShaderSerializer.h"
 #include "PBRMaterialSerializer.h"
+#include "ModelSerializer.h"

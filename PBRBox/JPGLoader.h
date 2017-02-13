@@ -18,9 +18,11 @@ public:
 		int width, height, bpp;
 		unsigned char* image = stbi_load(filename.c_str(), &width, &height, &bpp, 4);
 
-		tex->width = width;
-		tex->height = height;
-		tex->data = image;
+		TextureData* data = new TextureData();
+		data->setData(width, height, image);
+		data->setFormat(GL_RGBA);
+		data->setDataType(GL_UNSIGNED_BYTE);
+		tex->data = data;
 		tex->upload();
 		printf("LOADED JPG!!!!\n");
 		return tex;

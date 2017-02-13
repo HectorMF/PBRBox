@@ -63,14 +63,15 @@ public:
 		int t = glGetUniformLocation(overrideMaterial->shader.getProgram(), "lightSpaceMatrix");
 		glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
+		//renderNode(SceneNode* node, Camera& camera);
 		//for (int i = 0; i < scene.root->getChildCount(); i++)
-		if(scene.root)
+		/*if(scene.root)
 		{
 			t = glGetUniformLocation(overrideMaterial->shader.getProgram(), "model");
-			glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(scene.root->getTransformMatrix()));
+			glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(scene.root->getWorldMatrix()));
 
 			(scene.root)->mesh->render();
-		}
+		}*/
 		
 		renderTarget->Unbind();
 		overrideMaterial->unbind();
@@ -120,19 +121,26 @@ public:
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
-		//for (int i = 0; i < scene.sce.size(); i++)
-		if(scene.root)
+		renderNode(scene.root, camera);
+
+		if (renderTarget)
+			renderTarget->Unbind();
+	}
+
+	void renderNode(SceneNode* node, Camera& camera)
+	{
+		if (node->mesh != nullptr)
 		{
-			Material* m = (!overrideMaterial)? (scene.root->mesh->m_material): overrideMaterial;
+			Material* m = (!overrideMaterial) ? (node->mesh->m_material) : overrideMaterial;
 
 			m->bind();
 
 			glm::mat4 biasMatrix(
-					0.5, 0.0, 0.0, 0.0,
-					0.0, 0.5, 0.0, 0.0,
-					0.0, 0.0, 0.5, 0.0,
-					0.5, 0.5, 0.5, 1.0
-					);
+				0.5, 0.0, 0.0, 0.0,
+				0.0, 0.5, 0.0, 0.0,
+				0.0, 0.0, 0.5, 0.0,
+				0.5, 0.5, 0.5, 1.0
+				);
 
 			//glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
 			//int t = glGetUniformLocation(m->shader, "uDepthBiasMatrix");
@@ -149,7 +157,7 @@ public:
 			int t = glGetUniformLocation(m->shader.getProgram(), "lightSpaceMatrix");
 			glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
-			glm::mat4 model = scene.root->getTransformMatrix();
+			glm::mat4 model = node->getWorldMatrix();
 			glm::mat4 view = glm::lookAt(camera.position, camera.position + camera.view, camera.up);
 			glm::mat4 projection = glm::perspective(45.0f, (float)camera.resolution.x / (float)camera.resolution.y, 0.1f, 1000.0f);
 
@@ -177,12 +185,12 @@ public:
 			glUniform3fv(vd, 1, glm::value_ptr(camera.view));
 			glUniform3fv(vp, 1, glm::value_ptr(camera.position));
 
-			scene.root->mesh->render();
+			node->mesh->render();
 
 			m->unbind();
 		}
 
-		if (renderTarget)
-			renderTarget->Unbind();
+		for (int i = 0; i < node->getChildCount(); i++)
+			renderNode(node->getChild(i), camera);
 	}
 };

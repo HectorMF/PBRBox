@@ -6,5 +6,5 @@ uniform samplerCube uSpecularMap;
 
 void main()
 {    
-    fragColor = vec4(textureLod(uSpecularMap, TexCoords, 2).rgb, 1);
+    fragColor = vec4(textureLod(uSpecularMap, TexCoords, 0).rgb, 1);
 }

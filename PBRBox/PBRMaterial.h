@@ -42,7 +42,6 @@ public:
 	
 	std::bitset<5> m_permutation;
 
-	//environment information
 public:
 
 	PBRMaterial()
@@ -79,14 +78,6 @@ public:
 			m_dirty = false;
 		}
 
-		glUniform1i(glGetUniformLocation(shader.getProgram(), "uShadowMap"), 8);
-		glActiveTexture(GL_TEXTURE9);
-		glBindTexture(GL_TEXTURE_2D, shadowTex);
-
-		//GLint d4 = glGetUniformLocation(shader.getProgram(), "uBRDFLUT");
-		//glUniform1i(d4, 11);
-		//glActiveTexture(GL_TEXTURE11);
-		//glBindTexture(GL_TEXTURE_2D, m_environment->brdf->id);
 		if (m_environment.uid > 0)
 		{
 			shader.setUniform("uRadianceMap", *m_environment->radiance.operator->());
@@ -94,8 +85,6 @@ public:
 			shader.setUniform("uSpecularMap", *m_environment->specular.operator->());
 			shader.setUniform("uBRDFLUT", *m_environment->brdf.operator->());
 		}
-
-		shader.setUniform("uLightPos", 0.0, 10.0, 0.0);
 
 		if (m_permutation[TextureMap::Albedo])
 			shader.setUniform("uAlbedo",* m_albedoMap.operator->());
