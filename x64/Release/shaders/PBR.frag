@@ -507,7 +507,7 @@ void main()
 	//color = pow(color, vec3(1/2.2));
 
 	float shadow = ShadowCalculation(fragPosLightSpace, WSPosition, N);   
-	shadow = min(shadow, 0.6);
+	shadow = min(shadow, 0.8);
 	//color *=  (1.0 - shadow);
 	//vec4 t = texture2D( uBRDFLUT, fs_in.uv);
 	

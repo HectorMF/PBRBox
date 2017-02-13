@@ -261,6 +261,12 @@
     <ClInclude Include="Animation\Splines\LinearSpline.h">
       <Filter>Header Files\Animation\Splines</Filter>
     </ClInclude>
+    <ClInclude Include="cuda_pathtracer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cutil_math.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -345,5 +351,10 @@
     <Image Include="..\x64\Release\Error.png">
       <Filter>Resource Files\Images</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="cuda_pathtracer.cu">
+      <Filter>Source Files</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

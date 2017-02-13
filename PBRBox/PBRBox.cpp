@@ -8,7 +8,7 @@
 #else
 #include <GL/freeglut.h>
 #endif
-
+#include <Windows.h>
 #include "ResourceManager.h"
 #include "JPGLoader.h"
 #include "PNGLoader.h"
@@ -51,6 +51,7 @@
 // test scenes
 
 Camera* hostRendercam = NULL;
+Camera* cudaRendercam2 = NULL;
 
 int screenWidth, screenHeight;
 
@@ -70,6 +71,20 @@ SceneNode* node2;
 SceneNode* node3;
 
 TweenManager* tm;
+
+
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <cuda_gl_interop.h>
+#include "cuda_pathtracer.h"
+unsigned int framenumber = 0;
+GLuint vbo;
+void *d_vbo_buffer = NULL;
+// image buffer storing accumulated pixel samples
+glm::vec3* accumulatebuffer;
+// final output buffer storing averaged pixel samples
+glm::vec3* finaloutputbuffer;
+
 /* Handler for window re-size event. Called back when the window first appears and
 whenever the window is re-sized with its new width and height */
 void reshape(GLsizei newwidth, GLsizei newheight)
@@ -85,9 +100,26 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 	glutPostRedisplay();
 }
 
+void createVBO(GLuint* vbo)
+{
+	//Create vertex buffer object
+	glGenBuffers(1, vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, *vbo);
+
+	//Initialize VBO
+	unsigned int size = screenWidth * screenHeight * sizeof(glm::vec3);
+	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	//Register VBO with CUDA
+	cudaGLRegisterBufferObject(*vbo);
+}
 
 void initializeScene()
 {
+
+	createVBO(&vbo);
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
@@ -112,6 +144,9 @@ void initializeScene()
 	scene.environment = operatingRoom;
 
 	shadowTarget = new RenderTarget();
+
+
+	//rm->load<Volume>("data\\artifix\\artifix_small.raw");
 
 	// new Environment();
 	
@@ -205,18 +240,18 @@ void initializeScene()
 	headModel->m_hierarchy->position = glm::vec3(3, 1, 0);
 	headModel->m_hierarchy->rotation = glm::quat();
 	Tween<glm::vec3> t;
-	t.start({ 3, 1, 0 }).end({ 0, 1, 0 }).loop(10, LoopType::YoYo).duration(5).ease(Easing::BounceInOut).target(headModel->m_hierarchy->position);
+	t.start({ 3, 1, 0 }).end({ 0, 1, 0 }).duration(3).ease(Easing::BounceInOut).target(headModel->m_hierarchy->position);
 	
 	Tween<glm::vec3> t2;
-	t2.start({ 0, 1, 0 }).end({ 0, 1, 3 }).loop(10, LoopType::YoYo).duration(5).ease(Easing::BounceInOut).target(headModel->m_hierarchy->position);
+	t2.start({ 1, 1, 1 }).end({ 13, 13, 13 }).ease(Easing::CircularIn).duration(3).target(headModel->m_hierarchy->scale);
 
 	TweenSequence ts;
-	ts.add(t);
-	ts.begin(SequenceType::Parallel);
-	ts.add(t2);
-	ts.end();
+	ts.begin(SequenceType::Parallel)
+	.add(t)
+	.add(t2)
+	.end();
 	ts.loop(4, LoopType::YoYo);
-	tm->start(t);
+	tm->start(ts);
 
 	scene.add(headModel->m_hierarchy);
 
@@ -494,11 +529,21 @@ void initializeScene()
 	
 	//scene.add(model);
 }
+unsigned int WangHash(unsigned int a) {
+	a = (a ^ 61) ^ (a >> 16);
+	a = a + (a << 3);
+	a = a ^ (a >> 4);
+	a = a * 0x27d4eb2d;
+	a = a ^ (a >> 15);
+	return a;
+}
 
 // display function called by glutMainLoop(), gets executed every frame 
 void disp(void)
 {
 	tm->update(.01);
+
+
 
 	//scene.root->getChild(2)->rotation = glm::rotate(scene.root->getChild(2)->rotation, .01f, glm::vec3(0, 1, 0));
 	node3->rotation = glm::rotate(node3->rotation, .01f, glm::vec3(1, -1, 0));
@@ -508,7 +553,7 @@ void disp(void)
 	// if camera has moved, reset the accumulation buffer
 
 	// build a new camera for each frame on the CPU
-	interactiveCamera->buildRenderCamera(hostRendercam);
+	/*interactiveCamera->buildRenderCamera(hostRendercam);
 
 	renderer->setRenderTarget(*shadowTarget);
 
@@ -530,7 +575,49 @@ void disp(void)
 //	depthQuad->m_material->unbind();
 
 	glEnable(GL_DEPTH_TEST);
+	glutSwapBuffers();*/
+
+
+	// if camera has moved, reset the accumulation buffer
+	if (buffer_reset) { cudaMemset(accumulatebuffer, 1, screenWidth * screenHeight * sizeof(glm::vec3)); framenumber = 0; }
+
+	buffer_reset = false;
+	framenumber++;
+
+	// build a new camera for each frame on the CPU
+	interactiveCamera->buildRenderCamera(hostRendercam);
+
+	// copy the CPU camera to a GPU camera
+	cudaMemcpy(cudaRendercam2, hostRendercam, sizeof(Camera), cudaMemcpyHostToDevice);
+
+	cudaThreadSynchronize();
+
+	// maps a buffer object for acces by CUDA
+	cudaGLMapBufferObject((void**)&finaloutputbuffer, vbo);
+
+	//clear all pixels:
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	// calculate a new seed for the random number generator, based on the framenumber
+	unsigned int hashedframes = WangHash(framenumber);
+
+	// gateway from host to CUDA, passes all data needed to render frame (triangles, BVH tree, camera) to CUDA for execution
+	cudarender(finaloutputbuffer, accumulatebuffer, framenumber, hashedframes, cudaRendercam2);
+
+	cudaThreadSynchronize();
+	cudaGLUnmapBufferObject(vbo);
+	//glFlush();
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glVertexPointer(2, GL_FLOAT, 12, 0);
+	glColorPointer(4, GL_UNSIGNED_BYTE, 12, (GLvoid*)8);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glDrawArrays(GL_POINTS, 0, screenWidth * screenHeight);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
 	glutSwapBuffers();
+	glutPostRedisplay();
 }
 
 void deleteCudaAndCpuMemory() {
@@ -547,6 +634,10 @@ int main(int argc, char** argv) {
 	initCamera();
 	interactiveCamera->buildRenderCamera(hostRendercam);
 
+	// allocate GPU memory for accumulation buffer
+	cudaMalloc(&accumulatebuffer, screenWidth * screenHeight * sizeof(glm::vec3));
+	// allocate GPU memory for interactive camera
+	cudaMalloc((void**)&cudaRendercam2, sizeof(Camera));
 	//initHDR(); // initialise the HDR environment map
 			   // initialise GLUT
 	glutInit(&argc, argv);
@@ -601,6 +692,12 @@ int main(int argc, char** argv) {
 	fprintf(stderr, "Entering glutMainLoop...  \n");
 	printf("Rendering started...\n");
 	glutMainLoop();
+
+	// free CUDA memory
+	cudaFree(finaloutputbuffer);
+	cudaFree(accumulatebuffer);
+	cudaFree(cudaRendercam2);
+
 
 	deleteCudaAndCpuMemory();
 }
