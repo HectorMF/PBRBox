@@ -1,36 +1,57 @@
-﻿  Compiling CUDA source file cuda_pathtracer.cu...
-  
-  C:\Users\Hector\Documents\GitHub\PBRBox\PBRBox>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\bin\nvcc.exe" -gencode=arch=compute_20,code=\"sm_20,compute_20\" --use-local-env --cl-version 2015 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64"  -I"..\ext\glew-2.0.0\include" -I..\ext\freeglut\include -I"..\ext\glm-0.9.8.1\glm" -I..\ext\assimp\include -I"..\ext\gli-0.8.1.1\gli" -I"..\ext\tinyxml2-4.0.1" -I"..\ext\cereal-1.2.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include" -I"C:\Program Files (x86)\Visual Leak Detector\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DNDEBUG -D_CONSOLE -D_CRT_SECURE_NO_WARNINGS -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi  /MD " -o x64\Release\cuda_pathtracer.cu.obj "C:\Users\Hector\Documents\GitHub\PBRBox\PBRBox\cuda_pathtracer.cu" 
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(40): warning C4005: 'M_PI': macro redefinition
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(157): warning : variable "Tnear" was set but never used
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(157): warning : variable "Tfar" was set but never used
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(161): warning : variable "limits" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(209): warning : variable "kAB" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(209): warning : variable "kBC" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(209): warning : variable "kCA" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(211): warning : variable "tmin" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(212): warning : variable "tmax" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(215): warning : variable "inf" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(216): warning : variable "hitdistance" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(659): warning : variable "fullBlocksPerGrid" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(40): warning C4005: 'M_PI': macro redefinition
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(157): warning : variable "Tnear" was set but never used
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(157): warning : variable "Tfar" was set but never used
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(161): warning : variable "limits" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(209): warning : variable "kAB" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(209): warning : variable "kBC" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(209): warning : variable "kCA" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(211): warning : variable "tmin" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(212): warning : variable "tmax" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(215): warning : variable "inf" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(216): warning : variable "hitdistance" was declared but never referenced
-C:/Users/Hector/Documents/GitHub/PBRBox/PBRBox/cuda_pathtracer.cu(659): warning : variable "fullBlocksPerGrid" was declared but never referenced
-CUDACOMPILE : nvcc warning : The 'compute_20', 'sm_20', and 'sm_21' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
-  cuda_pathtracer.cu
-     Creating library C:\Users\Hector\Documents\GitHub\PBRBox\x64\Release\PBRBox.lib and object C:\Users\Hector\Documents\GitHub\PBRBox\x64\Release\PBRBox.exp
+﻿  PBRBox.cpp
+c:\users\javi\documents\github\pbrbox\pbrbox\Shader.h(148): warning C4018: '<': signed/unsigned mismatch
+c:\users\javi\documents\github\pbrbox\pbrbox\MathUtil.h(13): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\javi\documents\github\pbrbox\pbrbox\Geometry.h(106): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\SceneNode.h(72): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\SceneNode.h(112): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\ModelLoader.h(54): warning C4018: '<': signed/unsigned mismatch
+c:\users\javi\documents\github\pbrbox\pbrbox\ModelLoader.h(72): warning C4018: '<': signed/unsigned mismatch
+c:\users\javi\documents\github\pbrbox\pbrbox\ModelLoader.h(98): warning C4018: '<': signed/unsigned mismatch
+c:\users\javi\documents\github\pbrbox\pbrbox\ModelLoader.h(118): warning C4018: '<': signed/unsigned mismatch
+c:\users\javi\documents\github\pbrbox\pbrbox\ModelLoader.h(204): warning C4018: '<': signed/unsigned mismatch
+c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(38): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(39): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(40): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(41): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(67): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(68): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(72): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\MouseKeyboardInput.h(77): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(79): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(84): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(104): warning C4018: '<': signed/unsigned mismatch
+c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(126): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(127): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\GeometryUtil.h(128): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\Renderer.h(87): warning C4018: '<': signed/unsigned mismatch
+c:\users\javi\documents\github\pbrbox\pbrbox\Renderer.h(123): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\Renderer.h(236): warning C4018: '<': signed/unsigned mismatch
+c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(28): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(48): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(64): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(65): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(82): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(189): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(332): warning C4018: '<': signed/unsigned mismatch
+c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(338): warning C4018: '<': signed/unsigned mismatch
+c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(348): warning C4018: '<': signed/unsigned mismatch
+c:\users\javi\documents\github\pbrbox\pbrbox\FluentMesh.h(357): warning C4018: '<': signed/unsigned mismatch
+c:\users\javi\documents\github\pbrbox\pbrbox\animation\TweenManager.h(37): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+PBRBox.cpp(116): warning C4244: 'argument': conversion from 'GLsizei' to 'float', possible loss of data
+PBRBox.cpp(346): warning C4305: 'argument': truncation from 'double' to 'float'
+PBRBox.cpp(599): warning C4305: 'argument': truncation from 'double' to 'float'
+PBRBox.cpp(717): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+c:\users\javi\documents\github\pbrbox\pbrbox\ResourceManager.h(148): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  c:\users\javi\documents\github\pbrbox\pbrbox\ResourceManager.h(83): note: see reference to function template instantiation 'Loader<Environment> *ResourceManager::getLoader<T>(std::type_index,std::string)' being compiled
+          with
+          [
+              T=Environment
+          ]
+  c:\users\javi\documents\github\pbrbox\pbrbox\MaterialLoader.h(23): note: see reference to function template instantiation 'ResourceHandle<Environment> ResourceManager::load<Environment>(std::string)' being compiled
+     Creating library C:\Users\Javi\Documents\GitHub\PBRBox\x64\Release\PBRBox.lib and object C:\Users\Javi\Documents\GitHub\PBRBox\x64\Release\PBRBox.exp
   Generating code
-  33 of 13884 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+  1 of 14088 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    32 functions had inline decision re-evaluated but remain unchanged
+    1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  PBRBox.vcxproj -> C:\Users\Hector\Documents\GitHub\PBRBox\x64\Release\PBRBox.exe
+  PBRBox.vcxproj -> C:\Users\Javi\Documents\GitHub\PBRBox\x64\Release\PBRBox.exe

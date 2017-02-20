@@ -61,6 +61,9 @@
     <Filter Include="Header Files\Animation\Splines">
       <UniqueIdentifier>{9bf9e9ba-11f2-423d-afef-4d17417793b2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Cuda">
+      <UniqueIdentifier>{6c5704e4-5ac7-42c8-9792-ae81ad5e2fd7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -266,6 +269,9 @@
     </ClInclude>
     <ClInclude Include="cutil_math.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CudaRenderTarget.h">
+      <Filter>Header Files\Cuda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

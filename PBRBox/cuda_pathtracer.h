@@ -32,13 +32,27 @@
 //#define width 1920	// screenwidth
 //#define height 1072 // screenheight
 
+
+#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort = true)
+{
+	if (code != cudaSuccess)
+	{
+		fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+		//if (abort) exit(code);
+	}
+}
+
+
+
+
 #define DBG_PUTS(level, msg) \
     do { if (level <= 1) { puts(msg); fflush(stdout); }} while (0)
 
 
 // The gateway to CUDA, called from C++ (src/main.cpp)
 
-void cudarender(glm::vec3* dptr, glm::vec3* accumulatebuffer, unsigned framenumber, unsigned hashedframes, Camera* cudaRendercam);
+void cudarender(cudaArray* tex, glm::vec3* dptr, glm::vec3* accumulatebuffer, unsigned framenumber, unsigned hashedframes, Camera* cudaRendercam);
 
 
 struct Clock {

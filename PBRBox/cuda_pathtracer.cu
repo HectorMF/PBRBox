@@ -36,19 +36,25 @@
 #include <chrono>
 
 #include "cuda_pathtracer.h"
-
+#include <cuda_runtime.h>
 #define M_PI 3.1415926535897932384626422832795028841971f
 #define TWO_PI 6.2831853071795864769252867665590057683943f
 #define NUDGE_FACTOR     1e-3f  // epsilon
 #define samps  1 // samples
 #define BVH_STACK_SIZE 32
+
 #define SCREEN_DIST (screenHeight*2)
+
+
 
 int texturewidth = 0;
 int textureheight = 0;
 int total_number_of_triangles;
 
 __device__ int depth = 0;
+
+texture<unsigned, cudaTextureTypeCubemap, cudaReadModeElementType> cubemap;
+
 
 // Textures for vertices, triangles and BVH data
 // (see CudaRender() below, as well as main() to see the data setup process)
@@ -98,7 +104,7 @@ __device__ Sphere spheres[] = {
 	//{ 10000,{ 50.0f, 40.8f, -1060 },{ 0.51, 0.7, 0.9 },{ 0.175f, 0.175f, 0.25f }, DIFF },
 
 	// ground
-	//{ 100000,{ 0.0f, -100001.1, 0 },{ .1, .1, .1 },{ 0.4f, 0.4f, 0.4f }, CHECKER },
+	//100000,{ 0.0f, -100001.1, 0 },{ .1, .1, .1 },{ 0.4f, 0.4f, 0.4f }, CHECKER },
 	//{ 100000,{ 0.0f, -100001.2, 0 },{ 0, 0, 0 },{ 0.3f, 0.3f, 0.3f }, DIFF }, // double shell to prevent light leaking
 
 																			  // horizon brightener
@@ -520,6 +526,59 @@ __device__ glm::vec3 path_trace(curandState *randstate, glm::vec3 originInWorldS
 	return glm::vec3(accucolor.x, accucolor.y, accucolor.z);
 }
 
+
+
+__device__ glm::vec3 depth_trace(curandState *randstate, glm::vec3 originInWorldSpace, glm::vec3 rayInWorldSpace, int avoidSelf)
+{
+
+	// colour mask
+	glm::vec3 mask = glm::vec3(1.0f, 1.0f, 1.0f);
+	// accumulated colour
+	glm::vec3 accucolor = glm::vec3(0.0f, 0.0f, 0.0f);
+
+		int sphere_id = -1;
+		int geomtype = -1;
+		float kAB = 0.f, kBC = 0.f, kCA = 0.f; // distances from the 3 edges of the triangle (from where we hit it), to be used for texturing
+
+		float tmin = 1e20;
+		float tmax = -1e20;
+		float d = 1e20;
+		float scene_t = 1e20;
+		float inf = 1e20;
+		float hitdistance = 1e20;
+		glm::vec3 pointHitInWorldSpace;
+		float radius = 1;
+		glm::vec3 f = glm::vec3(0, 0, 0);
+		glm::vec3 emit = glm::vec3(0, 0, 0);
+		glm::vec3 x; // intersection point
+		glm::vec3 n; // normal
+		glm::vec3 nl; // oriented normal
+		glm::vec3 boxnormal = glm::vec3(0, 0, 0);
+		glm::vec3 dw; // ray direction of next path segment
+		Refl_t refltype;
+
+		float3 rayorig = make_float3(originInWorldSpace.x, originInWorldSpace.y, originInWorldSpace.z);
+		float3 raydir = make_float3(rayInWorldSpace.x, rayInWorldSpace.y, rayInWorldSpace.z);
+
+		// intersect all triangles in the scene stored in BVH
+
+		// intersect all spheres in the scene
+		float numspheres = sizeof(spheres) / sizeof(Sphere);
+		for (int i = int(numspheres); i--;) {  // for all spheres in scene
+											   // keep track of distance from origin to closest intersection point
+			if ((d = spheres[i].intersect(Ray(rayorig, raydir))) && d < scene_t) { scene_t = d; sphere_id = i; geomtype = 1; }
+		}
+		// set avoidSelf to current triangle index to avoid intersection between this triangle and the next ray, 
+		// so that we don't get self-shadow or self-reflection from this triangle...
+
+
+		if (scene_t >= 1e20) 
+			return glm::vec3(1.0f, 1.0f, 1.0f);
+		else
+			return glm::vec3(scene_t/100.0f);
+}
+
+
 union Colour  // 4 bytes = 4 chars = 1 float
 {
 	float c;
@@ -628,16 +687,134 @@ __global__ void CoreLoopPathTracingKernel(glm::vec3* output, glm::vec3* accumbuf
 	Colour fcolour;
 	glm::vec3 colour = glm::vec3(clamp(tempcol.x, 0.0f, 1.0f), clamp(tempcol.y, 0.0f, 1.0f), clamp(tempcol.z, 0.0f, 1.0f));
 	// convert from 96-bit to 24-bit colour + perform gamma correction
-	fcolour.components = make_uchar4((unsigned char)(powf(colour.x, 1 / 2.2f) * 255), (unsigned char)(powf(colour.y, 1 / 2.2f) * 255), (unsigned char)(powf(colour.z, 1 / 2.2f) * 255), 1);
+	//fcolour.components = make_uchar4((unsigned char)(powf(colour.x, 1 / 2.2f) * 255), (unsigned char)(powf(colour.y, 1 / 2.2f) * 255), (unsigned char)(powf(colour.z, 1 / 2.2f) * 255), 1);
+
+	//float test = tex2D(tex, x, y);
+
+	float t = texCubemap(cubemap, x, y, 0);
+
+	fcolour.components = make_uchar4((unsigned char)(colour.x * 255), (unsigned char)(colour.y * 255), (unsigned char)(colour.z * 255), 1);
 	// store pixel coordinates and pixelcolour in OpenGL readable outputbuffer
+	
+	output[i] =  glm::vec3(x, y, fcolour.c);
+
+}
+
+
+
+// the core path tracing kernel, 
+// running in parallel for all pixels
+__global__ void CoreLoopDepthTracingKernel(glm::vec3* output, glm::vec3* accumbuffer, Camera* cudaRendercam,
+	unsigned int framenumber, unsigned int hashedframenumber)
+{
+	// assign a CUDA thread to every pixel by using the threadIndex
+	unsigned int x = blockIdx.x*blockDim.x + threadIdx.x;
+	unsigned int y = blockIdx.y*blockDim.y + threadIdx.y;
+
+	// global threadId, see richiesams blogspot
+	int threadId = (blockIdx.x + blockIdx.y * gridDim.x) * (blockDim.x * blockDim.y) + (threadIdx.y * blockDim.x) + threadIdx.x;
+
+	// create random number generator and initialise with hashed frame number, see RichieSams blogspot
+	curandState randState; // state of the random number generator, to prevent repetition
+	curand_init(hashedframenumber + threadId, 0, 0, &randState);
+
+	glm::vec3 finalcol; // final pixel colour  
+	glm::vec3 rendercampos = glm::vec3(cudaRendercam->position.x, cudaRendercam->position.y, cudaRendercam->position.z);
+
+	int i = (screenHeight - y - 1)*screenWidth + x; // pixel index in buffer
+	int pixelx = x; // pixel x-coordinate on screen
+	int pixely = screenHeight - y - 1; // pixel y-coordintate on screen
+
+	finalcol = glm::vec3(0.0f, 0.0f, 0.0f); // reset colour to zero for every pixel	
+
+	for (int s = 0; s < 5; s++) {
+
+		// compute primary ray direction
+		// use camera view of current frame (transformed on CPU side) to create local orthonormal basis
+		glm::vec3 rendercamview = glm::vec3(cudaRendercam->view.x, cudaRendercam->view.y, cudaRendercam->view.z); 		rendercamview = glm::normalize(rendercamview); // view is already supposed to be normalized, but normalize it explicitly just in case.
+		glm::vec3 rendercamup = glm::vec3(cudaRendercam->up.x, cudaRendercam->up.y, cudaRendercam->up.z); 		rendercamup = glm::normalize(rendercamup);
+		glm::vec3 horizontalAxis = cross(rendercamview, rendercamup); 		horizontalAxis = glm::normalize(horizontalAxis);  // Important to normalize!
+		glm::vec3 verticalAxis = cross(horizontalAxis, rendercamview); 		verticalAxis = glm::normalize(verticalAxis);  // verticalAxis is normalized by default, but normalize it explicitly just for good measure.
+
+		glm::vec3 middle = rendercampos + rendercamview;
+		glm::vec3 horizontal = horizontalAxis * tanf(cudaRendercam->fov.x * 0.5 * (M_PI / 180)); // Now treating FOV as the full FOV, not half, so I multiplied it by 0.5. I also normzlized A and B, so there's no need to divide by the length of A or B anymore. Also normalized view and removed lengthOfView. Also removed the cast to float.
+		glm::vec3 vertical = verticalAxis * tanf(-cudaRendercam->fov.y * 0.5 * (M_PI / 180)); // Now treating FOV as the full FOV, not half, so I multiplied it by 0.5. I also normzlized A and B, so there's no need to divide by the length of A or B anymore. Also normalized view and removed lengthOfView. Also removed the cast to float.
+
+																							  // anti-aliasing
+																							  // calculate center of current pixel and add random number in X and Y dimension
+																							  // based on https://github.com/peterkutz/GPUPathTracer 
+		float jitterValueX = curand_uniform(&randState) - 0.5;
+		float jitterValueY = curand_uniform(&randState) - 0.5;
+		float sx = (jitterValueX + pixelx) / (cudaRendercam->resolution.x - 1);
+		float sy = (jitterValueY + pixely) / (cudaRendercam->resolution.y - 1);
+
+		// compute pixel on screen
+		glm::vec3 pointOnPlaneOneUnitAwayFromEye = middle + (horizontal * ((2 * sx) - 1)) + (vertical * ((2 * sy) - 1));
+		glm::vec3 pointOnImagePlane = rendercampos + ((pointOnPlaneOneUnitAwayFromEye - rendercampos) * cudaRendercam->focalDistance); // Important for depth of field!		
+
+																																	   // calculation of depth of field / camera aperture 
+																																	   // based on https://github.com/peterkutz/GPUPathTracer 
+
+		glm::vec3 aperturePoint;
+
+		if (cudaRendercam->apertureRadius > 0.00001) { // the small number is an epsilon value.
+
+													   // generate random numbers for sampling a point on the aperture
+			float random1 = curand_uniform(&randState);
+			float random2 = curand_uniform(&randState);
+
+			// randomly pick a point on the circular aperture
+			float angle = TWO_PI * random1;
+			float distance = cudaRendercam->apertureRadius * sqrtf(random2);
+			float apertureX = cos(angle) * distance;
+			float apertureY = sin(angle) * distance;
+
+			aperturePoint = rendercampos + (horizontalAxis * apertureX) + (verticalAxis * apertureY);
+		}
+		else { // zero aperture
+			aperturePoint = rendercampos;
+		}
+
+		// calculate ray direction of next ray in path
+		glm::vec3 apertureToImagePlane = pointOnImagePlane - aperturePoint;
+		apertureToImagePlane = glm::normalize(apertureToImagePlane);
+		// ray direction, needs to be normalised
+		glm::vec3 rayInWorldSpace = apertureToImagePlane;
+		// in theory, this should not be required
+		rayInWorldSpace = glm::normalize(rayInWorldSpace);
+
+		// origin of next ray in path
+		glm::vec3 originInWorldSpace = aperturePoint;
+
+		finalcol += depth_trace(&randState, originInWorldSpace, rayInWorldSpace, -1) * (1.0f / samps);
+	}
+
+	// add pixel colour to accumulation buffer (accumulates all samples) 
+	accumbuffer[i] += finalcol;
+	// averaged colour: divide colour by the number of calculated frames so far
+	glm::vec3 tempcol = accumbuffer[i] * (1.0f / framenumber);
+
+	Colour fcolour;
+	glm::vec3 colour = glm::vec3(clamp(tempcol.x, 0.0f, 1.0f), clamp(tempcol.y, 0.0f, 1.0f), clamp(tempcol.z, 0.0f, 1.0f));
+	// convert from 96-bit to 24-bit colour + perform gamma correction
+	//fcolour.components = make_uchar4((unsigned char)(powf(colour.x, 1 / 2.2f) * 255), (unsigned char)(powf(colour.y, 1 / 2.2f) * 255), (unsigned char)(powf(colour.z, 1 / 2.2f) * 255), 1);
+
+	//float test = tex2D(tex, x, y);
+
+	float t = texCubemap(cubemap, x, y, 0);
+
+	fcolour.components = make_uchar4((unsigned char)(colour.x * 255), (unsigned char)(colour.y * 255), (unsigned char)(colour.z * 255), 1);
+	// store pixel coordinates and pixelcolour in OpenGL readable outputbuffer
+
 	output[i] = glm::vec3(x, y, fcolour.c);
 
 }
 
+
 bool g_bFirstTime = true;
 
 // the gateway to CUDA, called from C++ (in void disp() in main.cpp)
-void cudarender(glm::vec3* dptr, glm::vec3* accumulatebuffer, unsigned framenumber, unsigned hashedframes, Camera* cudaRendercam) {
+void cudarender(cudaArray* tex, glm::vec3* dptr, glm::vec3* accumulatebuffer, unsigned framenumber, unsigned hashedframes, Camera* cudaRendercam) {
 
 	if (g_bFirstTime) {
 		// if this is the first time cudarender() is called,
@@ -648,7 +825,16 @@ void cudarender(glm::vec3* dptr, glm::vec3* accumulatebuffer, unsigned framenumb
 		//cudaBindTexture(NULL, &g_verticesTexture, cudaPtrVertices, &channel4desc, g_verticesNo * 8 * sizeof(float));
 
 	}
+	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindUnsigned);
+	cudaChannelFormatDesc channel4desc = cudaCreateChannelDesc<float4>();
+	//cubemap.addressMode[0] = cudaAddressModeWrap;
+	//cubemap.addressMode[1] = cudaAddressModeWrap;
+	//cubemap.filterMode = cudaFilterModeLinear;
+	//cubemap.normalized = false;  // access with normalized texture coordinates
+	//gpuErrchk(cudaBindTextureToArray(cubemap, tex, channel4desc));
 
+	if(!tex)
+		printf("TEX VAL %d\n",tex);
 	//UpdateKernel << <1, 1 >> >(.02);
 	dim3 block(16, 16, 1);   // dim3 CUDA specific syntax, block and grid are required to schedule CUDA threads over streaming multiprocessors
 	dim3 grid(screenWidth / block.x, screenHeight / block.y, 1);
@@ -658,6 +844,6 @@ void cudarender(glm::vec3* dptr, glm::vec3* accumulatebuffer, unsigned framenumb
 	// Compute the number of blocks required, performing a ceiling operation to make sure there are enough:
 	int fullBlocksPerGrid = ((screenWidth * screenHeight) + threadsPerBlock - 1) / threadsPerBlock;
 	// <<<fullBlocksPerGrid, threadsPerBlock>>>
-	CoreLoopPathTracingKernel << <grid, block >> >(dptr, accumulatebuffer, cudaRendercam, framenumber, hashedframes);
+	CoreLoopDepthTracingKernel << <grid, block >> >(dptr, accumulatebuffer, cudaRendercam, framenumber, hashedframes);
 
 }

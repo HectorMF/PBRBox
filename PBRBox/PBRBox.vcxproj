@@ -166,6 +166,7 @@
     <CudaCompile Include="cuda_pathtracer.cu">
       <FileType>CppHeader</FileType>
     </CudaCompile>
+    <ClInclude Include="CudaRenderTarget.h" />
     <ClInclude Include="cuda_pathtracer.h" />
     <ClInclude Include="cutil_math.h" />
     <ClInclude Include="DDSLoader.h" />

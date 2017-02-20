@@ -9,6 +9,39 @@
 #include <GL/freeglut.h>
 #endif
 #include <Windows.h>
+
+
+
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <cuda_gl_interop.h>
+#include <cuda_texture_types.h>
+#include <cudaGL.h>
+#include "cuda_pathtracer.h"
+unsigned int framenumber = 0;
+GLuint vbo;
+void *d_vbo_buffer = NULL;
+// image buffer storing accumulated pixel samples
+glm::vec3* accumulatebuffer;
+// final output buffer storing averaged pixel samples
+glm::vec3* finaloutputbuffer;
+
+
+
+CUarray m_cudaArray;
+CUgraphicsResource m_cuda_graphicsResource;
+CUtexref m_surfReadRef;
+
+struct cudaGraphicsResource* tex_CUDA;
+cudaArray* array_CUDA;
+
+
+
+
+
+
+
+
 #include "ResourceManager.h"
 #include "JPGLoader.h"
 #include "PNGLoader.h"
@@ -53,7 +86,7 @@
 Camera* hostRendercam = NULL;
 Camera* cudaRendercam2 = NULL;
 
-int screenWidth, screenHeight;
+//int screenWidth, screenHeight;
 
 Scene scene;
 
@@ -72,18 +105,8 @@ SceneNode* node3;
 
 TweenManager* tm;
 
-
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <cuda_gl_interop.h>
-#include "cuda_pathtracer.h"
-unsigned int framenumber = 0;
-GLuint vbo;
-void *d_vbo_buffer = NULL;
-// image buffer storing accumulated pixel samples
-glm::vec3* accumulatebuffer;
-// final output buffer storing averaged pixel samples
-glm::vec3* finaloutputbuffer;
+//int screenWidth = 960;
+//int screenHeight = 640; 
 
 /* Handler for window re-size event. Called back when the window first appears and
 whenever the window is re-sized with its new width and height */
@@ -92,6 +115,13 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 	// Set the viewport to cover the new window
 	interactiveCamera->setResolution(newwidth, newheight);
 	renderer->windowSize = glm::vec2(newwidth, newheight);
+	//screenWidth = newwidth;
+	//screenHeight = newheight;
+
+
+
+
+
 //	glMatrixMode(GL_PROJECTION);
 //	glLoadIdentity();
 ////	glOrtho(0.0, screenWidth, screenHeight, 0.0, 0.0, 100.0);
@@ -100,7 +130,7 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 	glutPostRedisplay();
 }
 
-void createVBO(GLuint* vbo)
+void createVBO(GLuint* vbo, GLuint cubemapvbo)
 {
 	//Create vertex buffer object
 	glGenBuffers(1, vbo);
@@ -114,12 +144,37 @@ void createVBO(GLuint* vbo)
 
 	//Register VBO with CUDA
 	cudaGLRegisterBufferObject(*vbo);
+
+	//cudaError err = cudaGraphicsGLRegisterImage(&vbo_res, cubemapvbo, GL_TEXTURE_CUBE_MAP, cudaGraphicsRegisterFlagsSurfaceLoadStore);
+
+	//if (err != cudaSuccess)
+	//{
+	//	printf("ERROR CUDA");
+	//}
+
+	gpuErrchk(cudaGraphicsGLRegisterImage(&tex_CUDA, cubemapvbo, GL_TEXTURE_CUBE_MAP, cudaGraphicsRegisterFlagsReadOnly));
+	gpuErrchk(cudaGraphicsMapResources(1, &tex_CUDA, 0));
+	gpuErrchk(cudaGraphicsSubResourceGetMappedArray(&array_CUDA, tex_CUDA, 0, 0));
+	gpuErrchk(cudaGraphicsUnmapResources(1, &tex_CUDA, 0));
+
+	// Register both volume textures (pingponged) in CUDA
+	//CHECK_CUDA_CALL(cuGraphicsGLRegisterImage(&m_cuda_graphicsResource, cubemapvbo, 
+	//	GL_TEXTURE_CUBE_MAP, CU_GRAPHICS_REGISTER_FLAGS_READ_ONLY));
+
+	//CHECK_CUDA_CALL(cuGraphicsMapResources(1, &m_cuda_graphicsResource, 0));
+
+	// Bind the volume textures to their respective cuda arrays.
+	//CHECK_CUDA_CALL(cuGraphicsSubResourceGetMappedArray(&m_cudaArray
+	//	, m_cuda_graphicsResource
+	//	, 0, 0));
+
+	//CHECK_CUDA_CALL(cuGraphicsUnmapResources(1, &m_cuda_graphicsResource, 0));
 }
 
 void initializeScene()
 {
 
-	createVBO(&vbo);
+
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
@@ -145,7 +200,7 @@ void initializeScene()
 
 	shadowTarget = new RenderTarget();
 
-
+	createVBO(&vbo, scene.environment->radiance.uid);
 	//rm->load<Volume>("data\\artifix\\artifix_small.raw");
 
 	// new Environment();
@@ -205,7 +260,7 @@ void initializeScene()
 	ResourceHandle<Model> model = rm->load<Model>("data\\sponza\\SponzaNoFlag.obj");
 
 	model->m_hierarchy->scale = glm::vec3(.01, .01, .01);
-
+	
 	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
 	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
 	scene.add(model->m_hierarchy);
@@ -235,7 +290,7 @@ void initializeScene()
 		archive(*gunMat);
 	}
 	*/
-
+	
 	Model* headModel = rm->load<Model>("data\\head\\Infinite-Level_02.obj");
 	headModel->m_hierarchy->position = glm::vec3(3, 1, 0);
 	headModel->m_hierarchy->rotation = glm::quat();
@@ -353,7 +408,7 @@ void initializeScene()
 	node8->position = glm::vec3(6.0f, -6.0f, 6.0f);
 	//scene.add(node8);
 
-
+	
 	/*
 
 
@@ -544,7 +599,7 @@ void disp(void)
 	tm->update(.01);
 
 
-
+	
 	//scene.root->getChild(2)->rotation = glm::rotate(scene.root->getChild(2)->rotation, .01f, glm::vec3(0, 1, 0));
 	node3->rotation = glm::rotate(node3->rotation, .01f, glm::vec3(1, -1, 0));
 	scene.root->updateWorldMatrix();
@@ -553,7 +608,7 @@ void disp(void)
 	// if camera has moved, reset the accumulation buffer
 
 	// build a new camera for each frame on the CPU
-	/*interactiveCamera->buildRenderCamera(hostRendercam);
+	interactiveCamera->buildRenderCamera(hostRendercam);
 
 	renderer->setRenderTarget(*shadowTarget);
 
@@ -575,8 +630,10 @@ void disp(void)
 //	depthQuad->m_material->unbind();
 
 	glEnable(GL_DEPTH_TEST);
-	glutSwapBuffers();*/
+	glutSwapBuffers();
 
+	/*cuTexRefSetArray(m_surfReadRef, reinterpret_cast<CUarray>(m_cudaArray), 0);
+		
 
 	// if camera has moved, reset the accumulation buffer
 	if (buffer_reset) { cudaMemset(accumulatebuffer, 1, screenWidth * screenHeight * sizeof(glm::vec3)); framenumber = 0; }
@@ -590,10 +647,18 @@ void disp(void)
 	// copy the CPU camera to a GPU camera
 	cudaMemcpy(cudaRendercam2, hostRendercam, sizeof(Camera), cudaMemcpyHostToDevice);
 
+	//cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<uchar4>();
+
+	//texture<uchar4, cudaTextureTypeCubemap, cudaReadModeNormalizedFloat> texRef;
+
+	//cudaBindTextureToArray(&texRef, (cudaArray *)array, &channelDesc);
+	//texRef.filterMode = cudaFilterModeLinear;
+
 	cudaThreadSynchronize();
 
 	// maps a buffer object for acces by CUDA
 	cudaGLMapBufferObject((void**)&finaloutputbuffer, vbo);
+
 
 	//clear all pixels:
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -602,7 +667,7 @@ void disp(void)
 	unsigned int hashedframes = WangHash(framenumber);
 
 	// gateway from host to CUDA, passes all data needed to render frame (triangles, BVH tree, camera) to CUDA for execution
-	cudarender(finaloutputbuffer, accumulatebuffer, framenumber, hashedframes, cudaRendercam2);
+	cudarender(array_CUDA, finaloutputbuffer, accumulatebuffer, framenumber, hashedframes, cudaRendercam2);
 
 	cudaThreadSynchronize();
 	cudaGLUnmapBufferObject(vbo);
@@ -617,7 +682,7 @@ void disp(void)
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glutSwapBuffers();
-	glutPostRedisplay();
+	glutPostRedisplay();*/
 }
 
 void deleteCudaAndCpuMemory() {
@@ -635,9 +700,9 @@ int main(int argc, char** argv) {
 	interactiveCamera->buildRenderCamera(hostRendercam);
 
 	// allocate GPU memory for accumulation buffer
-	cudaMalloc(&accumulatebuffer, screenWidth * screenHeight * sizeof(glm::vec3));
+	//cudaMalloc(&accumulatebuffer, screenWidth * screenHeight * sizeof(glm::vec3));
 	// allocate GPU memory for interactive camera
-	cudaMalloc((void**)&cudaRendercam2, sizeof(Camera));
+	//cudaMalloc((void**)&cudaRendercam2, sizeof(Camera));
 	//initHDR(); // initialise the HDR environment map
 			   // initialise GLUT
 	glutInit(&argc, argv);
