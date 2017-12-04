@@ -6,10 +6,10 @@ InteractiveCamera::InteractiveCamera()
 {
 	centerPosition = glm::vec3(0, 0, 0);
 	yaw = 0;
-	pitch = 0.3;
-	radius = .5f;
+	pitch = 0;
+	radius = 1.0f;
 	apertureRadius = 0.04; 
-	focalDistance = 4.0f;
+	focalDistance = 60.0f;
 
 	resolution = glm::vec2(scrwidth, scrheight);  
 	fov = glm::vec2(40, 40);

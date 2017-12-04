@@ -26,6 +26,47 @@ class Texture : public ResourceBase
 {
 public:
 	void foo() {}
+	/*
+	GLuint getId();
+	GLenum getTarget() const { }
+	GLuint getInternalFormat() const { }
+
+	void bind(uint8_t textureUnit = 0) const;
+	void unbind(uint8_t textureUnit = 0) const;
+
+	GLuint getWidth() const {}
+	GLuint getHeight() const {}
+	GLuint getDepth() const {}
+
+	float getAspectRatio() const { return getWidth() / (float)getHeight(); }
+
+	void setWrapS(Wrap wrap) { m_wrapS = wrap; }
+	void setWrapT(Wrap wrap) { m_wrapT = wrap; }
+	void setWrapR(Wrap wrap) { m_wrapR = wrap; }
+
+	GLuint getWrapS() { return static_cast<unsigned>(m_wrapS); }
+	GLuint getWrapT() { return static_cast<unsigned>(m_wrapT); }
+	GLuint getWrapR() { return static_cast<unsigned>(m_wrapR); }
+
+	void setMinFilter(Filter filter);
+	void setMagFilter(Filter filter);
+
+	void setMaxAnisotropy(GLfloat anisotropy);
+
+	void setBorderColor(const glm::fvec4& color) { m_hasBorder = true; m_borderColor = color; }
+	glm::fvec4 getBorderColor() { return m_borderColor; }
+	bool hasBorder() { return m_hasBorder; }
+	
+	
+	bool m_hasBorder;
+	glm::fvec4 m_borderColor;
+	
+	Wrap m_wrapS;
+	Wrap m_wrapT;
+	Wrap m_wrapR;*/
+
+
+
 
 	unsigned int id;
 	operator unsigned int() const { return id; }
@@ -36,6 +77,7 @@ public:
 	Filter magFilter = Filter::Linear;
 	Wrap uWrap = Wrap::Repeat;
 	Wrap vWrap = Wrap::Repeat;
+
 	bool generateMipMaps = true;
 
 	TextureData* data;

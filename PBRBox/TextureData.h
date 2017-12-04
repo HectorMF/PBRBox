@@ -2,6 +2,7 @@
 class TextureData
 {
 	unsigned int width, height;
+
 	void* data;
 	unsigned int dataType;
 	unsigned int format;

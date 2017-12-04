@@ -6,7 +6,7 @@
 #define M_PI_2 1.57079632679
 #define M_PI 3.14156265
 #define PI_OVER_TWO 1.5707963267948966192313216916397514420985
-#define scrwidth 1280
+#define scrwidth 720
 #define scrheight 720
 
 

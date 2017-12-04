@@ -102,7 +102,7 @@ public:
 			shader.setUniform("uNormal", *m_normalMap.operator->());
 
 		if (m_permutation[TextureMap::AmbientOcclusion])
-			shader.setUniform("uAmbientOcclusion", m_ambientOcclusion->id);
+			shader.setUniform("uAmbientOcclusion", *m_ambientOcclusion.operator->());
 	}
 
 	void setAmbientOcclusionMap(ResourceHandle<Texture> ao)

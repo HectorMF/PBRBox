@@ -41,7 +41,6 @@ cudaArray* array_CUDA;
 
 
 
-
 #include "ResourceManager.h"
 #include "JPGLoader.h"
 #include "PNGLoader.h"
@@ -81,6 +80,8 @@ cudaArray* array_CUDA;
 //#include "EnvironmentTools.h"
 
 #include "Animation\Animation.h"
+
+#include "OptixVolumeRenderer.h"
 // test scenes
 
 Camera* hostRendercam = NULL;
@@ -89,8 +90,12 @@ Camera* cudaRendercam2 = NULL;
 //int screenWidth, screenHeight;
 
 Scene scene;
+unsigned int hdrTarget;
+unsigned int texColorBuffer;
+unsigned int rbo;
 
 RenderTarget* shadowTarget;
+RenderTarget* pbrTarget;
 Renderer* renderer;
 
 Material* shadowMat;
@@ -105,6 +110,8 @@ SceneNode* node3;
 
 TweenManager* tm;
 
+OptixVolumeRenderer* volumeRenderer;
+Mesh* quad;
 //int screenWidth = 960;
 //int screenHeight = 640; 
 
@@ -115,8 +122,25 @@ void reshape(GLsizei newwidth, GLsizei newheight)
 	// Set the viewport to cover the new window
 	interactiveCamera->setResolution(newwidth, newheight);
 	renderer->windowSize = glm::vec2(newwidth, newheight);
+	volumeRenderer->resize(newwidth, newheight);
 	//screenWidth = newwidth;
 	//screenHeight = newheight;
+
+
+
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, hdrTarget);
+
+	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, newwidth, newheight, 0, GL_RGBA, GL_FLOAT, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, newwidth, newheight);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
 
@@ -174,8 +198,8 @@ void createVBO(GLuint* vbo, GLuint cubemapvbo)
 void initializeScene()
 {
 
-
-	glEnable(GL_FRAMEBUFFER_SRGB);
+	volumeRenderer = new OptixVolumeRenderer();
+	//glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	tm = new TweenManager();
@@ -199,6 +223,34 @@ void initializeScene()
 	scene.environment = operatingRoom;
 
 	shadowTarget = new RenderTarget();
+
+
+
+	glGenFramebuffers(1, &hdrTarget);
+	glBindFramebuffer(GL_FRAMEBUFFER, hdrTarget);
+
+	glGenTextures(1, &texColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 1920, 1080, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// attach it to currently bound framebuffer object
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1920, 1080);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
+	pbrTarget = new RenderTarget();
 
 	createVBO(&vbo, scene.environment->radiance.uid);
 	//rm->load<Volume>("data\\artifix\\artifix_small.raw");
@@ -237,7 +289,7 @@ void initializeScene()
 	irrigationTool->m_meshes[0]->m_material = irrigationMat;
 	irrigationTool->m_hierarchy->scale = { .1,.1,.1 };
 	irrigationTool->m_hierarchy->position = { -3, 0, 0 };
-	scene.add(irrigationTool->m_hierarchy);
+	//scene.add(irrigationTool->m_hierarchy);
 
 	//Mesh* irrigation = new Mesh(irrigationTool->m_meshes[0]->m_geometry, irrigationMat);
 	//SceneNode* node = new SceneNode();
@@ -257,13 +309,13 @@ void initializeScene()
 	depthMat->shader = Shader("shaders\\Diffuse.vert", "shaders\\Diffuse.frag");
 
 //	Model* model = new Model("data\\head\\Infinite-Level_02.OBJ");
-	ResourceHandle<Model> model = rm->load<Model>("data\\sponza\\SponzaNoFlag.obj");
-
-	model->m_hierarchy->scale = glm::vec3(.01, .01, .01);
+//	ResourceHandle<Model> model = rm->load<Model>("data\\sponza\\SponzaNoFlag.obj");
+//
+//	model->m_hierarchy->scale = glm::vec3(.01, .01, .01);
 	
 	//model->m_hierarchy->m_transform = glm::scale(model->m_hierarchy->m_transform, glm::vec3(.05, .05, .05));
 	//model->m_hierarchy->m_transform = glm::translate(model->m_hierarchy->m_transform, glm::vec3(2, 0, .05));
-	scene.add(model->m_hierarchy);
+//	scene.add(model->m_hierarchy);
 	
 	/*
 	Model* model = new Model("data\\cerberus\\Cerberus.obj");
@@ -290,7 +342,7 @@ void initializeScene()
 		archive(*gunMat);
 	}
 	*/
-	
+	/*
 	Model* headModel = rm->load<Model>("data\\head\\Infinite-Level_02.obj");
 	headModel->m_hierarchy->position = glm::vec3(3, 1, 0);
 	headModel->m_hierarchy->rotation = glm::quat();
@@ -327,7 +379,7 @@ void initializeScene()
 	gunMat2->setMetalness(0);
 	gunMat2->setRoughness(.5f);
 //	gunMat->setNormalMap(gunN);
-
+	*/
 
 	/*Mesh* gun1 = new Mesh(gun->m_geometry, gunMat2);
 	node2 = new SceneNode();
@@ -336,11 +388,11 @@ void initializeScene()
 	node2->position = glm::vec3(0, 0, 4);
 	scene.add(node2);*/
 
-	node3 = new SceneNode();
+	/*node3 = new SceneNode();
 	node3->mesh = new Mesh(gun4, gunMat);
 	node3->scale = glm::vec3(1, 1, 1);
 	node3->position = glm::vec3(0, 1, 0);
-	scene.add(node3);
+	scene.add(node3);*/
 
 
 	Geometry sphereMesh = Shapes::sphere(.2);
@@ -359,24 +411,24 @@ void initializeScene()
 	//scene.root = node3;
 
 
-	for (int x = -4; x <= 4; x++)
+	for (int x = -5; x <= 5; x++)
 	{
-		for (int z = -4; z <= 4; z++)
+		for (int z = -5; z <= 5; z++)
 		{
 
 			PBRMaterial* diffuseMat1 = new PBRMaterial();
 
 			diffuseMat1->setEnvironment(operatingRoom);
 			diffuseMat1->setAlbedo(glm::vec4(1, 1, 1, 1));
-			diffuseMat1->setMetalness((x + 4) / 8.0f);
-			diffuseMat1->setRoughness((z + 4) / 8.0f);
+			diffuseMat1->setMetalness((x + 5) / 10.0f);
+			diffuseMat1->setRoughness((z + 5) / 10.0f);
 
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
 			//sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, 6, z * .5));
 			SceneNode* node4 = new SceneNode();
 			node4->mesh = sphere;
 			node4->position = glm::vec3(x*.5, z* .5, 0);
-			//scene.add(node4);
+			scene.add(node4);
 		}
 	}
 
@@ -409,6 +461,44 @@ void initializeScene()
 	//scene.add(node8);
 
 	
+
+	ResourceHandle<Model> skull2 = rm->load<Model>("data\\skull2\\model.dae");
+
+	ResourceHandle<Texture> skull2A = rm->load<Texture>("data\\skull2\\textures\\Rosa-material_albedo.jpg");
+	ResourceHandle<Texture> skull2M = rm->load<Texture>("data\\skull2\\textures\\Rosa-material_metallic.jpg");
+	ResourceHandle<Texture> skull2N = rm->load<Texture>("data\\skull2\\textures\\Rosa-material_normal.jpg");
+	ResourceHandle<Texture> skull2R = rm->load<Texture>("data\\skull2\\textures\\Rosa-material_roughness.jpg");
+	ResourceHandle<Texture> skull2AO = rm->load<Texture>("data\\skull2\\textures\\Rosa-material_AO.jpg");
+
+	skull2N->colorSpace = ColorSpace::Linear;
+	skull2M->colorSpace = ColorSpace::Linear;
+	skull2R->colorSpace = ColorSpace::Linear;
+	skull2AO->colorSpace = ColorSpace::Linear;
+
+
+	skull2A->upload();
+	skull2M->upload();
+	skull2N->upload();
+	skull2R->upload();
+	skull2AO->upload();
+	
+	PBRMaterial* skull2Mat = new PBRMaterial();
+	skull2Mat->setEnvironment(operatingRoom);
+	skull2Mat->setAlbedoMap(skull2A);
+	skull2Mat->setMetalnessMap(skull2M);
+	skull2Mat->setAmbientOcclusionMap(skull2AO);
+	skull2Mat->setRoughnessMap(skull2R);
+	skull2Mat->setNormalMap(skull2N);
+
+
+	SceneNode* node9 = new SceneNode();
+	node9->mesh = new Mesh(skull2->m_meshes[0]->m_geometry, skull2Mat);
+
+	node9->scale = glm::vec3(1, 1, 1);
+	node9->position = glm::vec3(0, 1, 0);
+	scene.add(node9);
+
+
 	/*
 
 
@@ -547,7 +637,7 @@ void initializeScene()
 	//depthQuad->transform = glm::scale(depthQuad->transform, glm::vec3(.25, .25, 0));
 
 	//scene.add(depthQuad);
-
+	
 	Geometry sphereMesh = Shapes::sphere(.2);
 
 	for (int x = -4; x <= 4; x++)
@@ -561,14 +651,25 @@ void initializeScene()
 			diffuseMat1->setAlbedo(glm::vec4(1, 1, 1, 1));
 			diffuseMat1->setMetalness((x + 4) / 8.0f);
 			diffuseMat1->setRoughness((z + 4) / 8.0f);
-			diffuseMat1->shadowTex = shadowTarget->depthTexture;
+			//diffuseMat1->shadowTex = shadowTarget->depthTexture;
 			diffuseMat1->m_BRDFLUT = brdfLUT;
 			Mesh* sphere = new Mesh(sphereMesh, diffuseMat1);
-			//sphere->transform = glm::translate(sphere->transform, glm::vec3(x * .5, 6, z * .5));
-			//scene.add(sphere);
+			//sphere- = glm::translate(sphere->transform, glm::vec3(x * .5, 6, z * .5));
+			add(sphere);
 		}
 	}
 	*/
+
+Material* quadMat = new Material();
+quadMat->shader = Shader("shaders\\Tonemap.vert", "shaders\\Tonemap.frag");
+Geometry renderLDR = Shapes::renderQuad();
+quad = new Mesh(renderLDR, quadMat);
+
+quadMat->shader.setUniform("uFrame", 0);
+
+
+
+
 	renderer = new Renderer();
 	renderer->clearColor = glm::vec4(1, 0, 1, 1);
 	renderer->shadowTarget = shadowTarget;
@@ -598,10 +699,9 @@ void disp(void)
 {
 	tm->update(.01);
 
-
 	
 	//scene.root->getChild(2)->rotation = glm::rotate(scene.root->getChild(2)->rotation, .01f, glm::vec3(0, 1, 0));
-	node3->rotation = glm::rotate(node3->rotation, .01f, glm::vec3(1, -1, 0));
+	//node3->rotation = glm::rotate(node3->rotation, .01f, glm::vec3(1, -1, 0));
 	scene.root->updateWorldMatrix();
 	//gun1->transform = glm::rotate(gun1->transform, .001f, glm::vec3(0,1,0));
 	//hovercraft->transform = glm::rotate(hovercraft->transform, .003f, glm::vec3(0, 0, 1));
@@ -622,9 +722,45 @@ void disp(void)
 	
 	//diffuseMat->shadowTex = shadowTarget->depthTexture;
 	//glUniformMatrix4fv(t, 1, GL_FALSE, glm::value_ptr(shadowTarget->depthTexture));
-
+	glBindFramebuffer(GL_FRAMEBUFFER, hdrTarget);
 	renderer->render(scene, *hostRendercam);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//volumeRenderer->draw();
+
 	glDisable(GL_DEPTH_TEST);
+	quad->m_material->bind();
+	glm::mat4 model;
+	glm::mat4 view = glm::lookAt((*hostRendercam).position, (*hostRendercam).position + (*hostRendercam).view, (*hostRendercam).up);
+	glm::mat4 projection = glm::perspective(45.0f, (float)(*hostRendercam).resolution.x / (float)(*hostRendercam).resolution.y, 0.1f, 1000.0f);
+
+	glm::mat4 normal = glm::transpose(glm::inverse(view * model));
+	glm::mat4 invProjection = glm::inverse(projection);
+	glm::mat4 transView = glm::transpose(view);
+	glm::vec4 viewDir = view * model * glm::vec4(1, 0, 0, 0);
+
+	view = glm::mat4(glm::mat3(view));
+
+	quad->m_material->shader.setUniform("camera.position", (*hostRendercam).position);
+	quad->m_material->shader.setUniform("camera.viewDirection", (*hostRendercam).view);
+
+	quad->m_material->shader.setUniform("camera.mModel", model);
+	quad->m_material->shader.setUniform("camera.mView", view);
+	quad->m_material->shader.setUniform("camera.mProjection", projection);
+	quad->m_material->shader.setUniform("camera.mNormal", normal);
+	quad->m_material->shader.setUniform("camera.mInvView", glm::inverse(view));
+
+	glActiveTexture(GL_TEXTURE0 + 0);
+	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+	
+	quad->render();
+
+	quad->m_material->unbind();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
+	
 //	depthQuad->m_material->bind();
 //	depthQuad->render();
 //	depthQuad->m_material->unbind();
@@ -763,7 +899,7 @@ int main(int argc, char** argv) {
 	cudaFree(accumulatebuffer);
 	cudaFree(cudaRendercam2);
 
-
+	delete volumeRenderer;
 	deleteCudaAndCpuMemory();
 }
 

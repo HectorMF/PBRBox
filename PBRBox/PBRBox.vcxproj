@@ -134,15 +134,15 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\ext\glew-2.0.0\include;..\ext\freeglut\include;..\ext\glm-0.9.8.1\glm;..\ext\assimp\include;..\ext\gli-0.8.1.1\gli;..\ext\tinyxml2-4.0.1;..\ext\cereal-1.2.1\include;$(CUDA_PATH_V8_0)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\ext\glew-2.0.0\include;..\ext\freeglut\include;..\ext\glm-0.9.8.1\glm;..\ext\assimp\include;..\ext\gli-0.8.2.0\gli;..\ext\tinyxml2-4.0.1;..\ext\cereal-1.2.1\include;$(CUDA_PATH_V8_0)\include;C:\ProgramData\NVIDIA Corporation\OptiX SDK 4.1.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\ext\glew-2.0.0\lib\Release\x64;..\ext\freeglut\lib\x64;..\ext\assimp\lib\Release;$(CUDA_PATH_V8_0)\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;freeglut.lib;assimp.lib;cudart.lib;cuda.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\ext\glew-2.0.0\lib\Release\x64;..\ext\freeglut\lib\x64;..\ext\assimp\lib\Release;$(CUDA_PATH_V8_0)\lib\x64;C:\ProgramData\NVIDIA Corporation\OptiX SDK 4.1.1\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;freeglut.lib;assimp.lib;cudart.lib;cuda.lib;optix.1.lib;optixu.1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -163,9 +163,23 @@
     <ClInclude Include="Animation\TweenSequence.h" />
     <ClInclude Include="AntiAliasing.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="DepthTarget.h" />
+    <ClInclude Include="RenderTarget.h" />
+    <ClInclude Include="VolumeShader.h" />
+    <CudaCompile Include="accum_camera.cu">
+      <CompileOut Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutputPath)Optix\%(Filename).ptx</CompileOut>
+      <NvccCompilation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ptx</NvccCompilation>
+      <TargetMachinePlatform Condition="'$(Configuration)|$(Platform)'=='Release|x64'">64</TargetMachinePlatform>
+    </CudaCompile>
+    <CudaCompile Include="constantbg.cu">
+      <CompileOut Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutputPath)Optix\%(Filename).ptx</CompileOut>
+      <NvccCompilation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ptx</NvccCompilation>
+      <TargetMachinePlatform Condition="'$(Configuration)|$(Platform)'=='Release|x64'">64</TargetMachinePlatform>
+    </CudaCompile>
     <CudaCompile Include="cuda_pathtracer.cu">
       <FileType>CppHeader</FileType>
     </CudaCompile>
+    <ClInclude Include="ColorXYZ.h" />
     <ClInclude Include="CudaRenderTarget.h" />
     <ClInclude Include="cuda_pathtracer.h" />
     <ClInclude Include="cutil_math.h" />
@@ -178,7 +192,9 @@
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="GeometryUtil.h" />
     <ClInclude Include="Environment.h" />
+    <ClInclude Include="helpers.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Lighting.h" />
     <ClInclude Include="Loader.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialLoader.h" />
@@ -187,18 +203,24 @@
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelSerializer.h" />
+    <ClInclude Include="MonteCarlo.h" />
     <ClInclude Include="MouseKeyboardInput.h" />
+    <ClInclude Include="OptixVolumeRenderer.h" />
     <ClInclude Include="OrthographicCamera.h" />
+    <ClInclude Include="Packet.h" />
     <ClInclude Include="PBRMaterialSerializer.h" />
     <ClInclude Include="PerspectiveCamera.h" />
     <ClInclude Include="PNGLoader.h" />
     <ClInclude Include="PointLight.h" />
+    <ClInclude Include="random.h" />
+    <ClInclude Include="RayMarching.h" />
     <ClInclude Include="Renderer.h" />
-    <ClInclude Include="RenderTarget.h" />
+    <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="ResourceBase.h" />
     <ClInclude Include="ResourceHandle.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="ResourceSerialization.h" />
+    <ClInclude Include="Sample.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneNode.h" />
     <ClInclude Include="Shader.h" />
@@ -220,6 +242,16 @@
     <ClInclude Include="ToneMapping.h" />
     <ClInclude Include="UnlitMaterial.h" />
     <ClInclude Include="Volume.h" />
+    <CudaCompile Include="phong.cu">
+      <CompileOut Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutputPath)Optix\%(Filename).ptx</CompileOut>
+      <NvccCompilation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ptx</NvccCompilation>
+      <TargetMachinePlatform Condition="'$(Configuration)|$(Platform)'=='Release|x64'">64</TargetMachinePlatform>
+    </CudaCompile>
+    <CudaCompile Include="volume.cu">
+      <CompileOut Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutputPath)Optix\%(Filename).ptx</CompileOut>
+      <NvccCompilation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ptx</NvccCompilation>
+      <TargetMachinePlatform Condition="'$(Configuration)|$(Platform)'=='Release|x64'">64</TargetMachinePlatform>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -232,6 +264,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Model.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="OptixVolumeRenderer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="PBRBox.cpp" />
@@ -249,12 +284,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\x64\Release\Optix\accum_camera.ptx" />
+    <None Include="..\x64\Release\Optix\constantbg.ptx" />
+    <None Include="..\x64\Release\Optix\phong.ptx" />
+    <None Include="..\x64\Release\Optix\volume.ptx" />
     <None Include="..\x64\Release\shaders\PBR.frag" />
     <None Include="..\x64\Release\shaders\PBR.vert" />
     <None Include="..\x64\Release\shaders\ISPBR.frag">
       <DeploymentContent>false</DeploymentContent>
     </None>
     <None Include="..\x64\Release\shaders\ISPBR.vert" />
+    <None Include="..\x64\Release\shaders\Tonemap.frag" />
+    <None Include="..\x64\Release\shaders\Tonemap.vert" />
     <None Include="..\x64\Release\shaders\Unlit.frag" />
     <None Include="..\x64\Release\shaders\Unlit.vert" />
     <None Include="..\x64\Release\shaders\Mirror.frag" />

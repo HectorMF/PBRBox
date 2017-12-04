@@ -64,6 +64,12 @@
     <Filter Include="Header Files\Cuda">
       <UniqueIdentifier>{6c5704e4-5ac7-42c8-9792-ae81ad5e2fd7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Optix">
+      <UniqueIdentifier>{1a39a70b-12ba-41bb-80d4-67f2093f2e81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\PTX">
+      <UniqueIdentifier>{c94a9234-e244-4dd2-984a-461586fdf834}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -109,9 +115,6 @@
       <Filter>Header Files\Input</Filter>
     </ClInclude>
     <ClInclude Include="Renderer.h">
-      <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderTarget.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
@@ -273,6 +276,45 @@
     <ClInclude Include="CudaRenderTarget.h">
       <Filter>Header Files\Cuda</Filter>
     </ClInclude>
+    <ClInclude Include="OptixVolumeRenderer.h">
+      <Filter>Header Files\Optix</Filter>
+    </ClInclude>
+    <ClInclude Include="random.h">
+      <Filter>Header Files\Optix</Filter>
+    </ClInclude>
+    <ClInclude Include="Packet.h">
+      <Filter>Header Files\Optix</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorXYZ.h">
+      <Filter>Header Files\Optix</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers.h">
+      <Filter>Header Files\Optix</Filter>
+    </ClInclude>
+    <ClInclude Include="Lighting.h">
+      <Filter>Header Files\Optix</Filter>
+    </ClInclude>
+    <ClInclude Include="MonteCarlo.h">
+      <Filter>Header Files\Optix</Filter>
+    </ClInclude>
+    <ClInclude Include="RayMarching.h">
+      <Filter>Header Files\Optix</Filter>
+    </ClInclude>
+    <ClInclude Include="Sample.h">
+      <Filter>Header Files\Optix</Filter>
+    </ClInclude>
+    <ClInclude Include="VolumeShader.h">
+      <Filter>Header Files\Optix</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthTarget.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameBuffer.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTarget.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -297,6 +339,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ResourceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OptixVolumeRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -352,6 +397,24 @@
     <None Include="Volume.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="..\x64\Release\Optix\accum_camera.ptx">
+      <Filter>Resource Files\PTX</Filter>
+    </None>
+    <None Include="..\x64\Release\Optix\constantbg.ptx">
+      <Filter>Resource Files\PTX</Filter>
+    </None>
+    <None Include="..\x64\Release\Optix\phong.ptx">
+      <Filter>Resource Files\PTX</Filter>
+    </None>
+    <None Include="..\x64\Release\Optix\volume.ptx">
+      <Filter>Resource Files\PTX</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Tonemap.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\x64\Release\shaders\Tonemap.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\x64\Release\Error.png">
@@ -361,6 +424,18 @@
   <ItemGroup>
     <CudaCompile Include="cuda_pathtracer.cu">
       <Filter>Source Files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="accum_camera.cu">
+      <Filter>Header Files\Optix</Filter>
+    </CudaCompile>
+    <CudaCompile Include="phong.cu">
+      <Filter>Header Files\Optix</Filter>
+    </CudaCompile>
+    <CudaCompile Include="volume.cu">
+      <Filter>Header Files\Optix</Filter>
+    </CudaCompile>
+    <CudaCompile Include="constantbg.cu">
+      <Filter>Header Files\Optix</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

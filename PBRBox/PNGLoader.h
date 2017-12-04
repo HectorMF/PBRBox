@@ -18,12 +18,13 @@ public:
 		unsigned char* image = stbi_load(filename.c_str(), &width, &height, &bpp, 4);
 
 		TextureData* data = new TextureData();
+		
 		data->setData(width, height, image);
 		data->setFormat(GL_RGBA);
 		data->setDataType(GL_UNSIGNED_BYTE);
 
 		tex->data = data;
-		tex->upload();
+
 		printf("LOADED PNG!!!!\n");
 		return tex;
 	}

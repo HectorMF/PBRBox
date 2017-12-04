@@ -23,7 +23,6 @@ public:
 		data->setFormat(GL_RGBA);
 		data->setDataType(GL_UNSIGNED_BYTE);
 		tex->data = data;
-		tex->upload();
 		printf("LOADED JPG!!!!\n");
 		return tex;
 	}

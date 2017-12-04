@@ -1,4 +1,5 @@
 #pragma once
+#include <glm\glm.hpp>
 #include <gli/gli.hpp>
 #include "Loader.h"
 #include "Texture.h"

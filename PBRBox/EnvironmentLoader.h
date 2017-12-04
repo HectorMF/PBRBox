@@ -31,7 +31,16 @@ public:
 		//env->specular.manager = resourceManager;
 		stbi_set_flip_vertically_on_load(true);
 		env->brdf = resourceManager->load<Texture>(env->brdf.filePath);
+		env->brdf->colorSpace = ColorSpace::Linear;
+		env->brdf->uWrap = Wrap::Clamp;
+		env->brdf->vWrap = Wrap::Clamp;
+		env->brdf->upload();
+
+
+
 		stbi_set_flip_vertically_on_load(false);
+
+		
 	
 		return env;
 	}

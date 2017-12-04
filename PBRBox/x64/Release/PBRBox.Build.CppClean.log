@@ -3,6 +3,7 @@ c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\vc140.pdb
 c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\stdafx.obj
 c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\scenenode.obj
 c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\resourcemanager.obj
+c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\optixvolumerenderer.obj
 c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\model.obj
 c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\mesh.obj
 c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\geometry.obj
@@ -14,7 +15,11 @@ c:\users\javi\documents\github\pbrbox\x64\release\pbrbox.iobj
 c:\users\javi\documents\github\pbrbox\x64\release\pbrbox.pdb
 c:\users\javi\documents\github\pbrbox\x64\release\pbrbox.lib
 c:\users\javi\documents\github\pbrbox\x64\release\pbrbox.exp
+c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\accum_camera.cu.cache
+c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\constantbg.cu.cache
 c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\cuda_pathtracer.cu.cache
+c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\phong.cu.cache
+c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\volume.cu.cache
 c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\cuda_pathtracer.cu.obj
 c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\pbrbox.tlog\cl.command.1.tlog
 c:\users\javi\documents\github\pbrbox\pbrbox\x64\release\pbrbox.tlog\cl.read.1.tlog

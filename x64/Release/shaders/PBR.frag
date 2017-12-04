@@ -226,19 +226,65 @@ float linRoughnessToMipmap( float roughnessLinear )
 }
 
 
+#define FLT_EPSILON     1.192092896e-07f  
+
 const int nMipOffset = 3;
 const int nMips = 11;
-const float fUserScale = .3864;
+//const float fUserScale = .3864;
 
-float roughnessToMip(float roughness) // log2 distribution
+float RoughnessFromPerceptualRoughness(float fPerceptualRoughness)
 {
-	float temp = (2.0/(roughness*roughness))-2.0;
-	return (nMips-1-nMipOffset) - log2(temp)*fUserScale;
+    return fPerceptualRoughness*fPerceptualRoughness;
+}
+ 
+float PerceptualRoughnessFromRoughness(float fRoughness)
+{
+    return sqrt(max(0.0,fRoughness));
+}
+ 
+
+float SpecularPowerFromPerceptualRoughness(float fPerceptualRoughness)
+{
+    float fRoughness = RoughnessFromPerceptualRoughness(fPerceptualRoughness);
+    return (2.0/max(FLT_EPSILON, fRoughness*fRoughness))-2.0;
+}
+ 
+float PerceptualRoughnessFromSpecularPower(float fSpecPower)
+{
+    float fRoughness = sqrt(2.0/(fSpecPower + 2.0));
+    return PerceptualRoughnessFromRoughness(fRoughness);
 }
 
-vec3 prefilterEnvMap( float roughnessLinear, const in vec3 R )
+float roughnessToMip(float roughness, float NdotR) // log2 distribution
 {
-    float lod = roughnessToMip(roughnessLinear * roughnessLinear); //( uEnvironmentMaxLod - 1.0 );
+	//float temp = (2.0/(roughness*roughness))-2.0;
+	//return (nMips-1-nMipOffset) - log2(temp)*fUserScale;
+
+   float fSpecPower = SpecularPowerFromPerceptualRoughness(roughness);
+   fSpecPower /= (4*max(NdotR, FLT_EPSILON));		// see section "Pre-convolved Cube Maps vs Path Tracers"
+   float fScale = PerceptualRoughnessFromSpecularPower(fSpecPower);
+
+ //  float fScale = roughness*(1.7 - 0.7*roughness);    // approximate remap from LdotR based distribution to NdotH
+   return fScale*(nMips- 1- nMipOffset);
+  // return roughness*(nMips-1-nMipOffset);
+
+
+}
+
+float BurleyToMip(float fPerceptualRoughness, float NdotR)
+{
+    float fSpecPower = SpecularPowerFromPerceptualRoughness(fPerceptualRoughness);
+    fSpecPower /= (4*max(NdotR, FLT_EPSILON));      // see section "Pre-convolved Cube Maps vs Path Tracers"
+    float fScale = PerceptualRoughnessFromSpecularPower(fSpecPower);
+    return fPerceptualRoughness*(nMips-1-nMipOffset);
+}
+ 
+
+
+
+vec3 prefilterEnvMap( float roughnessLinear, const in vec3 N, const in vec3 R )
+{
+    float lod = roughnessToMip(roughnessLinear, dot(N,R)); //( uEnvironmentMaxLod - 1.0 );
     return textureLod(uSpecularMap, R, lod).rgb;//textureCubeLodEXTFixed( uRadianceMap, R, lod );
 }
 
@@ -274,17 +320,25 @@ vec3 approximateSpecularIBL( const in vec3 specularColor,
                              const in vec3 N,
                              const in vec3 V )
 {
+
     float roughnessLinear = max( rLinear, 0.0);
     float NoV = clamp( dot( N, V ), 0.0, 1.0 );
     vec3 R = normalize( (2.0 * NoV ) * N - V);
 
 
+	
+    vec3 vR = getSpecularDominantDir(N, R, rLinear*rLinear);
+    float RdotNsat = saturate(dot(N, R));
+ 
+
+    float l = BurleyToMip(rLinear, RdotNsat);
+
     // From Sebastien Lagarde Moving Frostbite to PBR page 69
     // so roughness = linRoughness * linRoughness
-    vec3 dominantR = getSpecularDominantDir( N, R,  roughnessLinear*roughnessLinear);
+   // vec3 dominantR = getSpecularDominantDir( N, R,  roughnessLinear);
 
-    vec3 dir = ( vec4(dominantR, 0)).rgb;
-    vec3 prefilteredColor = prefilterEnvMap( roughnessLinear, dir );
+   // vec3 dir = ( vec4(dominantR, 0)).rgb;
+    vec3 prefilteredColor = textureLod(uSpecularMap, vR, l).rgb; //prefilterEnvMap( roughnessLinear, N, dir );
 
 
    // marmoset tricks
@@ -292,8 +346,34 @@ vec3 approximateSpecularIBL( const in vec3 specularColor,
 
 	//return uBrightness * prefilteredColor * integrateBRDFApprox( specularColor, roughnessLinear, NoV );
     vec4 envBRDF = texture2D( uBRDFLUT, vec2(NoV, roughnessLinear));
+	
 	//return vec3(roughnessToMip(roughnessLinear)/7);
-	return uBrightness * prefilteredColor * ( specularColor * envBRDF.x + envBRDF.y );
+	return prefilteredColor * ( specularColor * envBRDF.x + envBRDF.y );
+}
+
+ 
+float bias(float value, float b)
+{
+    return (b > 0.0) ? pow(value, log(b) / log(0.5)) : 0.0;
+}
+ 
+
+// contrast function.
+float gain(float value, float g)
+{
+    return 0.5 * ((value < 0.5) ? bias(2.0*value, 1.0-g) : (2.0 - bias(2.0-2.0*value, 1.0-g)));
+}
+ 
+ 
+ 
+float EmpiricalSpecularAO(float ao, float perceptualRoughness)
+{
+    // basically a ramp curve allowing ao on very diffuse specular
+    // and gradually less so as the reflection hardens.
+    float fSmooth = 1-perceptualRoughness;
+    float fSpecAo = gain(ao,0.5+max(0.0,fSmooth*0.4));
+ 
+    return min(1.0,fSpecAo + mix(0.0, 0.5, fSmooth*fSmooth*fSmooth*fSmooth));
 }
 
 
@@ -301,15 +381,16 @@ vec3 computeIBL_UE4( const in vec3 normal,
                      const in vec3 view,
                      const in vec3 albedo,
                      const in float roughness,
-                     const in vec3 specular)
+                     const in vec3 specular,
+					 const in float ao)
 {
 
     vec3 color = vec3(0.0);
     if ( albedo != color ) { // skip if no diffuse
-       color += uBrightness * albedo * texture(uIrradianceMap, normal).rgb * getAO();//* evaluateDiffuseSphericalHarmonics(normal,view );
+       color += uBrightness * albedo * texture(uIrradianceMap, normal).rgb * ao;//* evaluateDiffuseSphericalHarmonics(normal,view );
     }
 	//color = texture(uRadianceMap, normal).rgb;
-    color += approximateSpecularIBL(specular, roughness, normal, view);
+    color += approximateSpecularIBL(specular, roughness, normal, view) * EmpiricalSpecularAO(ao, roughness);
 	//float mip = (roughness <.01) ? 1 : 0;
 	//color = vec3(mip);
     return color;
@@ -433,7 +514,106 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
+// ----------------------------------------------------------------------------
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}   
+// ----------------------------------------------------------------------------
 
+
+
+
+// marmoset horizon occlusion http://marmosetco.tumblr.com/post/81245981087
+float ApproximateSpecularSelfOcclusion(vec3 vR, vec3 vertNormalNormalized)
+{
+    const float fFadeParam = 1.3;
+    float rimmask = clamp( 1 + fFadeParam * dot(vR, vertNormalNormalized), 0.0, 1.0);
+    rimmask *= rimmask;
+ 
+    return rimmask;
+}
+ 
+
+
+ 
+// frostbite presentation (moving frostbite to pbr)
+vec3 GetSpecularDominantDir(vec3 vN, vec3 vR, float fRealRoughness)
+{
+    float fInvRealRough = saturate(1 - fRealRoughness);
+    float lerpFactor = fInvRealRough * (sqrt(fInvRealRough)+fRealRoughness);
+ 
+    return mix(vN, vR, lerpFactor);
+}
+
+
+ 
+
+float GetReductionInMicrofacets(float perceptualRoughness)
+{
+    // this is not needed if you separately precompute an integrated FG term such as proposed
+    // by epic. Alternatively this simple analytical approximation retains the energy
+    // loss associated with Integral GGX(NdotH)*NdotH * (NdotL>0) dH which
+    // for GGX equals 1/(roughness^2+1) when integrated over the half sphere.
+    // without the NdotL>0 indicator term the integral equals one.
+    float roughness = RoughnessFromPerceptualRoughness(perceptualRoughness);
+    return 1.0 / (roughness*roughness+1.0);
+}
+
+
+
+
+
+ 
+vec3 EvalBRDF(vec3 vN, vec3 org_normal, vec3 to_cam,vec3 V,  float perceptualRoughness, float metalness, vec3 albedo, float ao)
+{
+    const int numMips = 11;
+    const int nrBrdfMips = numMips-3;
+
+    float VdotN = clamp(dot(to_cam, vN), 0.0, 1.0f);    // same as NdotR
+    vec3 vRorg = 2*vN*VdotN-to_cam;
+ 
+    vec3 vR = GetSpecularDominantDir(vN, vRorg, RoughnessFromPerceptualRoughness(perceptualRoughness));
+    float RdotNsat = saturate(dot(vN, vR));
+ 
+
+    float l = BurleyToMip(perceptualRoughness, RdotNsat);
+
+ 
+ 
+    // fxcomposer uses a right hand coordinate frame (unlike d3d which uses left)
+    // and has Y axis up. We've exported accordingly in Lys. For conventional
+    // d3d11 just set Y axis as up in Lys before export.
+	
+    vec3 specRad = textureLod(uSpecularMap, vR,  l).rgb;
+	 
+    vec3 diffRad = texture(uIrradianceMap, vN).rgb;
+ 
+ 
+    vec3 spccol = mix( vec3 (0.04), albedo, metalness);
+    vec3 dfcol = mix( vec3( 0.0), albedo, 1 - metalness);
+ 
+    // fresnel
+    float fT = 1.0-RdotNsat;
+    float fT5 = fT*fT; fT5 = fT5*fT5*fT;
+    spccol = mix(spccol, vec3( 1.0), fT5);
+ 
+
+    // take reduction in brightness into account.
+    float fFade = 1;//GetReductionInMicrofacets(perceptualRoughness);
+    fFade *= EmpiricalSpecularAO(ao, perceptualRoughness);
+	//fFade *= ApproximateSpecularSelfOcclusion(vR, org_normal);
+
+  	vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, albedo, metalness);
+ 	vec3 F = fresnelSchlickRoughness(max(dot(vN, V), 0.0), F0, perceptualRoughness);
+    vec2 brdf  = texture(uBRDFLUT, vec2(max(dot(vN, V), 0.0), perceptualRoughness)).rg;
+	vec3 specular = specRad * (F * brdf.x + brdf.y);
+
+    // final result
+    return ao* dfcol*diffRad + fFade * specular ;
+}
+ 
 
 
 
@@ -514,7 +694,8 @@ void main()
 //vec4(integrateBRDF(fs_in.uv.x, fs_in.uv.y),0,1);//
 
 
-
+	vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, albedo, metalness);
    
            
     // reflectance equation
@@ -523,7 +704,7 @@ void main()
     {
 
 		// calculate per-light radiance
-        vec3 L = normalize(lightPositions[i]);
+        vec3 L = normalize(lightPositions[i] - WSPosition);
         vec3 H = normalize(V + L);
         float distance = length(lightPositions[i] - WSPosition);
         float attenuation = 1.0 / (distance * distance);
@@ -532,8 +713,12 @@ void main()
         // Cook-Torrance BRDF
         float NDF = DistributionGGX(N, H, roughness);   
         float G   = GeometrySmith(N, V, L, roughness);    
-        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), specularColor);        
+        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);        
         
+		vec3 nominator    = NDF * G * F;
+        float denominator = 4 * max(dot(N,V), 0.0) * max(dot(N,L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
+        vec3 specular = nominator / denominator;
+
          // kS is equal to Fresnel
         vec3 kS = F;
         // for energy conservation, the diffuse and specular light can't
@@ -544,16 +729,13 @@ void main()
         // have diffuse lighting, or a linear blend if partly metal (pure metals
         // have no diffuse light).
         kD *= 1.0 - metalness;	  
-               
-        vec3 nominator    = NDF * G * F;
-        float denominator = 4 * max(dot(V, N), 0.0) * max(dot(L, N), 0.0) + 0.001; // 0.001 to prevent divide by zero.
-        vec3 brdf = nominator / denominator;
+             
             
         // scale light by NdotL
         float NdotL = max(dot(N, L), 0.0);        
 
         // add to outgoing radiance Lo
-        Lo += (kD * albedo / PI + brdf) * radiance * NdotL; // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL; // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }   
   
     //vec3 ambient = vec3(0.03) * albedo * ao;
@@ -565,21 +747,43 @@ void main()
 
 
 
+	vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    
+    vec3 kS = F;
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metalness;	  
+    
+    vec3 irradiance = texture(uIrradianceMap, N).rgb;
+    vec3 diffuse    = irradiance * albedo;
+    
+    // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
+    const float MAX_REFLECTION_LOD = 7.0;
+    vec3 prefilteredColor = textureLod(uSpecularMap, getSpecularDominantDir(N, R, roughness),  roughnessToMip(roughness, dot(N,R))).rgb;    
+    vec2 brdf  = texture(uBRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+
+    vec3 ambient = (kD * diffuse + specular) * ao;
+    
+    vec3 color = ambient + Lo;
+
+    // HDR tonemapping
+   // color = color / (color + vec3(1.0));
+    // gamma correct
+    //color = pow(color, vec3(1.0/2.2)); 
+
+    fragColor = vec4((kD * diffuse + specular) , 1.0);
 
 
 
+	float roughnessLinear = max( roughness, 0.0);
+    float NoV = clamp( dot( N, V ), 0.0, 1.0 );
+    vec4 envBRDF = clamp(texture2D( uBRDFLUT, vec2(NoV, roughnessLinear)), 0.0, 1.0 );
+
+	//fragColor = vec4(EvalBRDF(N, fs_in.normal, eye_vec, V, roughness, metalness, albedo, ao), 1);
 
 
 
+	// Lo + *  (1.0 - shadow)
 
-
-
-
-
-
-
-
-	//
-
-	fragColor = vec4((Lo + computeIBL_UE4(N, V, diffuseColor, roughness, specularColor)) *  (1.0 - shadow), 1.0f);//  vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb, 1.0);
+	fragColor = vec4((computeIBL_UE4(N, V, diffuseColor, roughness, specularColor, ao)), 1.0f);//  vec4(envBRDF.xy,0,1);//vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb, 1.0);//
 }
