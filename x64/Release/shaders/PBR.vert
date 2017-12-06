@@ -52,6 +52,8 @@ out vec3 vLightPosition;
 
 out vec3 WSPosition;
 out vec3 WSNormal;
+
+centroid out vec3 WSNormalCentroid;
 out vec3 EyePosition;
 
 void main() 
@@ -67,7 +69,8 @@ void main()
 	vec3 wcNormal = normalize(vec3(camera.mInvView * vec4(VSNormal, 0.0)));
 	
 	WSPosition = wsPosition.xyz;
-	WSNormal = normalize(vec3(camera.mModel* vec4(normal,0)));//normalize(camera.mInvView * vsNormal).xyz);
+	WSNormal = vec3(camera.mModel* vec4(normal,0));
+	WSNormalCentroid = WSNormal;//normalize(camera.mInvView * vsNormal).xyz);
 	VSNormal = normalize(vec3(camera.mView * vec4(WSNormal,0)));
 	EyePosition	= normalize(camera.position - vec3(wsPosition));
 

@@ -361,7 +361,7 @@ float bias(float value, float b)
 // contrast function.
 float gain(float value, float g)
 {
-    return 0.5 * ((value < 0.5) ? bias(2.0*value, 1.0-g) : (2.0 - bias(2.0-2.0*value, 1.0-g)));
+    return 0.5 * ((value < 0.5) ? bias(2.0 * value, 1.0 - g) : (2.0 - bias(2.0 - 2.0 * value, 1.0 - g)));
 }
  
  
@@ -614,10 +614,12 @@ vec3 EvalBRDF(vec3 vN, vec3 org_normal, vec3 to_cam,vec3 V,  float perceptualRou
     return ao* dfcol*diffRad + fFade * specular ;
 }
  
+centroid in vec3 WSNormalCentroid;
 
-
-
-
+const float CURV_MOD = 2;
+const float MAX_POW = 2000;
+const float POW_MOD_MIN = 5;
+const float POW_MOD_MAX = 15;
 void main() 
 {
 	//TODO:: prefilter normal distribution
@@ -637,6 +639,10 @@ void main()
 	
 	vec3 albedo = getAlbedo() * getVertexColor();
 	vec3 normal = getNormal();
+		float roughness = getRoughness() ;
+
+
+	
 
 	vec3 eye_vec = normalize(camera.position - WSPosition);
 	float ndv = dot(eye_vec, normal);
@@ -661,7 +667,25 @@ void main()
     float NdotV = abs(dot(N, V)) + 1e-5f;
 	float VdotH = saturate(dot(V, H));
 
-	float roughness = getRoughness() ;
+
+	vec3 ddxN = dFdx(normal);
+	vec3 ddyN = dFdy(normal);
+	float curv2 = max( dot( ddxN, ddxN ), dot( ddyN, ddyN ) );
+	float gloss_max = -0.0909 - 0.0909 * log2(CURV_MOD*curv2);
+	float gloss = min(1-roughness, gloss_max);
+	gloss = min(MAX_POW, exp2(1 + mix(POW_MOD_MIN, POW_MOD_MAX, gloss )));
+	//Compute specular this way:
+
+	float D = (gloss  + 1) * pow(NdotH, gloss);
+	//specularColor = lightColor.rgb * NdotL * D;
+
+	vec3 vNormalWsDdx = dFdx( normal );
+	vec3 vNormalWsDdy = dFdy( normal );
+
+	float flGeometricRoughnessFactor = pow( saturate( max( dot( vNormalWsDdx, vNormalWsDdx ), dot( vNormalWsDdy, vNormalWsDdy ) ) ), 0.33);
+	curv2= flGeometricRoughnessFactor;
+	roughness = max(roughness, flGeometricRoughnessFactor);
+	//vRoughness.xy = max( vRoughness.xy, flGeometricRoughnessFactor.xx )
 
 
 	vec3 diffuseColor =  albedo * (1 - metalness);
@@ -784,6 +808,14 @@ void main()
 
 
 	// Lo + *  (1.0 - shadow)
-
-	fragColor = vec4((computeIBL_UE4(N, V, diffuseColor, roughness, specularColor, ao)), 1.0f);//  vec4(envBRDF.xy,0,1);//vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb, 1.0);//
+	float haha = dot(WSNormal,WSNormal) ;
+	vec3 col = vec3(haha,haha, haha);
+	if(haha >= 1.01)
+	 col = vec3(1,0, 0);
+	//else
+	//haha = 0;
+	if(flGeometricRoughnessFactor> roughness)
+	haha = flGeometricRoughnessFactor - roughness;
+	else haha = 0;
+	fragColor = vec4((computeIBL_UE4(N, V, diffuseColor, roughness, specularColor, ao)), 1.0f);//  vec4(envBRDF.xy,0,1);// vec4(normalize(((camera.mView * vec4(N, 0.0)) + 1) *.5).rgb, 1.0);//
 }

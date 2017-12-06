@@ -195,6 +195,7 @@ void createVBO(GLuint* vbo, GLuint cubemapvbo)
 	//CHECK_CUDA_CALL(cuGraphicsUnmapResources(1, &m_cuda_graphicsResource, 0));
 }
 
+ResourceHandle<Model> irrigationTool;
 void initializeScene()
 {
 
@@ -278,18 +279,42 @@ void initializeScene()
 
 	//Volume* vol = new Volume("data\\3L_768x768x768_type_uc_1channels.raw");
 
-	ResourceHandle<Model> irrigationTool = rm->load<Model>("data\\IrrigationTool.obj");
+	irrigationTool = rm->load<Model>("data\\DrillGrip2.fbx");
+
+	ResourceHandle<Texture> irrA = rm->load<Texture>("data\\DrillGrip_BaseColor.png");
+	ResourceHandle<Texture> irrM = rm->load<Texture>("data\\DrillGrip_Metallic.png");
+	ResourceHandle<Texture> irrR = rm->load<Texture>("data\\DrillGrip_Roughness.png");
+	ResourceHandle<Texture> irrN = rm->load<Texture>("data\\DrillGrip_Normal.png");
+	ResourceHandle<Texture> irrAO = rm->load<Texture>("data\\DrillGrip_AmbientOcclusion.png");
+
+	irrN->colorSpace = ColorSpace::Linear;
+	irrM->colorSpace = ColorSpace::Linear;
+	irrR->colorSpace = ColorSpace::Linear;
+	irrAO->colorSpace = ColorSpace::Linear;
+
+	irrA->upload();
+	irrM->upload();
+	irrR->upload();
+	irrN->upload();
+	irrAO->upload();
+
 
 	PBRMaterial* irrigationMat = new PBRMaterial();
 	irrigationMat->setEnvironment(operatingRoom);
-	irrigationMat->setAlbedo(glm::vec4(.96f, .96f, .9686f, 1));
-	irrigationMat->setMetalness(1);
-	irrigationMat->setRoughness(.05f);
+	irrigationMat->setAlbedoMap(irrA);
+	irrigationMat->setNormalMap(irrN);
+	irrigationMat->setMetalnessMap(irrM);
+	irrigationMat->setRoughnessMap(irrR);
+	irrigationMat->setAmbientOcclusionMap(irrAO);
+
+	//irrigationMat->setAlbedo(glm::vec4(.96f, .96f, .9686f, 1));
+	//irrigationMat->setMetalness(1);
+	//irrigationMat->setRoughness(.5f);
 
 	irrigationTool->m_meshes[0]->m_material = irrigationMat;
-	irrigationTool->m_hierarchy->scale = { .1,.1,.1 };
-	irrigationTool->m_hierarchy->position = { -3, 0, 0 };
-	//scene.add(irrigationTool->m_hierarchy);
+	irrigationTool->m_hierarchy->scale = { .01,.01,.01 };
+	irrigationTool->m_hierarchy->position = { 0, 0, 0 };
+	scene.add(irrigationTool->m_hierarchy);
 
 	//Mesh* irrigation = new Mesh(irrigationTool->m_meshes[0]->m_geometry, irrigationMat);
 	//SceneNode* node = new SceneNode();
@@ -698,7 +723,7 @@ unsigned int WangHash(unsigned int a) {
 void disp(void)
 {
 	tm->update(.01);
-
+	//irrigationTool->m_hierarchy->rotation = glm::rotate(irrigationTool->m_hierarchy->rotation, glm::radians(.5f), glm::vec3(0, 1, 0));
 	
 	//scene.root->getChild(2)->rotation = glm::rotate(scene.root->getChild(2)->rotation, .01f, glm::vec3(0, 1, 0));
 	//node3->rotation = glm::rotate(node3->rotation, .01f, glm::vec3(1, -1, 0));
